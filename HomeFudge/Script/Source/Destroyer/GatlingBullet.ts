@@ -4,56 +4,74 @@ namespace HomeFudge {
     //TODO:move texturePivot to the Beck
     export class GatlingBullet extends Bullet {
         protected maxLifeTime: number = null;
-        protected maxSpeed: number = null;
-        protected spreadRadius: number = null;
 
-        private parentVelocity: ƒ.Vector3 = ƒ.Vector3.ZERO();
-
+        
         private static graph: ƒ.Graph = null;
         private static mesh: ƒ.Mesh = null;
         private static material: ƒ.Material = null;
-
+        private static maxSpeed: number = null;
+        
+        private static seedRigidBody: ƒ.ComponentRigidbody = null;
+        private rigidBody: ƒ.ComponentRigidbody = null;
+        
         //TODO: try faction out.
         // faction: FACTION="FACTION.A";
 
         public update = (): void => {
+
             //goes out of the update loop as long the date is received into the config variable
-            if (this.maxLifeTime == null || this.maxSpeed == null) {
+            if (this.maxLifeTime == null || GatlingBullet.maxSpeed == null) {
                 return
             }
             this.maxLifeTime -= _deltaSeconds;
-            this.mtxLocal.translate( new ƒ.Vector3(
-                (this.parentVelocity.x + this.maxSpeed) * _deltaSeconds,
-                2*this.parentVelocity.y * _deltaSeconds,
-                2*this.parentVelocity.z * _deltaSeconds
-                ));
-
-                //TODO:Get Distance to Player cam and scale the size a of the mesh to make the bullet better visible at long distance
+            //TODO:Get Distance to Player cam and scale the size a of the mesh to make the bullet better visible at long distance
 
             //life check.
             if (!this.alive()) {
                 this.destroyNode();
             }
+
         }
-        private async initBulletConfig(): Promise<void> {
+        private async init(spawnTransform: ƒ.Matrix4x4): Promise<void> {
             GatlingBullet.graph = await Resources.getGraphResources(Config.gatlingBullet.graphID);
+            let node: ƒ.Node = await Resources.getComponentNode("GatlingBullet", GatlingBullet.graph);
 
             ///initAttributes\\\
             this.maxLifeTime = Config.gatlingBullet.maxLifeTime;
-            this.maxSpeed = Config.gatlingBullet.maxSpeed;
+            GatlingBullet.maxSpeed = Config.gatlingBullet.maxSpeed;
 
-            let node: ƒ.Node = await Resources.getComponentNode("GatlingBullet", GatlingBullet.graph);
+            this.addComponents(node, spawnTransform);
+            this.rigidBody.applyImpulseAtPoint(ƒ.Vector3.TRANSFORMATION(new ƒ.Vector3(this.mtxLocal.translation.x+GatlingBullet.maxSpeed, -this.mtxLocal.translation.y, -this.mtxLocal.translation.z), spawnTransform));//RIGIDBODY is initialed at world positional rotation
+
+
+        }
+        private getNodeResources(node: ƒ.Node) {
             if (GatlingBullet.mesh == null) {
                 GatlingBullet.mesh = node.getComponent(ƒ.ComponentMesh).mesh;
             }
             if (GatlingBullet.material == null) {
                 GatlingBullet.material = node.getComponent(ƒ.ComponentMaterial).material;
             }
+            if (GatlingBullet.seedRigidBody == null) {
+                console.log(node.getComponent(ƒ.ComponentRigidbody));
 
+                GatlingBullet.seedRigidBody = node.getComponent(ƒ.ComponentRigidbody);
+            }
+        }
+        private addComponents(node: ƒ.Node, spawnTransform: ƒ.Matrix4x4) {
+            this.getNodeResources(node);
+            this.addComponent(new ƒ.ComponentTransform(spawnTransform));
             this.addComponent(new ƒ.ComponentMesh(GatlingBullet.mesh));
             this.addComponent(new ƒ.ComponentMaterial(GatlingBullet.material));
-
-
+            this.rigidBody = new ƒ.ComponentRigidbody(
+                Config.gatlingBullet.mass,
+                GatlingBullet.seedRigidBody.typeBody,
+                GatlingBullet.seedRigidBody.typeCollider
+            );
+            this.rigidBody.mtxPivot = GatlingBullet.seedRigidBody.mtxPivot;
+            this.rigidBody.setPosition(spawnTransform.translation);
+            this.rigidBody.setRotation(spawnTransform.rotation);
+            this.addComponent(this.rigidBody);
         }
 
         public alive(): boolean {
@@ -77,16 +95,9 @@ namespace HomeFudge {
                 ƒ.Loop.stop();
             }
         }
-        constructor(spawnTransform: ƒ.Matrix4x4, _parentVelocity: ƒ.Vector3) {
+        constructor(spawnTransform: ƒ.Matrix4x4) {
             super("Gatling");
-            this.addComponent(new ƒ.ComponentTransform(spawnTransform));
-            ///\\\
-            this.parentVelocity = _parentVelocity;
-            this.initBulletConfig();
-            //TODO:Make that cleaner TEMP FIX 
-            let copy =_parentVelocity.clone;
-            copy.scale(_deltaSeconds*5);
-            this.mtxLocal.translate(copy);
+            this.init(spawnTransform);
             ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.update);
         }
     }

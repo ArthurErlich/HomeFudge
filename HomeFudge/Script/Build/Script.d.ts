@@ -30,6 +30,7 @@ declare namespace HomeFudge {
         maxLifeTime: number;
         maxSpeed: number;
         spreadRadius: number;
+        mass: number;
         [key: string]: string | number;
     }
     interface BeamTurretConfig {
@@ -53,11 +54,14 @@ declare namespace HomeFudge {
         maxAcceleration: number;
         maxSpeed: number;
         maxTurnSpeed: number;
+        mass: number;
         maxHealthPoints: number;
         RotThruster_FL: number[];
         RotThruster_FR: number[];
         RotThruster_BL: number[];
         RotThruster_BR: number[];
+        MainThrusterA: number[];
+        MainThrusterB: number[];
         [key: string]: string | number | number[];
     }
     interface CameraConfig {
@@ -148,35 +152,15 @@ declare namespace HomeFudge {
     import ƒ = FudgeCore;
     abstract class Bullet extends ƒ.Node {
         protected abstract maxLifeTime: number;
-        protected abstract maxSpeed: number;
         abstract update(): void;
         abstract destroyNode(): void;
         abstract toString(): string;
-        /**
-         * This function retrieves a graph resource from a project in TypeScript.
-         *
-         * @param graphID A string representing the ID of the graph resource that needs to be
-         * retrieved.
-         * @return a Promise that resolves to a ƒ.Graph object.
-         */
-        protected static getGraphResources(graphID: string): Promise<ƒ.Graph>;
-        /**
-         * This function retrieves a specific node from a graph and returns it as a promise.
-         *
-         * @param nodeName A string representing the name of the node that is being searched for in the
-         * graph.
-         * @param graph A ƒ.Graph object, which is a container for nodes and their connections in a
-         * scene or game world.
-         * @return a Promise that resolves to a ƒ.Node object.
-         */
-        protected static getComponentNode(nodeName: string, graph: ƒ.Graph): Promise<ƒ.Node>;
         constructor(idString: string);
     }
 }
 declare namespace HomeFudge {
     import ƒ = FudgeCore;
     abstract class Ship extends ƒ.Node {
-        protected abstract velocity: ƒ.Vector3;
         protected abstract maxSpeed: number;
         protected abstract maxAcceleration: number;
         protected abstract maxTurnSpeed: number;
@@ -184,24 +168,6 @@ declare namespace HomeFudge {
         protected abstract update(): void;
         abstract destroyNode(): void;
         abstract toString(): string;
-        /**
-         * This function retrieves a graph resource from a project in TypeScript.
-         *
-         * @param graphID A string representing the ID of the graph resource that needs to be
-         * retrieved.
-         * @return a Promise that resolves to a ƒ.Graph object.
-         */
-        protected static getGraphResources(graphID: string): Promise<ƒ.Graph>;
-        /**
-         * This function retrieves a specific node from a graph and returns it as a promise.
-         *
-         * @param nodeName A string representing the name of the node that is being searched for in the
-         * graph.
-         * @param graph A ƒ.Graph object, which is a container for nodes and their connections in a
-         * scene or game world.
-         * @return a Promise that resolves to a ƒ.Node object.
-         */
-        protected static getComponentNode(nodeName: string, graph: ƒ.Graph): Promise<ƒ.Node>;
         constructor(name: string);
     }
 }
@@ -245,12 +211,12 @@ declare namespace HomeFudge {
     export class Destroyer extends Ship {
         protected maxSpeed: number;
         protected maxAcceleration: number;
-        protected velocity: ƒ.Vector3;
+        private static seedRigidBody;
+        private rigidBody;
         protected healthPoints: number;
         protected maxTurnSpeed: number;
         private gatlingTurret;
         private beamTurretList;
-        private rotation;
         private rotThruster;
         weapons: typeof Weapons;
         static graph: ƒ.Graph;
@@ -264,14 +230,13 @@ declare namespace HomeFudge {
         protected update: () => void;
         alive(): boolean;
         destroyNode(): void;
-        getVelocity(): ƒ.Vector3;
         toString(): string;
         fireWeapon(_weapon: Weapons): void;
         fireGatling(): void;
         fireBeam(): void;
         move(moveDirection: ƒ.Vector3): void;
         rotate(rotateY: number): void;
-        constructor(startPosition: ƒ.Vector3);
+        constructor(startTransfrom: ƒ.Matrix4x4);
     }
     export {};
 }
@@ -279,18 +244,20 @@ declare namespace HomeFudge {
     import ƒ = FudgeCore;
     class GatlingBullet extends Bullet {
         protected maxLifeTime: number;
-        protected maxSpeed: number;
-        protected spreadRadius: number;
-        private parentVelocity;
         private static graph;
         private static mesh;
         private static material;
+        private static maxSpeed;
+        private static seedRigidBody;
+        private rigidBody;
         update: () => void;
-        private initBulletConfig;
+        private init;
+        private getNodeResources;
+        private addComponents;
         alive(): boolean;
         toString(): string;
         destroyNode(): void;
-        constructor(spawnTransform: ƒ.Matrix4x4, _parentVelocity: ƒ.Vector3);
+        constructor(spawnTransform: ƒ.Matrix4x4);
     }
 }
 declare namespace HomeFudge {
@@ -310,12 +277,11 @@ declare namespace HomeFudge {
         private magazineCapacity;
         private magazineRounds;
         private initConfigAndAllNodes;
-        private getGraphResources;
         private createComponents;
         private createShootPosNode;
         private update;
         moveTurret(xRot: number, yRot: number): void;
-        fire(parentVelocity: ƒ.Vector3): void;
+        fire(): void;
         constructor();
     }
 }

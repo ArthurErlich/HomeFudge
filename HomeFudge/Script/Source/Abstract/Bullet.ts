@@ -4,7 +4,6 @@ namespace HomeFudge {
     `ƒ.Node` class. The `export` keyword makes the class available for use in other modules. */
     export abstract class Bullet extends ƒ.Node {
         protected abstract maxLifeTime:number;
-        protected abstract maxSpeed:number;
 
         //abstract faction:string; //may be used later for multiple turrets
         public abstract update():void;

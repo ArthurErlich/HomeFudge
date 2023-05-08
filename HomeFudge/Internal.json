@@ -445,7 +445,7 @@
         {
           "ƒ.Node": {
             "name": "GatlingTurretBase",
-            "active": true,
+            "active": false,
             "components": {
               "ComponentMesh": [
                 {
@@ -487,7 +487,7 @@
         {
           "ƒ.Node": {
             "name": "GatlingTurretHead",
-            "active": true,
+            "active": false,
             "components": {
               "ComponentMesh": [
                 {
@@ -529,7 +529,7 @@
         {
           "ƒ.Node": {
             "name": "GatlingBullet",
-            "active": true,
+            "active": false,
             "components": {
               "ComponentMesh": [
                 {
@@ -561,6 +561,45 @@
                       "active": true
                     },
                     "idMaterial": "Material|2023-04-26T14:44:25.193Z|05381"
+                  }
+                }
+              ],
+              "ComponentTransform": [
+                {
+                  "ƒ.ComponentTransform": {
+                    "local": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": false
+                    }
+                  }
+                }
+              ],
+              "ComponentRigidbody": [
+                {
+                  "ƒ.ComponentRigidbody": {
+                    "initialization": "TO_PIVOT",
+                    "friction": 0.2,
+                    "restitution": 0.2,
+                    "mass": 1,
+                    "dampTranslation": 0,
+                    "dampRotation": 0,
+                    "effectGravity": 1,
+                    "typeBody": "DYNAMIC",
+                    "typeCollider": "CUBE",
+                    "isTrigger": false,
+                    "id": 1,
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[6, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
                   }
                 }
               ]
@@ -605,6 +644,45 @@
                     "idMaterial": "Material|2023-05-01T12:00:31.871Z|31008"
                   }
                 }
+              ],
+              "ComponentTransform": [
+                {
+                  "ƒ.ComponentTransform": {
+                    "local": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentRigidbody": [
+                {
+                  "ƒ.ComponentRigidbody": {
+                    "initialization": "TO_NODE",
+                    "friction": 0.2,
+                    "restitution": 0.2,
+                    "mass": 1,
+                    "dampTranslation": 0.1,
+                    "dampRotation": 0.1,
+                    "effectGravity": 1,
+                    "typeBody": "DYNAMIC",
+                    "typeCollider": "CUBE",
+                    "isTrigger": false,
+                    "id": 0,
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
               ]
             },
             "children": []
@@ -613,7 +691,7 @@
         {
           "ƒ.Node": {
             "name": "BeamTurret",
-            "active": true,
+            "active": false,
             "components": {
               "ComponentMesh": [
                 {
@@ -655,7 +733,7 @@
         {
           "ƒ.Node": {
             "name": "Astroid_L_01",
-            "active": true,
+            "active": false,
             "components": {
               "ComponentMesh": [
                 {
@@ -697,7 +775,7 @@
         {
           "ƒ.Node": {
             "name": "Astroid_L_02",
-            "active": true,
+            "active": false,
             "components": {
               "ComponentMaterial": [
                 {
@@ -739,7 +817,7 @@
         {
           "ƒ.Node": {
             "name": "Astroid_L_03",
-            "active": true,
+            "active": false,
             "components": {
               "ComponentMaterial": [
                 {
@@ -781,7 +859,7 @@
         {
           "ƒ.Node": {
             "name": "Astroid_L_04",
-            "active": true,
+            "active": false,
             "components": {
               "ComponentMaterial": [
                 {
@@ -823,7 +901,7 @@
         {
           "ƒ.Node": {
             "name": "ThrustExhaust",
-            "active": true,
+            "active": false,
             "components": {
               "ComponentMesh": [
                 {
@@ -862,7 +940,7 @@
                 {
                   "ƒ.ComponentAnimator": {
                     "Component": {
-                      "active": false
+                      "active": true
                     },
                     "idAnimation": "AnimationSprite|2023-05-06T09:40:20.448Z|91079",
                     "playmode": "loop",
@@ -880,7 +958,7 @@
         {
           "ƒ.Node": {
             "name": "LaserBeam",
-            "active": true,
+            "active": false,
             "components": {
               "ComponentMesh": [
                 {

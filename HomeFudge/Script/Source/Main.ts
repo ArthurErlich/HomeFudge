@@ -32,6 +32,8 @@ namespace HomeFudge {
     _viewport = _event.detail;
     _worldNode = _viewport.getBranch();
 
+    _viewport.physicsDebugMode =ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
+
     console.log(_viewport);
     //Loads Config then initilizes the world in the right order
     await loadConfig().then(initWorld).then(() => {
@@ -48,13 +50,13 @@ namespace HomeFudge {
       p1 = new Player("test_P1");
       _viewport.getBranch().addChild(p1);
       _mainCamera.attachToShip(p1.destroyer);
-      let destroyer = new Destroyer(new ƒ.Vector3(500,0,0));
+      let destroyer = new Destroyer(ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(500,0,0)));
       _worldNode.appendChild(destroyer);
-
+      ƒ.Physics.setGravity(ƒ.Vector3.ZERO());
     }
 
     /// ------------T-E-S-T--A-R-E-A------------------\\\
-        /// ------------T-E-S-T--A-R-E-A------------------\\\
+    /// ------------T-E-S-T--A-R-E-A------------------\\\
 
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);
     ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 35);  // start the game loop to continuously draw the _viewport, update the audiosystem and drive the physics i/a
@@ -84,7 +86,7 @@ namespace HomeFudge {
 
     /// ------------T-E-S-T--A-R-E-A------------------\\\
 
-    _viewport.draw();
+    _viewport.draw();//TODO move to a loop of 30 frames per second;
     ƒ.AudioManager.default.update();
   }
 

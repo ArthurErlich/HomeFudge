@@ -213,6 +213,7 @@ var HomeFudge;
         HomeFudge.LoadingScreen.remove();
         HomeFudge._viewport = _event.detail;
         HomeFudge._worldNode = HomeFudge._viewport.getBranch();
+        HomeFudge._viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
         console.log(HomeFudge._viewport);
         //Loads Config then initilizes the world in the right order
         await loadConfig().then(initWorld).then(() => {
@@ -229,8 +230,9 @@ var HomeFudge;
             p1 = new HomeFudge.Player("test_P1");
             HomeFudge._viewport.getBranch().addChild(p1);
             HomeFudge._mainCamera.attachToShip(p1.destroyer);
-            let destroyer = new HomeFudge.Destroyer(new ƒ.Vector3(500, 0, 0));
+            let destroyer = new HomeFudge.Destroyer(ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(500, 0, 0)));
             HomeFudge._worldNode.appendChild(destroyer);
+            ƒ.Physics.setGravity(ƒ.Vector3.ZERO());
         }
         /// ------------T-E-S-T--A-R-E-A------------------\\\
         /// ------------T-E-S-T--A-R-E-A------------------\\\
@@ -256,7 +258,7 @@ var HomeFudge;
         // }
         // let aimPos:ƒ.Vector3 = getAimPos(); //TODO:Remove unused AimingRayCaster
         /// ------------T-E-S-T--A-R-E-A------------------\\\
-        HomeFudge._viewport.draw();
+        HomeFudge._viewport.draw(); //TODO move to a loop of 30 frames per second;
         ƒ.AudioManager.default.update();
     }
     /// ------------T-E-S-T--A-R-E-A------------------\\\
@@ -358,36 +360,6 @@ var HomeFudge;
     /* This is a TypeScript class definition for an abstract class called `Bullet` that extends the
     `ƒ.Node` class. The `export` keyword makes the class available for use in other modules. */
     class Bullet extends ƒ.Node {
-        /**
-         * This function retrieves a graph resource from a project in TypeScript.
-         *
-         * @param graphID A string representing the ID of the graph resource that needs to be
-         * retrieved.
-         * @return a Promise that resolves to a ƒ.Graph object.
-         */
-        static async getGraphResources(graphID) {
-            let graph = ƒ.Project.resources[graphID];
-            if (graph == null) {
-                console.warn(graph + " not found with ID: " + graphID);
-            }
-            return graph;
-        }
-        /**
-         * This function retrieves a specific node from a graph and returns it as a promise.
-         *
-         * @param nodeName A string representing the name of the node that is being searched for in the
-         * graph.
-         * @param graph A ƒ.Graph object, which is a container for nodes and their connections in a
-         * scene or game world.
-         * @return a Promise that resolves to a ƒ.Node object.
-         */
-        static async getComponentNode(nodeName, graph) {
-            let node = graph.getChildrenByName(nodeName)[0];
-            if (node == null) {
-                console.warn("+\"" + nodeName + "\" not found inside: " + graph.name + "->Graph");
-            }
-            return node;
-        }
         constructor(idString) {
             super("Bullet" + idString);
             HomeFudge._worldNode.addChild(this);
@@ -400,36 +372,6 @@ var HomeFudge;
 (function (HomeFudge) {
     var ƒ = FudgeCore;
     class Ship extends ƒ.Node {
-        /**
-         * This function retrieves a graph resource from a project in TypeScript.
-         *
-         * @param graphID A string representing the ID of the graph resource that needs to be
-         * retrieved.
-         * @return a Promise that resolves to a ƒ.Graph object.
-         */
-        static async getGraphResources(graphID) {
-            let graph = ƒ.Project.resources[graphID];
-            if (graph == null) {
-                console.warn(graph + " not found with ID: " + graphID);
-            }
-            return graph;
-        }
-        /**
-         * This function retrieves a specific node from a graph and returns it as a promise.
-         *
-         * @param nodeName A string representing the name of the node that is being searched for in the
-         * graph.
-         * @param graph A ƒ.Graph object, which is a container for nodes and their connections in a
-         * scene or game world.
-         * @return a Promise that resolves to a ƒ.Node object.
-         */
-        static async getComponentNode(nodeName, graph) {
-            let node = graph.getChildrenByName(nodeName)[0];
-            if (node == null) {
-                console.warn("+\"" + nodeName + "\" not found inside: " + graph.name + "->Graph");
-            }
-            return node;
-        }
         constructor(name) {
             super("Ship_" + name);
             //register to updater list
@@ -553,24 +495,21 @@ var HomeFudge;
     class Destroyer extends HomeFudge.Ship {
         maxSpeed = null;
         maxAcceleration = null;
-        velocity = new ƒ.Vector3(0, 0, 0);
-        ;
+        static seedRigidBody = null;
+        rigidBody = null;
         healthPoints = null;
-        maxTurnSpeed = 0;
+        maxTurnSpeed = null;
         gatlingTurret = null;
         beamTurretList = new Array(2);
-        rotation = 0;
         rotThruster = new Array(4);
         //list of weapons
         weapons = Weapons;
         static graph = null;
         static mesh = null;
         static material = null;
-        async initAllConfigs(startPosition) {
-            Destroyer.graph = await HomeFudge.Ship.getGraphResources(HomeFudge.Config.destroyer.graphID);
-            let node = await HomeFudge.Ship.getComponentNode("Destroyer", Destroyer.graph);
-            let transNode = new ƒ.ComponentTransform(ƒ.Matrix4x4.TRANSLATION(startPosition)); //TODO: move after turret are loaded!
-            this.addComponent(transNode);
+        async initAllConfigs(startTransform) {
+            Destroyer.graph = await HomeFudge.Resources.getGraphResources(HomeFudge.Config.destroyer.graphID);
+            let node = await HomeFudge.Resources.getComponentNode("Destroyer", Destroyer.graph);
             //init mesh and material
             Destroyer.mesh = node.getComponent(ƒ.ComponentMesh).mesh;
             Destroyer.material = node.getComponent(ƒ.ComponentMaterial).material;
@@ -582,8 +521,8 @@ var HomeFudge;
             this.addWeapons();
             this.addThrusters();
             //init Components
-            this.setAllComponents();
-            this.addRigidBody();
+            this.setAllComponents(startTransform);
+            this.addRigidBody(node, startTransform);
         }
         addWeapons() {
             this.gatlingTurret = new HomeFudge.GatlingTurret();
@@ -603,15 +542,25 @@ var HomeFudge;
                 this.addChild(thruster);
             });
         }
-        setAllComponents() {
+        setAllComponents(startPosition) {
             if (Destroyer.material == null || Destroyer.mesh == null) {
                 console.warn(this.name + " Mesh and/or Material is missing");
                 return;
             }
             this.addComponent(new ƒ.ComponentMaterial(Destroyer.material));
             this.addComponent(new ƒ.ComponentMesh(Destroyer.mesh));
+            this.addComponent(new ƒ.ComponentTransform(startPosition));
         }
-        addRigidBody() {
+        addRigidBody(node, startTransform) {
+            if (Destroyer.seedRigidBody == null) {
+                Destroyer.seedRigidBody = node.getComponent(ƒ.ComponentRigidbody);
+            }
+            this.rigidBody = new ƒ.ComponentRigidbody(HomeFudge.Config.destroyer.mass, Destroyer.seedRigidBody.typeBody, Destroyer.seedRigidBody.typeCollider);
+            this.rigidBody.mtxPivot.scale(Destroyer.mesh.boundingBox.max);
+            this.rigidBody.setPosition(startTransform.translation);
+            this.rigidBody.setRotation(startTransform.rotation);
+            this.rigidBody.effectRotation = new ƒ.Vector3(0, 0.0025, 0);
+            this.addComponent(this.rigidBody);
         }
         update = () => {
             //DISABLE THRUSTERS
@@ -621,9 +570,6 @@ var HomeFudge;
                     thruster.getComponent(ƒ.ComponentMesh).activate(false);
                 });
             }
-            this.mtxLocal.translate(new ƒ.Vector3(this.velocity.x * HomeFudge._deltaSeconds, this.velocity.y * HomeFudge._deltaSeconds, this.velocity.z * HomeFudge._deltaSeconds));
-            this.mtxLocal.rotateY(this.rotation * HomeFudge._deltaSeconds);
-            this.rotation = 0; //TODO: move to player. make the control there smoother
             //TODO:remove test of gatling rot
             ///TEST----------------TEST\\\
             let tempRotBase = this.gatlingTurret.baseNode.mtxLocal.rotation;
@@ -641,9 +587,6 @@ var HomeFudge;
         destroyNode() {
             //console.error("Method not implemented.");
             return null;
-        }
-        getVelocity() {
-            return this.velocity;
         }
         toString() {
             //console.error("Method not implemented.");
@@ -666,7 +609,7 @@ var HomeFudge;
             }
         }
         fireGatling() {
-            this.gatlingTurret.fire(this.velocity);
+            this.gatlingTurret.fire();
         }
         fireBeam() {
             this.beamTurretList.forEach(turret => {
@@ -680,7 +623,7 @@ var HomeFudge;
             }
             moveDirection.scale(this.maxSpeed);
             //TODO:add smooth acceleration
-            this.velocity = moveDirection;
+            //add acceleration
         }
         rotate(rotateY) {
             if (this.maxTurnSpeed == null) {
@@ -696,11 +639,11 @@ var HomeFudge;
                 this.rotThruster[1].getComponent(ƒ.ComponentMesh).activate(true);
                 this.rotThruster[2].getComponent(ƒ.ComponentMesh).activate(true);
             }
-            this.rotation = this.maxTurnSpeed * rotateY;
+            //TODO: add Rotation
         }
-        constructor(startPosition) {
+        constructor(startTransfrom) {
             super("Destroyer");
-            this.initAllConfigs(startPosition);
+            this.initAllConfigs(startTransfrom);
             ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, this.update);
         }
     }
@@ -713,41 +656,57 @@ var HomeFudge;
     //TODO:move texturePivot to the Beck
     class GatlingBullet extends HomeFudge.Bullet {
         maxLifeTime = null;
-        maxSpeed = null;
-        spreadRadius = null;
-        parentVelocity = ƒ.Vector3.ZERO();
         static graph = null;
         static mesh = null;
         static material = null;
+        static maxSpeed = null;
+        static seedRigidBody = null;
+        rigidBody = null;
         //TODO: try faction out.
         // faction: FACTION="FACTION.A";
         update = () => {
             //goes out of the update loop as long the date is received into the config variable
-            if (this.maxLifeTime == null || this.maxSpeed == null) {
+            if (this.maxLifeTime == null || GatlingBullet.maxSpeed == null) {
                 return;
             }
             this.maxLifeTime -= HomeFudge._deltaSeconds;
-            this.mtxLocal.translate(new ƒ.Vector3((this.parentVelocity.x + this.maxSpeed) * HomeFudge._deltaSeconds, 2 * this.parentVelocity.y * HomeFudge._deltaSeconds, 2 * this.parentVelocity.z * HomeFudge._deltaSeconds));
             //TODO:Get Distance to Player cam and scale the size a of the mesh to make the bullet better visible at long distance
             //life check.
             if (!this.alive()) {
                 this.destroyNode();
             }
         };
-        async initBulletConfig() {
-            GatlingBullet.graph = await HomeFudge.Bullet.getGraphResources(HomeFudge.Config.gatlingBullet.graphID);
+        async init(spawnTransform) {
+            GatlingBullet.graph = await HomeFudge.Resources.getGraphResources(HomeFudge.Config.gatlingBullet.graphID);
+            let node = await HomeFudge.Resources.getComponentNode("GatlingBullet", GatlingBullet.graph);
             ///initAttributes\\\
             this.maxLifeTime = HomeFudge.Config.gatlingBullet.maxLifeTime;
-            this.maxSpeed = HomeFudge.Config.gatlingBullet.maxSpeed;
-            let node = await HomeFudge.Bullet.getComponentNode("GatlingBullet", GatlingBullet.graph);
+            GatlingBullet.maxSpeed = HomeFudge.Config.gatlingBullet.maxSpeed;
+            this.addComponents(node, spawnTransform);
+            this.rigidBody.applyImpulseAtPoint(ƒ.Vector3.TRANSFORMATION(new ƒ.Vector3(this.mtxLocal.translation.x + GatlingBullet.maxSpeed, -this.mtxLocal.translation.y, -this.mtxLocal.translation.z), spawnTransform)); //RIGIDBODY is initialed at world positional rotation
+        }
+        getNodeResources(node) {
             if (GatlingBullet.mesh == null) {
                 GatlingBullet.mesh = node.getComponent(ƒ.ComponentMesh).mesh;
             }
             if (GatlingBullet.material == null) {
                 GatlingBullet.material = node.getComponent(ƒ.ComponentMaterial).material;
             }
+            if (GatlingBullet.seedRigidBody == null) {
+                console.log(node.getComponent(ƒ.ComponentRigidbody));
+                GatlingBullet.seedRigidBody = node.getComponent(ƒ.ComponentRigidbody);
+            }
+        }
+        addComponents(node, spawnTransform) {
+            this.getNodeResources(node);
+            this.addComponent(new ƒ.ComponentTransform(spawnTransform));
             this.addComponent(new ƒ.ComponentMesh(GatlingBullet.mesh));
             this.addComponent(new ƒ.ComponentMaterial(GatlingBullet.material));
+            this.rigidBody = new ƒ.ComponentRigidbody(HomeFudge.Config.gatlingBullet.mass, GatlingBullet.seedRigidBody.typeBody, GatlingBullet.seedRigidBody.typeCollider);
+            this.rigidBody.mtxPivot = GatlingBullet.seedRigidBody.mtxPivot;
+            this.rigidBody.setPosition(spawnTransform.translation);
+            this.rigidBody.setRotation(spawnTransform.rotation);
+            this.addComponent(this.rigidBody);
         }
         alive() {
             if (this.maxLifeTime == null) {
@@ -770,16 +729,9 @@ var HomeFudge;
                 ƒ.Loop.stop();
             }
         }
-        constructor(spawnTransform, _parentVelocity) {
+        constructor(spawnTransform) {
             super("Gatling");
-            this.addComponent(new ƒ.ComponentTransform(spawnTransform));
-            ///\\\
-            this.parentVelocity = _parentVelocity;
-            this.initBulletConfig();
-            //TODO:Make that cleaner TEMP FIX 
-            let copy = _parentVelocity.clone;
-            copy.scale(HomeFudge._deltaSeconds * 5);
-            this.mtxLocal.translate(copy);
+            this.init(spawnTransform);
             ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, this.update);
         }
     }
@@ -805,7 +757,7 @@ var HomeFudge;
         magazineCapacity = null;
         magazineRounds = null;
         async initConfigAndAllNodes() {
-            let graph = await this.getGraphResources(HomeFudge.Config.gatlingTurret.graphID);
+            let graph = await HomeFudge.Resources.getGraphResources(HomeFudge.Config.gatlingTurret.graphID);
             //TODO|ON-HOLD| REWRITE Turret Mesh and Material component gathering and attaching -> like Destroyer Class
             this.headNode = this.createComponents("GatlingTurretHead", HomeFudge.JSONparser.toVector3(HomeFudge.Config.gatlingTurret.headPosition), graph);
             this.baseNode = this.createComponents("GatlingTurretBase", HomeFudge.JSONparser.toVector3(HomeFudge.Config.gatlingTurret.basePosition), graph);
@@ -819,13 +771,6 @@ var HomeFudge;
             this.headNode.addChild(this.shootNode);
             this.baseNode.addChild(this.headNode);
             this.addChild(this.baseNode);
-        }
-        async getGraphResources(graphID) {
-            let graph = ƒ.Project.resources[graphID];
-            if (graph == null) {
-                console.warn(graph + " not found with ID: " + graphID);
-            }
-            return graph;
         }
         createComponents(nodeName, transform, graph) {
             let node = graph.getChildrenByName(nodeName)[0];
@@ -892,7 +837,7 @@ var HomeFudge;
         if not, it returns without firing. If the reload timer has finished and there are rounds
         left in the magazine, it creates a new GatlingBullet object at the position of the shootNode
         and resets the rounds timer. */
-        fire(parentVelocity) {
+        fire() {
             if (this.magazineRounds <= 0) {
                 this.reloadTimer = 0;
                 this.magazineRounds = this.magazineCapacity;
@@ -911,7 +856,7 @@ var HomeFudge;
                 let spread1y = Math.random() * 0.2 - (Math.random()) * 0.2;
                 let spread1z = Math.random() * 0.2 - (Math.random()) * 0.2;
                 shot2.rotate(new ƒ.Vector3(spread1x, spread1y, spread1z));
-                new HomeFudge.GatlingBullet(shot2, parentVelocity);
+                new HomeFudge.GatlingBullet(shot2);
                 //TEST end
                 this.roundsTimer = 0;
                 this.magazineRounds--;
@@ -965,7 +910,7 @@ var HomeFudge;
         static material = null;
         static animation = null;
         async init(side, position) {
-            console.log("addding: " + this.name);
+            console.log("addling: " + this.name);
             RotThrusters.graph = await HomeFudge.Resources.getGraphResources(HomeFudge.Config.destroyer.graphID);
             let node = await HomeFudge.Resources.getComponentNode("ThrustExhaust", RotThrusters.graph);
             if (RotThrusters.material == null || RotThrusters.mesh == null) {
@@ -1234,7 +1179,7 @@ var HomeFudge;
         };
         constructor(name) {
             super(name);
-            this.destroyer = new HomeFudge.Destroyer(ƒ.Vector3.ZERO());
+            this.destroyer = new HomeFudge.Destroyer(ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.ZERO()));
             this.addChild(this.destroyer);
             this.selectedWeapon = this.destroyer.weapons.GatlingTurret; //Set WP to one
             HomeFudge._viewport.canvas.style.cursor = "url(Textures/MouseAimCurser.png) 16 16, crosshair"; //TODO: remove temp setting

@@ -15,7 +15,7 @@ namespace HomeFudge {
             let gatBulletResponse: Response = await fetch("Configs/gatBulletConfig.json");
             let gatTurretResponse: Response = await fetch("Configs/gatTurretConfig.json");
             let beamTurretResponse: Response = await fetch("Configs/beamTurretConfig.json");
-            let laserBeamResponse:Response = await fetch("Configs/laserBeamConfig.json")
+            let laserBeamResponse: Response = await fetch("Configs/laserBeamConfig.json")
             let destroyerResponse: Response = await fetch("Configs/destroyerConfig.json");
             let cameraResponse: Response = await fetch("Configs/cameraConfig.json");
 
@@ -51,6 +51,7 @@ namespace HomeFudge {
         maxLifeTime: number;
         maxSpeed: number;
         spreadRadius: number;
+        mass: number;
         [key: string]: string | number;
     }
     interface BeamTurretConfig {
@@ -75,11 +76,14 @@ namespace HomeFudge {
         maxAcceleration: number;
         maxSpeed: number;
         maxTurnSpeed: number;
+        mass: number;
         maxHealthPoints: number;
-        RotThruster_FL:  number[];
-        RotThruster_FR:  number[];
-        RotThruster_BL: number[]; 
+        RotThruster_FL: number[];
+        RotThruster_FR: number[];
+        RotThruster_BL: number[];
         RotThruster_BR: number[];
+        MainThrusterA: number[];
+        MainThrusterB: number[];
         [key: string]: string | number | number[];
     }
     interface CameraConfig {

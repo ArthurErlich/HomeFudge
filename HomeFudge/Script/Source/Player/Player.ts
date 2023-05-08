@@ -77,7 +77,7 @@ namespace HomeFudge {
         }
         constructor(name: string) {
             super(name);
-            this.destroyer = new Destroyer(ƒ.Vector3.ZERO());
+            this.destroyer = new Destroyer(ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.ZERO()));
             this.addChild(this.destroyer);
             this.selectedWeapon = this.destroyer.weapons.GatlingTurret;//Set WP to one
             _viewport.canvas.style.cursor = "url(Textures/MouseAimCurser.png) 16 16, crosshair";//TODO: remove temp setting

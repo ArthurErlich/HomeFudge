@@ -1,27 +1,42 @@
 {
     "graphID": "Graph|2023-04-25T14:30:46.195Z|98798",
-    "maxAcceleration": 0.5,
+    "maxAcceleration": 1500,
     "maxSpeed": 50,
     "maxTurnSpeed": 50,
     "maxHealthPoints": 1000,
+    "mass": 2000,
     "RotThruster_FL": [
         44.9562,
         0,
-        -19,345
+        -19,
+        345
     ],
     "RotThruster_FR": [
         44.9562,
         0,
-        19,345
+        19,
+        345
     ],
     "RotThruster_BL": [
         -69.9368,
         0,
-        -19,345
+        -19,
+        345
     ],
     "RotThruster_BR": [
         -69.9368,
         0,
-        19,345
+        19,
+        345
+    ],
+    "MainThrusterA": [
+        0,
+        0,
+        0
+    ],
+    "MainThrusterB": [
+        0,
+        0,
+        0
     ]
 }
