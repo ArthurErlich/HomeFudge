@@ -1,0 +1,24 @@
+{
+    "graphID": "Graph|2023-04-25T14:30:46.195Z|98798",
+    "maxRotSpeed": null,
+    "maxPitch" : 90,
+    "minPitch" : 7.85, 
+    "roundsPerSeconds": 8,
+    "reloadTime": 1.5,
+    "magazineCapacity": 30,
+    "headPosition": [
+        -0.007236,
+        1.5738,
+        0
+    ],
+    "basePosition": [
+        22.7231,
+        20.221,
+        0
+    ],
+    "shootNodePosition": [
+        6.7799,
+        1,
+        0
+    ]
+}

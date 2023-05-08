@@ -1,0 +1,935 @@
+{
+  "Material|2023-04-21T17:06:52.835Z|19108": {
+    "ƒ.Material": {
+      "name": "Mat_TEMP",
+      "idResource": "Material|2023-04-21T17:06:52.835Z|19108",
+      "shader": "ShaderFlat",
+      "coat": {
+        "ƒ.CoatRemissive": {
+          "color": "[1, 1, 1, 1]",
+          "diffuse": 1,
+          "specular": 0
+        }
+      }
+    }
+  },
+  "MeshObj|2023-04-27T09:49:37.194Z|95685": {
+    "ƒ.MeshObj": {
+      "idResource": "MeshObj|2023-04-27T09:49:37.194Z|95685",
+      "name": "Mesh_SkySphere",
+      "type": "MeshObj",
+      "url": "Mesh\\TestSkySphere\\SkySphere.obj"
+    }
+  },
+  "Material|2023-04-27T09:50:25.186Z|15747": {
+    "ƒ.Material": {
+      "name": "Mat_SkySphere",
+      "idResource": "Material|2023-04-27T09:50:25.186Z|15747",
+      "shader": "ShaderLitTextured",
+      "coat": {
+        "ƒ.CoatTextured": {
+          "color": "[1, 1, 1, 1]",
+          "idTexture": "TextureImage|2023-05-01T11:29:10.981Z|33946"
+        }
+      }
+    }
+  },
+  "TextureImage|2023-05-01T11:29:10.981Z|33946": {
+    "ƒ.TextureImage": {
+      "url": "Mesh\\TestSkySphere\\SkySphereTexture_2k.png",
+      "type": "TextureImage",
+      "Texture": {
+        "idResource": "TextureImage|2023-05-01T11:29:10.981Z|33946",
+        "name": "Text_SkySphere2k",
+        "mipmap": "CRISP"
+      }
+    }
+  },
+  "TextureImage|2023-04-27T09:49:41.672Z|34876": {
+    "ƒ.TextureImage": {
+      "url": "Mesh\\TestSkySphere\\SkySphereTexture.png",
+      "type": "TextureImage",
+      "Texture": {
+        "idResource": "TextureImage|2023-04-27T09:49:41.672Z|34876",
+        "name": "Text_SkySphere8k",
+        "mipmap": "CRISP"
+      }
+    }
+  },
+  "Graph|2023-04-21T17:05:28.109Z|61452": {
+    "ƒ.Graph": {
+      "name": "Game",
+      "active": true,
+      "components": {},
+      "children": [
+        {
+          "ƒ.Node": {
+            "name": "Sun",
+            "active": true,
+            "components": {
+              "ComponentLight": [
+                {
+                  "ƒ.ComponentLight": {
+                    "pivot": {
+                      "translation": "[20, -100, 50]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "light": {
+                      "ƒ.LightDirectional": {
+                        "color": "[1, 1, 1, 1]"
+                      }
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ]
+            },
+            "children": [
+              {
+                "ƒ.Node": {
+                  "name": "Ambient",
+                  "active": true,
+                  "components": {
+                    "ComponentLight": [
+                      {
+                        "ƒ.ComponentLight": {
+                          "pivot": {
+                            "translation": "[20, -100, 50]",
+                            "rotation": "[0, 0, 0]",
+                            "scaling": "[1, 1, 1]"
+                          },
+                          "light": {
+                            "ƒ.LightAmbient": {
+                              "color": "[0.0196078431372549, 0.0196078431372549, 0.0196078431372549, 0.1]"
+                            }
+                          },
+                          "Component": {
+                            "active": true
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  "children": []
+                }
+              }
+            ]
+          }
+        },
+        {
+          "ƒ.Node": {
+            "name": "SkySphere",
+            "active": true,
+            "components": {
+              "ComponentMesh": [
+                {
+                  "ƒ.ComponentMesh": {
+                    "idMesh": "MeshObj|2023-04-27T09:49:37.194Z|95685",
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentMaterial": [
+                {
+                  "ƒ.ComponentMaterial": {
+                    "sortForAlpha": true,
+                    "clrPrimary": "[1, 1, 1, 1]",
+                    "clrSecondary": "[1, 1, 1, 1]",
+                    "pivot": {
+                      "translation": "[0, 0]",
+                      "rotation": 0,
+                      "scaling": "[1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    },
+                    "idMaterial": "Material|2023-04-27T09:50:25.186Z|15747"
+                  }
+                }
+              ]
+            },
+            "children": []
+          }
+        }
+      ],
+      "idResource": "Graph|2023-04-21T17:05:28.109Z|61452",
+      "type": "Graph"
+    }
+  },
+  "MeshCube|2023-04-25T14:51:45.078Z|34693": {
+    "ƒ.MeshCube": {
+      "idResource": "MeshCube|2023-04-25T14:51:45.078Z|34693",
+      "name": "Mesh_TEMP",
+      "type": "MeshCube"
+    }
+  },
+  "MeshObj|2023-04-25T16:48:05.703Z|54473": {
+    "ƒ.MeshObj": {
+      "idResource": "MeshObj|2023-04-25T16:48:05.703Z|54473",
+      "name": "GatlingTurretHead",
+      "type": "MeshObj",
+      "url": "Mesh\\Destroyer\\HomeFudge_Head.obj"
+    }
+  },
+  "MeshObj|2023-04-25T16:48:09.298Z|94442": {
+    "ƒ.MeshObj": {
+      "idResource": "MeshObj|2023-04-25T16:48:09.298Z|94442",
+      "name": "GatlingTurretBase",
+      "type": "MeshObj",
+      "url": "Mesh\\Destroyer\\HomeFudge_Base.obj"
+    }
+  },
+  "MeshObj|2023-04-26T14:25:28.306Z|19816": {
+    "ƒ.MeshObj": {
+      "idResource": "MeshObj|2023-04-26T14:25:28.306Z|19816",
+      "name": "Mesh_TempBullet",
+      "type": "MeshObj",
+      "url": "Mesh\\Destroyer\\HomeFuge_GatlingBullet.obj"
+    }
+  },
+  "Material|2023-04-26T14:44:25.193Z|05381": {
+    "ƒ.Material": {
+      "name": "Mat_LitGatlingBullet",
+      "idResource": "Material|2023-04-26T14:44:25.193Z|05381",
+      "shader": "ShaderLitTextured",
+      "coat": {
+        "ƒ.CoatTextured": {
+          "color": "[1, 1, 1, 1]",
+          "idTexture": "TextureImage|2023-04-26T14:26:14.544Z|39959"
+        }
+      }
+    }
+  },
+  "TextureImage|2023-04-26T14:26:14.544Z|39959": {
+    "ƒ.TextureImage": {
+      "url": "Mesh\\Destroyer\\GatBulletTexture.png",
+      "type": "TextureImage",
+      "Texture": {
+        "idResource": "TextureImage|2023-04-26T14:26:14.544Z|39959",
+        "name": "Text_GatlingBullet",
+        "mipmap": "CRISP"
+      }
+    }
+  },
+  "MeshObj|2023-04-29T16:43:33.751Z|79488": {
+    "ƒ.MeshObj": {
+      "idResource": "MeshObj|2023-04-29T16:43:33.751Z|79488",
+      "name": "Mesh_Destroyer",
+      "type": "MeshObj",
+      "url": "Mesh\\Destroyer\\HomeFuge_Destroyser_V_1.0.obj"
+    }
+  },
+  "Material|2023-05-01T12:00:31.871Z|31008": {
+    "ƒ.Material": {
+      "name": "Mat_Destroyer",
+      "idResource": "Material|2023-05-01T12:00:31.871Z|31008",
+      "shader": "ShaderFlatTextured",
+      "coat": {
+        "ƒ.CoatRemissiveTextured": {
+          "color": "[1, 1, 1, 1]",
+          "idTexture": "TextureImage|2023-05-01T12:00:02.827Z|48641",
+          "diffuse": 1,
+          "specular": 0
+        }
+      }
+    }
+  },
+  "TextureImage|2023-05-01T12:00:02.827Z|48641": {
+    "ƒ.TextureImage": {
+      "url": "Mesh\\Destroyer\\DestroyerTempTexture.png",
+      "type": "TextureImage",
+      "Texture": {
+        "idResource": "TextureImage|2023-05-01T12:00:02.827Z|48641",
+        "name": "Text_Destroyer_TEMP",
+        "mipmap": "CRISP"
+      }
+    }
+  },
+  "MeshObj|2023-05-03T14:58:20.766Z|18328": {
+    "ƒ.MeshObj": {
+      "idResource": "MeshObj|2023-05-03T14:58:20.766Z|18328",
+      "name": "Mesh_BeamTurret",
+      "type": "MeshObj",
+      "url": "Mesh\\Destroyer\\HomeFuge_BeamTurret.obj"
+    }
+  },
+  "MeshObj|2023-05-04T07:20:34.873Z|35777": {
+    "ƒ.MeshObj": {
+      "idResource": "MeshObj|2023-05-04T07:20:34.873Z|35777",
+      "name": "Mesh_TempBeam.obj",
+      "type": "MeshObj",
+      "url": "Mesh\\Destroyer\\HomeFuge_Beam.obj"
+    }
+  },
+  "TextureImage|2023-05-04T07:22:43.747Z|68477": {
+    "ƒ.TextureImage": {
+      "url": "Mesh\\Destroyer\\BeamTextureSheet.png",
+      "type": "TextureImage",
+      "Texture": {
+        "idResource": "TextureImage|2023-05-04T07:22:43.747Z|68477",
+        "name": "TextSheet_BeamTurret",
+        "mipmap": "CRISP"
+      }
+    }
+  },
+  "MeshObj|2023-05-05T17:24:23.730Z|05336": {
+    "ƒ.MeshObj": {
+      "idResource": "MeshObj|2023-05-05T17:24:23.730Z|05336",
+      "name": "MeshAstroid_L_1",
+      "type": "MeshObj",
+      "url": "Mesh\\Astroids\\L\\HomeFuge_Astroid_L001.obj"
+    }
+  },
+  "Material|2023-05-05T17:27:19.710Z|32221": {
+    "ƒ.Material": {
+      "name": "Mat_Astroid_L",
+      "idResource": "Material|2023-05-05T17:27:19.710Z|32221",
+      "shader": "ShaderFlatTextured",
+      "coat": {
+        "ƒ.CoatRemissiveTextured": {
+          "color": "[1, 1, 1, 1]",
+          "idTexture": "TextureImage|2023-05-05T17:24:11.100Z|53599",
+          "diffuse": 1,
+          "specular": 0
+        }
+      }
+    }
+  },
+  "TextureImage|2023-05-05T17:24:11.100Z|53599": {
+    "ƒ.TextureImage": {
+      "url": "Mesh\\Astroids\\L\\HomeFudge_Astroid_Large.png",
+      "type": "TextureImage",
+      "Texture": {
+        "idResource": "TextureImage|2023-05-05T17:24:11.100Z|53599",
+        "name": "Text_Astroid_L",
+        "mipmap": "CRISP"
+      }
+    }
+  },
+  "MeshObj|2023-05-05T17:24:23.731Z|81799": {
+    "ƒ.MeshObj": {
+      "idResource": "MeshObj|2023-05-05T17:24:23.731Z|81799",
+      "name": "MeshAstroid_L_2",
+      "type": "MeshObj",
+      "url": "Mesh\\Astroids\\L\\HomeFuge_Astroid_L002.obj"
+    }
+  },
+  "MeshObj|2023-05-05T17:24:23.732Z|28944": {
+    "ƒ.MeshObj": {
+      "idResource": "MeshObj|2023-05-05T17:24:23.732Z|28944",
+      "name": "MeshAstroid_L_3",
+      "type": "MeshObj",
+      "url": "Mesh\\Astroids\\L\\HomeFuge_Astroid_L003.obj"
+    }
+  },
+  "MeshObj|2023-05-05T17:24:23.732Z|76165": {
+    "ƒ.MeshObj": {
+      "idResource": "MeshObj|2023-05-05T17:24:23.732Z|76165",
+      "name": "MeshAstroid_L_4",
+      "type": "MeshObj",
+      "url": "Mesh\\Astroids\\L\\HomeFuge_Astroid_L004.obj"
+    }
+  },
+  "AnimationSprite|2023-05-05T17:54:08.566Z|04895": {
+    "ƒ.AnimationSprite": {
+      "idResource": "AnimationSprite|2023-05-05T17:54:08.566Z|04895",
+      "idTexture": "TextureImage|2023-05-05T18:06:05.316Z|28900",
+      "frames": 45,
+      "wrapAfter": 45,
+      "start": "[0, 0]",
+      "size": "[256, 256]",
+      "next": "[256, 0]",
+      "wrap": "[0, 510]",
+      "Animation": {
+        "idResource": "AnimationSprite|2023-05-05T17:54:08.566Z|04895",
+        "name": "AnimSprite_LaserBeam",
+        "labels": {},
+        "events": {},
+        "framesPerSecond": 15,
+        "animationStructure": {}
+      }
+    }
+  },
+  "TextureImage|2023-05-05T18:06:05.316Z|28900": {
+    "ƒ.TextureImage": {
+      "url": "Mesh\\Destroyer\\BeamTextureSheet_256.png",
+      "type": "TextureImage",
+      "Texture": {
+        "idResource": "TextureImage|2023-05-05T18:06:05.316Z|28900",
+        "name": "TextSheet_BeamTurret265",
+        "mipmap": "CRISP"
+      }
+    }
+  },
+  "Material|2023-05-05T17:59:58.827Z|03398": {
+    "ƒ.Material": {
+      "name": "Mat_LitBeam",
+      "idResource": "Material|2023-05-05T17:59:58.827Z|03398",
+      "shader": "ShaderLitTextured",
+      "coat": {
+        "ƒ.CoatTextured": {
+          "color": "[1, 1, 1, 1]",
+          "idTexture": "TextureImage|2023-05-05T18:06:05.316Z|28900"
+        }
+      }
+    }
+  },
+  "MeshObj|2023-05-06T09:34:43.642Z|07145": {
+    "ƒ.MeshObj": {
+      "idResource": "MeshObj|2023-05-06T09:34:43.642Z|07145",
+      "name": "Mesh_ThursterExhoust",
+      "type": "MeshObj",
+      "url": "Mesh\\Thrusters\\Trhuster.obj"
+    }
+  },
+  "Material|2023-05-06T09:37:38.954Z|46265": {
+    "ƒ.Material": {
+      "name": "Mat_LitExhoust",
+      "idResource": "Material|2023-05-06T09:37:38.954Z|46265",
+      "shader": "ShaderLitTextured",
+      "coat": {
+        "ƒ.CoatTextured": {
+          "color": "[1, 1, 1, 1]",
+          "idTexture": "TextureImage|2023-05-06T09:37:14.357Z|08913"
+        }
+      }
+    }
+  },
+  "TextureImage|2023-05-06T09:37:14.357Z|08913": {
+    "ƒ.TextureImage": {
+      "url": "Mesh\\Thrusters\\Texture\\Trhust_Exhoust_test-sheet.png",
+      "type": "TextureImage",
+      "Texture": {
+        "idResource": "TextureImage|2023-05-06T09:37:14.357Z|08913",
+        "name": "TextSheet_Exhoust",
+        "mipmap": "CRISP"
+      }
+    }
+  },
+  "AnimationSprite|2023-05-06T09:40:20.448Z|91079": {
+    "ƒ.AnimationSprite": {
+      "idResource": "AnimationSprite|2023-05-06T09:40:20.448Z|91079",
+      "idTexture": "TextureImage|2023-05-06T09:37:14.357Z|08913",
+      "frames": 14,
+      "wrapAfter": 4,
+      "start": "[0, 0]",
+      "size": "[256, 256]",
+      "next": "[256, 0]",
+      "wrap": "[0, 256]",
+      "Animation": {
+        "idResource": "AnimationSprite|2023-05-06T09:40:20.448Z|91079",
+        "name": "AnimSprite_ThursterExhoust",
+        "labels": {},
+        "events": {},
+        "framesPerSecond": 15,
+        "animationStructure": {}
+      }
+    }
+  },
+  "Graph|2023-04-25T14:30:46.195Z|98798": {
+    "ƒ.Graph": {
+      "name": "GameResources",
+      "active": true,
+      "components": {},
+      "children": [
+        {
+          "ƒ.Node": {
+            "name": "GatlingTurretBase",
+            "active": true,
+            "components": {
+              "ComponentMesh": [
+                {
+                  "ƒ.ComponentMesh": {
+                    "idMesh": "MeshObj|2023-04-25T16:48:09.298Z|94442",
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentMaterial": [
+                {
+                  "ƒ.ComponentMaterial": {
+                    "sortForAlpha": false,
+                    "clrPrimary": "[1, 1, 1, 1]",
+                    "clrSecondary": "[1, 1, 1, 1]",
+                    "pivot": {
+                      "translation": "[0, 0]",
+                      "rotation": 0,
+                      "scaling": "[1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    },
+                    "idMaterial": "Material|2023-04-21T17:06:52.835Z|19108"
+                  }
+                }
+              ]
+            },
+            "children": []
+          }
+        },
+        {
+          "ƒ.Node": {
+            "name": "GatlingTurretHead",
+            "active": true,
+            "components": {
+              "ComponentMesh": [
+                {
+                  "ƒ.ComponentMesh": {
+                    "idMesh": "MeshObj|2023-04-25T16:48:05.703Z|54473",
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentMaterial": [
+                {
+                  "ƒ.ComponentMaterial": {
+                    "sortForAlpha": false,
+                    "clrPrimary": "[1, 1, 1, 1]",
+                    "clrSecondary": "[1, 1, 1, 1]",
+                    "pivot": {
+                      "translation": "[0, 0]",
+                      "rotation": 0,
+                      "scaling": "[1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    },
+                    "idMaterial": "Material|2023-04-21T17:06:52.835Z|19108"
+                  }
+                }
+              ]
+            },
+            "children": []
+          }
+        },
+        {
+          "ƒ.Node": {
+            "name": "GatlingBullet",
+            "active": true,
+            "components": {
+              "ComponentMesh": [
+                {
+                  "ƒ.ComponentMesh": {
+                    "idMesh": "MeshObj|2023-04-26T14:25:28.306Z|19816",
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentMaterial": [
+                {
+                  "ƒ.ComponentMaterial": {
+                    "sortForAlpha": false,
+                    "clrPrimary": "[1, 1, 1, 1]",
+                    "clrSecondary": "[1, 1, 1, 1]",
+                    "pivot": {
+                      "translation": "[0, 0]",
+                      "rotation": 0,
+                      "scaling": "[1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    },
+                    "idMaterial": "Material|2023-04-26T14:44:25.193Z|05381"
+                  }
+                }
+              ]
+            },
+            "children": []
+          }
+        },
+        {
+          "ƒ.Node": {
+            "name": "Destroyer",
+            "active": true,
+            "components": {
+              "ComponentMesh": [
+                {
+                  "ƒ.ComponentMesh": {
+                    "idMesh": "MeshObj|2023-04-29T16:43:33.751Z|79488",
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentMaterial": [
+                {
+                  "ƒ.ComponentMaterial": {
+                    "sortForAlpha": false,
+                    "clrPrimary": "[1, 1, 1, 1]",
+                    "clrSecondary": "[1, 1, 1, 1]",
+                    "pivot": {
+                      "translation": "[0, 0]",
+                      "rotation": 0,
+                      "scaling": "[1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    },
+                    "idMaterial": "Material|2023-05-01T12:00:31.871Z|31008"
+                  }
+                }
+              ]
+            },
+            "children": []
+          }
+        },
+        {
+          "ƒ.Node": {
+            "name": "BeamTurret",
+            "active": true,
+            "components": {
+              "ComponentMesh": [
+                {
+                  "ƒ.ComponentMesh": {
+                    "idMesh": "MeshObj|2023-05-03T14:58:20.766Z|18328",
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentMaterial": [
+                {
+                  "ƒ.ComponentMaterial": {
+                    "sortForAlpha": false,
+                    "clrPrimary": "[1, 1, 1, 1]",
+                    "clrSecondary": "[1, 1, 1, 1]",
+                    "pivot": {
+                      "translation": "[0, 0]",
+                      "rotation": 0,
+                      "scaling": "[1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    },
+                    "idMaterial": "Material|2023-05-01T12:00:31.871Z|31008"
+                  }
+                }
+              ]
+            },
+            "children": []
+          }
+        },
+        {
+          "ƒ.Node": {
+            "name": "Astroid_L_01",
+            "active": true,
+            "components": {
+              "ComponentMesh": [
+                {
+                  "ƒ.ComponentMesh": {
+                    "idMesh": "MeshObj|2023-05-05T17:24:23.730Z|05336",
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentMaterial": [
+                {
+                  "ƒ.ComponentMaterial": {
+                    "sortForAlpha": false,
+                    "clrPrimary": "[1, 1, 1, 1]",
+                    "clrSecondary": "[1, 1, 1, 1]",
+                    "pivot": {
+                      "translation": "[0, 0]",
+                      "rotation": 0,
+                      "scaling": "[1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    },
+                    "idMaterial": "Material|2023-05-05T17:27:19.710Z|32221"
+                  }
+                }
+              ]
+            },
+            "children": []
+          }
+        },
+        {
+          "ƒ.Node": {
+            "name": "Astroid_L_02",
+            "active": true,
+            "components": {
+              "ComponentMaterial": [
+                {
+                  "ƒ.ComponentMaterial": {
+                    "sortForAlpha": false,
+                    "clrPrimary": "[1, 1, 1, 1]",
+                    "clrSecondary": "[1, 1, 1, 1]",
+                    "pivot": {
+                      "translation": "[0, 0]",
+                      "rotation": 0,
+                      "scaling": "[1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    },
+                    "idMaterial": "Material|2023-05-05T17:27:19.710Z|32221"
+                  }
+                }
+              ],
+              "ComponentMesh": [
+                {
+                  "ƒ.ComponentMesh": {
+                    "idMesh": "MeshObj|2023-05-05T17:24:23.731Z|81799",
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ]
+            },
+            "children": []
+          }
+        },
+        {
+          "ƒ.Node": {
+            "name": "Astroid_L_03",
+            "active": true,
+            "components": {
+              "ComponentMaterial": [
+                {
+                  "ƒ.ComponentMaterial": {
+                    "sortForAlpha": false,
+                    "clrPrimary": "[1, 1, 1, 1]",
+                    "clrSecondary": "[1, 1, 1, 1]",
+                    "pivot": {
+                      "translation": "[0, 0]",
+                      "rotation": 0,
+                      "scaling": "[1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    },
+                    "idMaterial": "Material|2023-05-05T17:27:19.710Z|32221"
+                  }
+                }
+              ],
+              "ComponentMesh": [
+                {
+                  "ƒ.ComponentMesh": {
+                    "idMesh": "MeshObj|2023-05-05T17:24:23.732Z|28944",
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ]
+            },
+            "children": []
+          }
+        },
+        {
+          "ƒ.Node": {
+            "name": "Astroid_L_04",
+            "active": true,
+            "components": {
+              "ComponentMaterial": [
+                {
+                  "ƒ.ComponentMaterial": {
+                    "sortForAlpha": false,
+                    "clrPrimary": "[1, 1, 1, 1]",
+                    "clrSecondary": "[1, 1, 1, 1]",
+                    "pivot": {
+                      "translation": "[0, 0]",
+                      "rotation": 0,
+                      "scaling": "[1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    },
+                    "idMaterial": "Material|2023-05-05T17:27:19.710Z|32221"
+                  }
+                }
+              ],
+              "ComponentMesh": [
+                {
+                  "ƒ.ComponentMesh": {
+                    "idMesh": "MeshObj|2023-05-05T17:24:23.732Z|76165",
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ]
+            },
+            "children": []
+          }
+        },
+        {
+          "ƒ.Node": {
+            "name": "ThrustExhaust",
+            "active": true,
+            "components": {
+              "ComponentMesh": [
+                {
+                  "ƒ.ComponentMesh": {
+                    "idMesh": "MeshObj|2023-05-06T09:34:43.642Z|07145",
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentMaterial": [
+                {
+                  "ƒ.ComponentMaterial": {
+                    "sortForAlpha": false,
+                    "clrPrimary": "[1, 1, 1, 1]",
+                    "clrSecondary": "[1, 1, 1, 1]",
+                    "pivot": {
+                      "translation": "[0, 0]",
+                      "rotation": 0,
+                      "scaling": "[0.25, 0.25]"
+                    },
+                    "Component": {
+                      "active": true
+                    },
+                    "idMaterial": "Material|2023-05-06T09:37:38.954Z|46265"
+                  }
+                }
+              ],
+              "ComponentAnimator": [
+                {
+                  "ƒ.ComponentAnimator": {
+                    "Component": {
+                      "active": false
+                    },
+                    "idAnimation": "AnimationSprite|2023-05-06T09:40:20.448Z|91079",
+                    "playmode": "loop",
+                    "quantization": "discrete",
+                    "scale": 1,
+                    "scaleWithGameTime": false,
+                    "animateInEditor": false
+                  }
+                }
+              ]
+            },
+            "children": []
+          }
+        },
+        {
+          "ƒ.Node": {
+            "name": "LaserBeam",
+            "active": true,
+            "components": {
+              "ComponentMesh": [
+                {
+                  "ƒ.ComponentMesh": {
+                    "idMesh": "MeshObj|2023-05-04T07:20:34.873Z|35777",
+                    "pivot": {
+                      "translation": "[0, 0, 0]",
+                      "rotation": "[0, 0, 0]",
+                      "scaling": "[1.0000001192092896, 1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    }
+                  }
+                }
+              ],
+              "ComponentMaterial": [
+                {
+                  "ƒ.ComponentMaterial": {
+                    "sortForAlpha": false,
+                    "clrPrimary": "[1, 1, 1, 1]",
+                    "clrSecondary": "[1, 1, 1, 1]",
+                    "pivot": {
+                      "translation": "[0, 0]",
+                      "rotation": 0,
+                      "scaling": "[1, 1]"
+                    },
+                    "Component": {
+                      "active": true
+                    },
+                    "idMaterial": "Material|2023-05-05T17:59:58.827Z|03398"
+                  }
+                }
+              ]
+            },
+            "children": []
+          }
+        }
+      ],
+      "idResource": "Graph|2023-04-25T14:30:46.195Z|98798",
+      "type": "Graph"
+    }
+  },
+  "MeshObj|2023-05-04T07:18:22.497Z|96617": {
+    "ƒ.MeshObj": {
+      "idResource": "MeshObj|2023-05-04T07:18:22.497Z|96617",
+      "name": "Mesh_LaserBeam",
+      "type": "MeshObj",
+      "url": "Mesh\\Destroyer\\HomeFuge_Beam.obj"
+    }
+  }
+}
