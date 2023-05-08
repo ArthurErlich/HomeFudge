@@ -8,10 +8,9 @@ namespace HomeFudge {
     export class Destroyer extends Ship {
         protected maxSpeed: number = null;
         protected maxAcceleration: number = null;
-        protected velocity: ƒ.Vector3 = new ƒ.Vector3(0, 0, 0);;
 
         protected healthPoints: number = null;
-        protected maxTurnSpeed: number = 0;
+        protected maxTurnSpeed: number = null;
 
         private gatlingTurret: GatlingTurret = null;
         private beamTurretList: BeamTurret[] = new Array(2);
@@ -27,8 +26,8 @@ namespace HomeFudge {
         static material: ƒ.Material = null;
 
         private async initAllConfigs(startPosition: ƒ.Vector3) {
-            Destroyer.graph = await Ship.getGraphResources(Config.destroyer.graphID);
-            let node: ƒ.Node = await Ship.getComponentNode("Destroyer", Destroyer.graph);
+            Destroyer.graph = await Resources.getGraphResources(Config.destroyer.graphID);
+            let node: ƒ.Node = await Resources.getComponentNode("Destroyer", Destroyer.graph);
 
             let transNode = new ƒ.ComponentTransform(ƒ.Matrix4x4.TRANSLATION(startPosition));//TODO: move after turret are loaded!
             this.addComponent(transNode);
@@ -102,13 +101,6 @@ namespace HomeFudge {
             }
            
 
-            this.mtxLocal.translate(new ƒ.Vector3(
-                this.velocity.x * _deltaSeconds,
-                this.velocity.y * _deltaSeconds,
-                this.velocity.z * _deltaSeconds)
-            );
-            this.mtxLocal.rotateY(this.rotation * _deltaSeconds);
-            this.rotation = 0;//TODO: move to player. make the control there smoother
 
             //TODO:remove test of gatling rot
             ///TEST----------------TEST\\\

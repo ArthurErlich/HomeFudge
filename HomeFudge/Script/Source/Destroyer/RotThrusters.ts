@@ -8,7 +8,7 @@ namespace HomeFudge {
         private static animation: ƒ.Animation = null;
 
         private async init(side: string, position: ƒ.Vector3) {
-            console.log("addding: "+ this.name);
+            console.log("addling: "+ this.name);
             
             RotThrusters.graph = await Resources.getGraphResources(Config.destroyer.graphID);
             let node: ƒ.Node = await Resources.getComponentNode("ThrustExhaust", RotThrusters.graph);

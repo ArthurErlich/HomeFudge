@@ -36,13 +36,13 @@ namespace HomeFudge {
             }
         }
         private async initBulletConfig(): Promise<void> {
-            GatlingBullet.graph = await Bullet.getGraphResources(Config.gatlingBullet.graphID);
+            GatlingBullet.graph = await Resources.getGraphResources(Config.gatlingBullet.graphID);
 
             ///initAttributes\\\
             this.maxLifeTime = Config.gatlingBullet.maxLifeTime;
             this.maxSpeed = Config.gatlingBullet.maxSpeed;
 
-            let node: ƒ.Node = await Bullet.getComponentNode("GatlingBullet", GatlingBullet.graph);
+            let node: ƒ.Node = await Resources.getComponentNode("GatlingBullet", GatlingBullet.graph);
             if (GatlingBullet.mesh == null) {
                 GatlingBullet.mesh = node.getComponent(ƒ.ComponentMesh).mesh;
             }

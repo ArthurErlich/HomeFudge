@@ -24,7 +24,7 @@ namespace HomeFudge {
 
         private async initConfigAndAllNodes(): Promise<void> {
 
-            let graph: ƒ.Graph = await this.getGraphResources(Config.gatlingTurret.graphID);
+            let graph: ƒ.Graph = await Resources.getGraphResources(Config.gatlingTurret.graphID);
 
             //TODO|ON-HOLD| REWRITE Turret Mesh and Material component gathering and attaching -> like Destroyer Class
             this.headNode = this.createComponents("GatlingTurretHead", JSONparser.toVector3(Config.gatlingTurret.headPosition), graph);
@@ -44,13 +44,6 @@ namespace HomeFudge {
             this.addChild(this.baseNode);
 
 
-        }
-        private async getGraphResources(graphID: string): Promise<ƒ.Graph> {
-            let graph: ƒ.Graph = <ƒ.Graph>ƒ.Project.resources[graphID]
-            if (graph == null) {
-                console.warn(graph + " not found with ID: " + graphID);
-            }
-            return graph;
         }
         private createComponents(nodeName: string, transform: ƒ.Vector3, graph: ƒ.Graph): ƒ.Node {
             let node: ƒ.Node = graph.getChildrenByName(nodeName)[0];
