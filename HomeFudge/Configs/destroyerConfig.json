@@ -1,8 +1,9 @@
 {
     "graphID": "Graph|2023-04-25T14:30:46.195Z|98798",
-    "maxAcceleration": 1500,
-    "maxSpeed": 50,
-    "maxTurnSpeed": 50,
+    "maxAcceleration": 5000,
+    "maxSpeed": 400,
+    "maxTurnSpeed": 1,
+    "maxTurnAcceleration": 10,
     "maxHealthPoints": 1000,
     "mass": 2000,
     "RotThruster_FL": [

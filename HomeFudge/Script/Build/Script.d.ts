@@ -54,6 +54,7 @@ declare namespace HomeFudge {
         maxAcceleration: number;
         maxSpeed: number;
         maxTurnSpeed: number;
+        maxTurnAcceleration: number;
         mass: number;
         maxHealthPoints: number;
         RotThruster_FL: number[];
@@ -69,6 +70,12 @@ declare namespace HomeFudge {
         [key: string]: number[];
     }
     export {};
+}
+declare namespace HomeFudge {
+    import ƒ = FudgeCore;
+    class ConvexHull {
+        static convertToFloat32Array(convexMesh: ƒ.Mesh): Float32Array;
+    }
 }
 declare namespace Script {
     import ƒ = FudgeCore;
@@ -215,13 +222,15 @@ declare namespace HomeFudge {
         private rigidBody;
         protected healthPoints: number;
         protected maxTurnSpeed: number;
+        private maxTurnAcceleration;
         private gatlingTurret;
         private beamTurretList;
         private rotThruster;
         weapons: typeof Weapons;
-        static graph: ƒ.Graph;
+        private static graph;
         static mesh: ƒ.Mesh;
         static material: ƒ.Material;
+        static convexHull: Float32Array;
         private initAllConfigs;
         private addWeapons;
         private addThrusters;
@@ -236,7 +245,7 @@ declare namespace HomeFudge {
         fireBeam(): void;
         move(moveDirection: ƒ.Vector3): void;
         rotate(rotateY: number): void;
-        constructor(startTransfrom: ƒ.Matrix4x4);
+        constructor(startTransform: ƒ.Matrix4x4);
     }
     export {};
 }
@@ -257,7 +266,7 @@ declare namespace HomeFudge {
         alive(): boolean;
         toString(): string;
         destroyNode(): void;
-        constructor(spawnTransform: ƒ.Matrix4x4);
+        constructor(initVelocity: ƒ.Vector3, spawnTransform: ƒ.Matrix4x4);
     }
 }
 declare namespace HomeFudge {
@@ -281,7 +290,7 @@ declare namespace HomeFudge {
         private createShootPosNode;
         private update;
         moveTurret(xRot: number, yRot: number): void;
-        fire(): void;
+        fire(shipVelocity: ƒ.Vector3): void;
         constructor();
     }
 }

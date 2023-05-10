@@ -29,6 +29,19 @@ var HomeFudge;
     }
     HomeFudge.Config = Config;
 })(HomeFudge || (HomeFudge = {}));
+var HomeFudge;
+(function (HomeFudge) {
+    class ConvexHull {
+        static convertToFloat32Array(convexMesh) {
+            //TODO:make float 32 array
+            let array = new Float32Array(convexMesh.vertices.flatMap((_vertex, _index) => {
+                return [...convexMesh.vertices.position(_index).get()];
+            }));
+            return array;
+        }
+    }
+    HomeFudge.ConvexHull = ConvexHull;
+})(HomeFudge || (HomeFudge = {}));
 var Script;
 (function (Script) {
     var ƒ = FudgeCore;
@@ -213,7 +226,7 @@ var HomeFudge;
         HomeFudge.LoadingScreen.remove();
         HomeFudge._viewport = _event.detail;
         HomeFudge._worldNode = HomeFudge._viewport.getBranch();
-        HomeFudge._viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
+        // _viewport.physicsDebugMode =ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
         console.log(HomeFudge._viewport);
         //Loads Config then initilizes the world in the right order
         await loadConfig().then(initWorld).then(() => {
@@ -499,6 +512,7 @@ var HomeFudge;
         rigidBody = null;
         healthPoints = null;
         maxTurnSpeed = null;
+        maxTurnAcceleration = null;
         gatlingTurret = null;
         beamTurretList = new Array(2);
         rotThruster = new Array(4);
@@ -507,22 +521,27 @@ var HomeFudge;
         static graph = null;
         static mesh = null;
         static material = null;
+        static convexHull = null;
         async initAllConfigs(startTransform) {
             Destroyer.graph = await HomeFudge.Resources.getGraphResources(HomeFudge.Config.destroyer.graphID);
             let node = await HomeFudge.Resources.getComponentNode("Destroyer", Destroyer.graph);
+            let nodeConvex = await HomeFudge.Resources.getComponentNode("DestroyerConvexHull", Destroyer.graph);
             //init mesh and material
             Destroyer.mesh = node.getComponent(ƒ.ComponentMesh).mesh;
+            Destroyer.convexHull = HomeFudge.ConvexHull.convertToFloat32Array(nodeConvex.getComponent(ƒ.ComponentMesh).mesh);
             Destroyer.material = node.getComponent(ƒ.ComponentMaterial).material;
             //init configs
             this.maxAcceleration = HomeFudge.Config.destroyer.maxAcceleration;
             this.maxSpeed = HomeFudge.Config.destroyer.maxSpeed;
             this.maxTurnSpeed = HomeFudge.Config.destroyer.maxTurnSpeed;
+            this.maxTurnAcceleration = HomeFudge.Config.destroyer.maxTurnAcceleration;
             //init Weapons
             this.addWeapons();
             this.addThrusters();
             //init Components
             this.setAllComponents(startTransform);
             this.addRigidBody(node, startTransform);
+            ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, this.update);
         }
         addWeapons() {
             this.gatlingTurret = new HomeFudge.GatlingTurret();
@@ -555,27 +574,55 @@ var HomeFudge;
             if (Destroyer.seedRigidBody == null) {
                 Destroyer.seedRigidBody = node.getComponent(ƒ.ComponentRigidbody);
             }
-            this.rigidBody = new ƒ.ComponentRigidbody(HomeFudge.Config.destroyer.mass, Destroyer.seedRigidBody.typeBody, Destroyer.seedRigidBody.typeCollider);
-            this.rigidBody.mtxPivot.scale(Destroyer.mesh.boundingBox.max);
+            this.rigidBody = new ƒ.ComponentRigidbody(HomeFudge.Config.destroyer.mass, Destroyer.seedRigidBody.typeBody, Destroyer.seedRigidBody.typeCollider, ƒ.COLLISION_GROUP.DEFAULT, startTransform, Destroyer.convexHull);
+            this.rigidBody.mtxPivot.scale(new ƒ.Vector3(2, 2, 2)); //Fixes the ConvexHull being 1/2 of the original convex
             this.rigidBody.setPosition(startTransform.translation);
             this.rigidBody.setRotation(startTransform.rotation);
             this.rigidBody.effectRotation = new ƒ.Vector3(0, 0.0025, 0);
+            this.rigidBody.restitution = 0;
+            this.rigidBody.dampRotation = 10;
+            this.rigidBody.dampTranslation = 5;
             this.addComponent(this.rigidBody);
         }
         update = () => {
             //DISABLE THRUSTERS
             //TODO:Find a new Solution if rotation moves to Player
-            if (this.rotThruster[0].getComponent(ƒ.ComponentMesh).activate) {
-                this.rotThruster.forEach(thruster => {
-                    thruster.getComponent(ƒ.ComponentMesh).activate(false);
-                });
+            // if (this.rotThruster[0].getComponent(ƒ.ComponentMesh).isActive) {
+            //     this.rotThruster.forEach(thruster => {
+            //         thruster.getComponent(ƒ.ComponentMesh).activate(false);
+            //     });
+            // }
+            //stops micro rotation
+            if (Math.abs(this.rigidBody.getAngularVelocity().y) <= 0.01) {
+                this.rigidBody.setAngularVelocity(ƒ.Vector3.ZERO());
+            }
+            if (this.rigidBody.getAngularVelocity().y < 0) {
+                //RIGHT TURN
+                this.rotThruster[0].getComponent(ƒ.ComponentMesh).activate(true);
+                this.rotThruster[3].getComponent(ƒ.ComponentMesh).activate(true);
+            }
+            else {
+                this.rotThruster[0].getComponent(ƒ.ComponentMesh).activate(false);
+                this.rotThruster[3].getComponent(ƒ.ComponentMesh).activate(false);
+            }
+            if (this.rigidBody.getAngularVelocity().y > 0) {
+                //LEFT TURN
+                this.rotThruster[1].getComponent(ƒ.ComponentMesh).activate(true);
+                this.rotThruster[2].getComponent(ƒ.ComponentMesh).activate(true);
+            }
+            else {
+                this.rotThruster[1].getComponent(ƒ.ComponentMesh).activate(false);
+                this.rotThruster[2].getComponent(ƒ.ComponentMesh).activate(false);
+            }
+            if (this.maxTurnSpeed <= Math.abs(this.rigidBody.getAngularVelocity().y)) {
+                return;
             }
             //TODO:remove test of gatling rot
             ///TEST----------------TEST\\\
             let tempRotBase = this.gatlingTurret.baseNode.mtxLocal.rotation;
             this.gatlingTurret.baseNode.mtxLocal.rotation = new ƒ.Vector3(tempRotBase.x, -(HomeFudge.Mouse.position.x - (HomeFudge._viewport.canvas.width / 2)) / Math.PI / 3, tempRotBase.z);
             let tempRotHead = this.gatlingTurret.headNode.mtxLocal.rotation;
-            this.gatlingTurret.headNode.mtxLocal.rotation = new ƒ.Vector3(tempRotHead.x, tempRotHead.y, -(HomeFudge.Mouse.position.y - (HomeFudge._viewport.canvas.width / 2)) / Math.PI / 4);
+            this.gatlingTurret.headNode.mtxLocal.rotation = new ƒ.Vector3(tempRotHead.x, tempRotHead.y, -(HomeFudge.Mouse.position.y - (HomeFudge._viewport.canvas.height / 2)) / Math.PI / 4);
             // this.beamTurretList[0].rotateTo(-(Mouse.position.y - (_viewport.canvas.height / 2)) / Math.PI / 4);
             // this.beamTurretList[1].rotateTo(-(Mouse.position.y - (_viewport.canvas.height / 2)) / Math.PI / 4);
             ///TEST----------------TEST\\\
@@ -609,7 +656,7 @@ var HomeFudge;
             }
         }
         fireGatling() {
-            this.gatlingTurret.fire();
+            this.gatlingTurret.fire(this.rigidBody.getVelocity());
         }
         fireBeam() {
             this.beamTurretList.forEach(turret => {
@@ -621,30 +668,22 @@ var HomeFudge;
             if (HomeFudge.Mathf.vectorLength(moveDirection) >= 0.001) {
                 moveDirection.normalize();
             }
-            moveDirection.scale(this.maxSpeed);
+            moveDirection.scale(this.maxSpeed * HomeFudge._deltaSeconds);
+            if (HomeFudge.Mathf.vectorLength(this.rigidBody.getVelocity()) <= this.maxSpeed) {
+                //fixes velocity, rotating it to the right direction
+                let mtxRot = new ƒ.Matrix4x4;
+                mtxRot.rotation = this.mtxWorld.rotation;
+                this.rigidBody.addVelocity(ƒ.Vector3.TRANSFORMATION(moveDirection, mtxRot));
+            }
             //TODO:add smooth acceleration
             //add acceleration
         }
         rotate(rotateY) {
-            if (this.maxTurnSpeed == null) {
-                return;
-            }
-            if (rotateY < 0) {
-                //RIGHT TURN
-                this.rotThruster[0].getComponent(ƒ.ComponentMesh).activate(true);
-                this.rotThruster[3].getComponent(ƒ.ComponentMesh).activate(true);
-            }
-            else if (rotateY > 0) {
-                //LEFT TURN
-                this.rotThruster[1].getComponent(ƒ.ComponentMesh).activate(true);
-                this.rotThruster[2].getComponent(ƒ.ComponentMesh).activate(true);
-            }
-            //TODO: add Rotation
+            this.rigidBody.addAngularVelocity(new ƒ.Vector3(0, rotateY * this.maxTurnAcceleration * HomeFudge._deltaSeconds, 0));
         }
-        constructor(startTransfrom) {
+        constructor(startTransform) {
             super("Destroyer");
-            this.initAllConfigs(startTransfrom);
-            ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, this.update);
+            this.initAllConfigs(startTransform);
         }
     }
     HomeFudge.Destroyer = Destroyer;
@@ -676,14 +715,21 @@ var HomeFudge;
                 this.destroyNode();
             }
         };
-        async init(spawnTransform) {
+        async init(initVelocity, spawnTransform) {
             GatlingBullet.graph = await HomeFudge.Resources.getGraphResources(HomeFudge.Config.gatlingBullet.graphID);
             let node = await HomeFudge.Resources.getComponentNode("GatlingBullet", GatlingBullet.graph);
             ///initAttributes\\\
             this.maxLifeTime = HomeFudge.Config.gatlingBullet.maxLifeTime;
             GatlingBullet.maxSpeed = HomeFudge.Config.gatlingBullet.maxSpeed;
             this.addComponents(node, spawnTransform);
-            this.rigidBody.applyImpulseAtPoint(ƒ.Vector3.TRANSFORMATION(new ƒ.Vector3(this.mtxLocal.translation.x + GatlingBullet.maxSpeed, -this.mtxLocal.translation.y, -this.mtxLocal.translation.z), spawnTransform)); //RIGIDBODY is initialed at world positional rotation
+            //fixes impulse direction.
+            //TODO: move into function
+            let localShootDir = new ƒ.Vector3(GatlingBullet.maxSpeed, 0, 0);
+            let gatRotAtZero = new ƒ.Matrix4x4();
+            gatRotAtZero.rotation = spawnTransform.rotation;
+            let worldShootDir = ƒ.Vector3.TRANSFORMATION(localShootDir, gatRotAtZero);
+            worldShootDir.add(initVelocity);
+            this.rigidBody.setVelocity(worldShootDir);
         }
         getNodeResources(node) {
             if (GatlingBullet.mesh == null) {
@@ -706,6 +752,8 @@ var HomeFudge;
             this.rigidBody.mtxPivot = GatlingBullet.seedRigidBody.mtxPivot;
             this.rigidBody.setPosition(spawnTransform.translation);
             this.rigidBody.setRotation(spawnTransform.rotation);
+            this.rigidBody.restitution = 0;
+            this.rigidBody.dampTranslation = 0;
             this.addComponent(this.rigidBody);
         }
         alive() {
@@ -729,9 +777,9 @@ var HomeFudge;
                 ƒ.Loop.stop();
             }
         }
-        constructor(spawnTransform) {
+        constructor(initVelocity, spawnTransform) {
             super("Gatling");
-            this.init(spawnTransform);
+            this.init(initVelocity, spawnTransform);
             ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, this.update);
         }
     }
@@ -837,7 +885,7 @@ var HomeFudge;
         if not, it returns without firing. If the reload timer has finished and there are rounds
         left in the magazine, it creates a new GatlingBullet object at the position of the shootNode
         and resets the rounds timer. */
-        fire() {
+        fire(shipVelocity) {
             if (this.magazineRounds <= 0) {
                 this.reloadTimer = 0;
                 this.magazineRounds = this.magazineCapacity;
@@ -856,7 +904,7 @@ var HomeFudge;
                 let spread1y = Math.random() * 0.2 - (Math.random()) * 0.2;
                 let spread1z = Math.random() * 0.2 - (Math.random()) * 0.2;
                 shot2.rotate(new ƒ.Vector3(spread1x, spread1y, spread1z));
-                new HomeFudge.GatlingBullet(shot2);
+                new HomeFudge.GatlingBullet(shipVelocity, shot2);
                 //TEST end
                 this.roundsTimer = 0;
                 this.magazineRounds--;

@@ -14,6 +14,7 @@ namespace HomeFudge {
 
         protected healthPoints: number = null;
         protected maxTurnSpeed: number = null;
+        private maxTurnAcceleration: number = null
 
         private gatlingTurret: GatlingTurret = null;
         private beamTurretList: BeamTurret[] = new Array(2);
@@ -23,22 +24,27 @@ namespace HomeFudge {
         //list of weapons
         public weapons = Weapons;
 
-        static graph: ƒ.Graph = null;
+        private static graph: ƒ.Graph = null;
         static mesh: ƒ.Mesh = null;
         static material: ƒ.Material = null;
+        static convexHull: Float32Array = null;
 
         private async initAllConfigs(startTransform: ƒ.Matrix4x4) {
             Destroyer.graph = await Resources.getGraphResources(Config.destroyer.graphID);
             let node: ƒ.Node = await Resources.getComponentNode("Destroyer", Destroyer.graph);
+            let nodeConvex: ƒ.Node = await Resources.getComponentNode("DestroyerConvexHull", Destroyer.graph);
 
             //init mesh and material
             Destroyer.mesh = node.getComponent(ƒ.ComponentMesh).mesh;
+            Destroyer.convexHull = ConvexHull.convertToFloat32Array(nodeConvex.getComponent(ƒ.ComponentMesh).mesh);
+
             Destroyer.material = node.getComponent(ƒ.ComponentMaterial).material;
 
             //init configs
             this.maxAcceleration = Config.destroyer.maxAcceleration;
             this.maxSpeed = Config.destroyer.maxSpeed;
             this.maxTurnSpeed = Config.destroyer.maxTurnSpeed;
+            this.maxTurnAcceleration = Config.destroyer.maxTurnAcceleration;
 
 
             //init Weapons
@@ -47,8 +53,7 @@ namespace HomeFudge {
             //init Components
             this.setAllComponents(startTransform);
             this.addRigidBody(node, startTransform);
-
-
+            ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.update);
         }
 
         private addWeapons(): void {
@@ -83,8 +88,8 @@ namespace HomeFudge {
             this.addComponent(new ƒ.ComponentMaterial(Destroyer.material));
             this.addComponent(new ƒ.ComponentMesh(Destroyer.mesh));
             this.addComponent(new ƒ.ComponentTransform(startPosition));
-
         }
+
         private addRigidBody(node: ƒ.Node, startTransform: ƒ.Matrix4x4): void {
             if (Destroyer.seedRigidBody == null) {
                 Destroyer.seedRigidBody = node.getComponent(ƒ.ComponentRigidbody);
@@ -93,24 +98,54 @@ namespace HomeFudge {
             this.rigidBody = new ƒ.ComponentRigidbody(
                 Config.destroyer.mass,
                 Destroyer.seedRigidBody.typeBody,
-                Destroyer.seedRigidBody.typeCollider
+                Destroyer.seedRigidBody.typeCollider,
+                ƒ.COLLISION_GROUP.DEFAULT,
+                startTransform,
+                Destroyer.convexHull
             );
-            this.rigidBody.mtxPivot.scale(Destroyer.mesh.boundingBox.max);
+            this.rigidBody.mtxPivot.scale(new ƒ.Vector3(2, 2, 2)); //Fixes the ConvexHull being 1/2 of the original convex
             this.rigidBody.setPosition(startTransform.translation);
             this.rigidBody.setRotation(startTransform.rotation);
-            this.rigidBody.effectRotation = new ƒ.Vector3(0,0.0025,0);
+            this.rigidBody.effectRotation = new ƒ.Vector3(0, 0.0025, 0);
+            this.rigidBody.restitution = 0;
+            this.rigidBody.dampRotation = 10;
+            this.rigidBody.dampTranslation = 5;
             this.addComponent(this.rigidBody);
         }
 
         protected update = (): void => {
             //DISABLE THRUSTERS
             //TODO:Find a new Solution if rotation moves to Player
-            if (this.rotThruster[0].getComponent(ƒ.ComponentMesh).activate) {
-                this.rotThruster.forEach(thruster => {
-                    thruster.getComponent(ƒ.ComponentMesh).activate(false);
-                });
+            // if (this.rotThruster[0].getComponent(ƒ.ComponentMesh).isActive) {
+            //     this.rotThruster.forEach(thruster => {
+            //         thruster.getComponent(ƒ.ComponentMesh).activate(false);
+            //     });
+            // }
+
+            //stops micro rotation
+            if(Math.abs(this.rigidBody.getAngularVelocity().y) <= 0.01){
+                this.rigidBody.setAngularVelocity(ƒ.Vector3.ZERO());
             }
 
+            if (this.rigidBody.getAngularVelocity().y < 0) {
+                //RIGHT TURN
+                this.rotThruster[0].getComponent(ƒ.ComponentMesh).activate(true);
+                this.rotThruster[3].getComponent(ƒ.ComponentMesh).activate(true);
+            }else{
+                this.rotThruster[0].getComponent(ƒ.ComponentMesh).activate(false);
+                this.rotThruster[3].getComponent(ƒ.ComponentMesh).activate(false);
+            }
+            if (this.rigidBody.getAngularVelocity().y > 0) {
+                //LEFT TURN
+                this.rotThruster[1].getComponent(ƒ.ComponentMesh).activate(true);
+                this.rotThruster[2].getComponent(ƒ.ComponentMesh).activate(true);
+            }else{
+                this.rotThruster[1].getComponent(ƒ.ComponentMesh).activate(false);
+                this.rotThruster[2].getComponent(ƒ.ComponentMesh).activate(false);
+            }
+            if (this.maxTurnSpeed <= Math.abs(this.rigidBody.getAngularVelocity().y)) {
+                return;
+            }
             //TODO:remove test of gatling rot
             ///TEST----------------TEST\\\
             let tempRotBase: ƒ.Vector3 = this.gatlingTurret.baseNode.mtxLocal.rotation;
@@ -123,7 +158,7 @@ namespace HomeFudge {
             this.gatlingTurret.headNode.mtxLocal.rotation = new ƒ.Vector3(
                 tempRotHead.x,
                 tempRotHead.y,
-                -(Mouse.position.y - (_viewport.canvas.width / 2)) / Math.PI / 4,
+                -(Mouse.position.y - (_viewport.canvas.height / 2)) / Math.PI / 4,
 
             );
             // this.beamTurretList[0].rotateTo(-(Mouse.position.y - (_viewport.canvas.height / 2)) / Math.PI / 4);
@@ -160,7 +195,7 @@ namespace HomeFudge {
             }
         }
         public fireGatling() {
-            this.gatlingTurret.fire();
+            this.gatlingTurret.fire(this.rigidBody.getVelocity());
         }
         public fireBeam() {
             this.beamTurretList.forEach(turret => {
@@ -172,31 +207,23 @@ namespace HomeFudge {
             if (Mathf.vectorLength(moveDirection) >= 0.001) {
                 moveDirection.normalize();
             }
-            moveDirection.scale(this.maxSpeed);
+            moveDirection.scale(this.maxSpeed * _deltaSeconds);
+            if (Mathf.vectorLength(this.rigidBody.getVelocity()) <= this.maxSpeed) {
+
+                //fixes velocity, rotating it to the right direction
+                let mtxRot: ƒ.Matrix4x4 = new ƒ.Matrix4x4;
+                mtxRot.rotation = this.mtxWorld.rotation;
+                this.rigidBody.addVelocity(ƒ.Vector3.TRANSFORMATION(moveDirection, mtxRot));
+            }
             //TODO:add smooth acceleration
             //add acceleration
         }
         public rotate(rotateY: number) {
-            if (this.maxTurnSpeed == null) {
-                return;
-            }
-            if (rotateY < 0) {
-                //RIGHT TURN
-                this.rotThruster[0].getComponent(ƒ.ComponentMesh).activate(true);
-                this.rotThruster[3].getComponent(ƒ.ComponentMesh).activate(true);
-
-            }
-            else if (rotateY > 0) {
-                //LEFT TURN
-                this.rotThruster[1].getComponent(ƒ.ComponentMesh).activate(true);
-                this.rotThruster[2].getComponent(ƒ.ComponentMesh).activate(true);
-            }
-            //TODO: add Rotation
+            this.rigidBody.addAngularVelocity(new ƒ.Vector3(0, rotateY * this.maxTurnAcceleration * _deltaSeconds, 0))
         }
-        constructor(startTransfrom: ƒ.Matrix4x4) {
+        constructor(startTransform: ƒ.Matrix4x4) {
             super("Destroyer");
-            this.initAllConfigs(startTransfrom);
-            ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.update);
+            this.initAllConfigs(startTransform);
         }
     }
 }

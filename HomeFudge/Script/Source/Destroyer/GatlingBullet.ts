@@ -5,15 +5,15 @@ namespace HomeFudge {
     export class GatlingBullet extends Bullet {
         protected maxLifeTime: number = null;
 
-        
+
         private static graph: ƒ.Graph = null;
         private static mesh: ƒ.Mesh = null;
         private static material: ƒ.Material = null;
         private static maxSpeed: number = null;
-        
+
         private static seedRigidBody: ƒ.ComponentRigidbody = null;
         private rigidBody: ƒ.ComponentRigidbody = null;
-        
+
         //TODO: try faction out.
         // faction: FACTION="FACTION.A";
 
@@ -32,7 +32,7 @@ namespace HomeFudge {
             }
 
         }
-        private async init(spawnTransform: ƒ.Matrix4x4): Promise<void> {
+        private async init(initVelocity: ƒ.Vector3, spawnTransform: ƒ.Matrix4x4): Promise<void> {
             GatlingBullet.graph = await Resources.getGraphResources(Config.gatlingBullet.graphID);
             let node: ƒ.Node = await Resources.getComponentNode("GatlingBullet", GatlingBullet.graph);
 
@@ -41,9 +41,15 @@ namespace HomeFudge {
             GatlingBullet.maxSpeed = Config.gatlingBullet.maxSpeed;
 
             this.addComponents(node, spawnTransform);
-            this.rigidBody.applyImpulseAtPoint(ƒ.Vector3.TRANSFORMATION(new ƒ.Vector3(this.mtxLocal.translation.x+GatlingBullet.maxSpeed, -this.mtxLocal.translation.y, -this.mtxLocal.translation.z), spawnTransform));//RIGIDBODY is initialed at world positional rotation
 
-
+            //fixes impulse direction.
+            //TODO: move into function
+            let localShootDir: ƒ.Vector3 = new ƒ.Vector3(GatlingBullet.maxSpeed, 0, 0);
+            let gatRotAtZero: ƒ.Matrix4x4 = new ƒ.Matrix4x4();
+            gatRotAtZero.rotation = spawnTransform.rotation;
+            let worldShootDir: ƒ.Vector3 = ƒ.Vector3.TRANSFORMATION(localShootDir, gatRotAtZero);
+            worldShootDir.add(initVelocity);
+            this.rigidBody.setVelocity(worldShootDir);
         }
         private getNodeResources(node: ƒ.Node) {
             if (GatlingBullet.mesh == null) {
@@ -71,6 +77,8 @@ namespace HomeFudge {
             this.rigidBody.mtxPivot = GatlingBullet.seedRigidBody.mtxPivot;
             this.rigidBody.setPosition(spawnTransform.translation);
             this.rigidBody.setRotation(spawnTransform.rotation);
+            this.rigidBody.restitution = 0;
+            this.rigidBody.dampTranslation = 0;
             this.addComponent(this.rigidBody);
         }
 
@@ -95,9 +103,9 @@ namespace HomeFudge {
                 ƒ.Loop.stop();
             }
         }
-        constructor(spawnTransform: ƒ.Matrix4x4) {
+        constructor(initVelocity: ƒ.Vector3, spawnTransform: ƒ.Matrix4x4) {
             super("Gatling");
-            this.init(spawnTransform);
+            this.init(initVelocity, spawnTransform);
             ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.update);
         }
     }

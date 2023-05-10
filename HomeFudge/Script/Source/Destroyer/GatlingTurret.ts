@@ -114,7 +114,7 @@ namespace HomeFudge {
         if not, it returns without firing. If the reload timer has finished and there are rounds
         left in the magazine, it creates a new GatlingBullet object at the position of the shootNode
         and resets the rounds timer. */
-        public fire() {
+        public fire(shipVelocity:ƒ.Vector3) {
             if (this.magazineRounds <= 0) {
                 this.reloadTimer = 0;
                 this.magazineRounds = this.magazineCapacity;
@@ -134,7 +134,7 @@ namespace HomeFudge {
                 let spread1y = Math.random()*0.2-(Math.random())*0.2;
                 let spread1z = Math.random()*0.2-(Math.random())*0.2;
                 shot2.rotate(new ƒ.Vector3(spread1x,spread1y,spread1z));
-                new GatlingBullet(shot2);
+                new GatlingBullet(shipVelocity,shot2);
                 //TEST end
 
                 this.roundsTimer = 0;

@@ -76,6 +76,7 @@ namespace HomeFudge {
         maxAcceleration: number;
         maxSpeed: number;
         maxTurnSpeed: number;
+        maxTurnAcceleration: number;
         mass: number;
         maxHealthPoints: number;
         RotThruster_FL: number[];
