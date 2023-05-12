@@ -11,18 +11,19 @@ namespace HomeFudge {
         private static graph: ƒ.Graph = null;
         private static mesh: ƒ.Mesh = null;
         private static material: ƒ.Material = null;
+        private beamReady: boolean = true;
 
-        private rotNode:ƒ.Node = null;
+        private rotNode: ƒ.Node = null;
 
         private beam: LaserBeam = null
+        private timer: ƒ.Time = new ƒ.Time();
 
-
-        private maxRotSpeed: number;
-        private maxPitch: number;
-        private minPitch: number;
-        private maxBeamTime: number;
-        private maxReloadTime: number;
-        private range: number;
+        //TODO:readd declaration
+        // private maxRotSpeed: number;
+        // private maxPitch: number;
+        // private minPitch: number;
+        // private maxBeamTime: number;
+        // private maxReloadTime: number;
 
 
 
@@ -34,15 +35,15 @@ namespace HomeFudge {
                 BeamTurret.mesh = resourceNode.getComponent(ƒ.ComponentMesh).mesh;
             }
 
-            this.rotNode = new ƒ.Node("RotNode" +this.name); 
+            this.rotNode = new ƒ.Node("RotNode" + this.name);
             //Init turret configs
 
-            this.maxRotSpeed = Config.beamTurret.maxRotSpeed;
-            this.maxPitch = Config.beamTurret.maxPitch;
-            this.minPitch = Config.beamTurret.minPitch;
-            this.maxBeamTime = Config.beamTurret.beamTime;
-            this.maxReloadTime = Config.beamTurret.reloadTime;
-            this.range = Config.beamTurret.range;
+            //TODO: re add init...
+            // this.maxRotSpeed = Config.beamTurret.maxRotSpeed;
+            // this.maxPitch = Config.beamTurret.maxPitch;
+            // this.minPitch = Config.beamTurret.minPitch;
+            // this.maxBeamTime = Config.beamTurret.beamTime;
+            // this.maxReloadTime = Config.beamTurret.reloadTime;
 
             this.addChild(this.rotNode);
             let turretPos: ƒ.Vector3 = JSONparser.toVector3(Config.beamTurret.basePosition)
@@ -66,10 +67,10 @@ namespace HomeFudge {
         }
         private addBeam(side: string): void {
             //TODO: BeamMaterial is disabled
-            // let beamPos: ƒ.Vector3 = JSONparser.toVector3(Config.beamTurret.beamPosition);
-            // this.beam = new LaserBeam(side, beamPos)
-            // this.rotNode.addChild(this.beam);
-   
+            let beamPos: ƒ.Vector3 = JSONparser.toVector3(Config.beamTurret.beamPosition);
+            this.beam = new LaserBeam(side, beamPos)
+            this.rotNode.addChild(this.beam);
+
 
         }
         private addComponents(position: ƒ.Vector3) {
@@ -90,21 +91,36 @@ namespace HomeFudge {
             //TODO:add rotation LOCK
 
 
-            if(this.mtxLocal.rotation.x == -90){
+            if (this.mtxLocal.rotation.x == -90) {
                 this.rotNode.mtxLocal.rotateY(rot);
             }
-            if(this.mtxLocal.rotation.x == 90){
+            if (this.mtxLocal.rotation.x == 90) {
                 this.rotNode.mtxLocal.rotateY(-rot);
             }
         }
         public fire() {
-            throw new Error("Method not implemented.");
+            console.log("is beam ready: " + this.beamReady);
+            if (this.beamReady) {
+                this.beamReady = false
+                //Beam time
+                this.timer.setTimer(4000, 1, () => {
+
+                    this.beam.getComponent(ƒ.ComponentMesh).activate(false);
+                    //Beam reload
+                    this.timer.setTimer(4000, 1, () => {
+
+                        this.beamReady = true;
+                    });
+                });
+                this.beam.getComponent(ƒ.ComponentMesh).activate(true);
+            }
+
         }
-        public rotateTo(cordY:number){
+        public rotateTo(cordY: number) {
             this.rotate(cordY);
         }
 
-        constructor(side: number) {2
+        constructor(side: number) {
             super("BeamTurret");
             this.init(side);
             ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.update);

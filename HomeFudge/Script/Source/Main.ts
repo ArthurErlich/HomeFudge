@@ -65,29 +65,19 @@ namespace HomeFudge {
   function update(_event: Event): void {
     ƒ.Physics.simulate();  // make an update loop just for the Physics. fixed at 30fps
     _deltaSeconds = ƒ.Loop.timeFrameGame / 1000;
-
+    
     /// ------------T-E-S-T--A-R-E-A------------------\\\
-    if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.DELETE])) {
-      ƒ.Loop.stop();
-      console.log(_worldNode);
-    }
-
-    //TODO: remove error when frames are dropping
-    if (ƒ.Loop.fpsGameAverage <= 20) {
-      console.warn(ƒ.Loop.fpsGameAverage);
-      console.warn("Active bullets in scene: " + _worldNode.getChildrenByName("BulletGatling").length);
-      ƒ.Loop.stop();
-    }
-
-    // if(Mouse.isPressedOne([MOUSE_CODE.LEFT])){
-    //   getPosTest();
+    // if(draw){
+    //   _viewport.draw(false);
+    //   draw = false;
+    // }else{
+    //   _viewport.draw(true);
+    //   draw = true;
     // }
-    // let aimPos:ƒ.Vector3 = getAimPos(); //TODO:Remove unused AimingRayCaster
-
     /// ------------T-E-S-T--A-R-E-A------------------\\\
-
     _viewport.draw();//TODO move to a loop of 30 frames per second;
     ƒ.AudioManager.default.update();
+
   }
 
   /// ------------T-E-S-T--A-R-E-A------------------\\\

@@ -5,25 +5,104 @@ namespace HomeFudge {
         private selectedWeapon: number = null; //TODO:Check if ok
 
         private moveDirection: ƒ.Vector3 = ƒ.Vector3.ZERO();
-        private camRotBeforeChange: ƒ.Vector3 = null;
 
         private update = (): void => {
-            this.camRotBeforeChange = _mainCamera.camComp.mtxPivot.rotation;
+            
             if (Mouse.isPressedOne([MOUSE_CODE.LEFT])) {
-                this.destroyer.fireWeapon(this.selectedWeapon);
+                this.destroyer.fireWeapon(this.selectedWeapon,new ƒ.Vector3(100,100,0));
             }
+            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ALT_LEFT])) {
+                this.rotateShip();
+                //TODO: PointerLock enabled
+            }else{
+                //TODO: PointerLock disabled
+                this.updateShipMovement();
+            }
+            this.updateWeaponSelection();
+
+            this.destroyer.move(this.moveDirection);
+            this.moveDirection = ƒ.Vector3.ZERO();
+
+
+
+
+            // //TODO: use PlayerCamera instant of mainCamera
+            // //TODO: pan camera only a specific threshold
+            //TODO: mouse panning for something elses
+            // _mainCamera.camComp.mtxPivot.rotation = new ƒ.Vector3(
+            //     _mainCamera.camComp.mtxPivot.rotation.x,
+            //     -(Mouse.position.x - (_viewport.canvas.width / 2)) / 100,
+            //     _mainCamera.camComp.mtxPivot.rotation.z
+            // );
+        }
+        private selectWeapon(weapon: number) {
+            switch (weapon) {
+                case this.destroyer.WEAPONS.GATLING_TURRET:
+                    if (this.selectedWeapon != weapon) {
+                        this.selectedWeapon = weapon;
+                        _viewport.canvas.style.cursor = "url(Textures/MouseAimCurser.png) 16 16, crosshair";
+                    }
+                    break;
+                case this.destroyer.WEAPONS.BEAM_TURRET:
+                    if (this.selectedWeapon != weapon) {
+                        this.selectedWeapon = weapon;
+                        _viewport.canvas.style.cursor = "url(Textures/GatlingTurretAimCurser.png) 16 16, crosshair";
+                    }
+                    break;
+                case this.destroyer.WEAPONS.ROCKET_POD:
+                    if (this.selectedWeapon != weapon) {
+                        this.selectedWeapon = weapon;
+                    }
+                    break;
+                default:
+                    console.warn("no WP selected");
+                    break;
+            }
+        }
+        private rotateShip():void {
+            throw new Error("Method not implemented.");
+        }
+        private updateWeaponSelection(): void {
+            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ONE])) {
+                //Gatling -> //TODO: Create Look on with mouse
+                this.selectWeapon(this.destroyer.WEAPONS.GATLING_TURRET);
+            }
+            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.TWO])) {
+                //Beam
+                this.selectWeapon(this.destroyer.WEAPONS.BEAM_TURRET);
+            }
+            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.THREE])) {
+                //Rocket
+                this.selectWeapon(this.destroyer.WEAPONS.ROCKET_POD);
+            }
+        }
+        private updateShipMovement() {
+            /*
+            Rotation : 
+             left ->this.destroyer.rotate(1);
+             RIGHT ->this.destroyer.rotate(-1);
+
+            */
 
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.A])) {
-                //LEFT
-                this.destroyer.rotate(1);
+                //LEFT STARVE
+                this.moveDirection.set(
+                    this.moveDirection.x,
+                    this.moveDirection.y,
+                    -1
+                );
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.D])) {
-                //RIGHT
-                this.destroyer.rotate(-1);
+                //RIGHT STARVE
+                this.moveDirection.set(
+                    this.moveDirection.x,
+                    this.moveDirection.y,
+                    1
+                );
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.W])) {
                 //FORWARD
-                this.moveDirection = new ƒ.Vector3(
+                this.moveDirection.set(
                     1,
                     this.moveDirection.y,
                     this.moveDirection.z
@@ -31,62 +110,58 @@ namespace HomeFudge {
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.S])) {
                 //BACKWARD
-                this.moveDirection = new ƒ.Vector3(
+                this.moveDirection.set(
                     -1,
                     this.moveDirection.y,
                     this.moveDirection.z
                 );
-
             }
-            //TODO move if check int a function to initiate the curser
-            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ONE])) {
-                //Gatling
-                if (this.selectedWeapon != this.destroyer.weapons.GatlingTurret) {
-                    this.selectedWeapon = this.destroyer.weapons.GatlingTurret;
-                    _viewport.canvas.style.cursor = "url(Textures/MouseAimCurser.png) 16 16, crosshair";
-                }
+            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.SHIFT_LEFT])) {
+                //BACKWARD
+                this.moveDirection.set(
+                    this.moveDirection.z,
+                    this.moveDirection.y,
+                    this.moveDirection.z
+                );
             }
-            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.TWO])) {
-                //Beam
-                if (this.selectedWeapon != this.destroyer.weapons.BeamTurret) {
-                    this.selectedWeapon = this.destroyer.weapons.BeamTurret;
-                    _viewport.canvas.style.cursor = "url(Textures/GatlingTurretAimCurser.png) 16 16, crosshair";
-                }
+            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.CTRL_LEFT])) {
+                //BACKWARD
+                this.moveDirection = new ƒ.Vector3(
+                    this.moveDirection.z,
+                    this.moveDirection.y,
+                    this.moveDirection.z
+                );
             }
-            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.THREE])) {
-                //Rocket
-                if (this.selectedWeapon != this.destroyer.weapons.RocketPod) {
-                    this.selectedWeapon = this.destroyer.weapons.RocketPod;
-                }
-            }
-
-            this.destroyer.move(this.moveDirection);
-            this.moveDirection = ƒ.Vector3.ZERO();
-
-            
-
-
-            //TODO: use PlayerCamera instant of mainCamera
-            //TODO: pan camera only a specific threshold
-            _mainCamera.camComp.mtxPivot.rotation = new ƒ.Vector3(
-                _mainCamera.camComp.mtxPivot.rotation.x,
-                -(Mouse.position.x - (_viewport.canvas.width / 2)) / 100,
-                _mainCamera.camComp.mtxPivot.rotation.z
-            );
-            _mainCamera.camComp.mtxPivot.rotation = this.camRotBeforeChange; // Resets cam rotation before using the cam rot mouse.
         }
-        constructor(name: string) {
-            super(name);
-            this.destroyer = new Destroyer(ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.ZERO()));
-            this.addChild(this.destroyer);
-            this.selectedWeapon = this.destroyer.weapons.GatlingTurret;//Set WP to one
-            _viewport.canvas.style.cursor = "url(Textures/MouseAimCurser.png) 16 16, crosshair";//TODO: remove temp setting
+        private init() {
+            this.initAudio();
+            this.initShip(Ship.SHIPS.DESTROYER);
+        }
+        private initAudio() {
             //inits Music Soundtrack
             let audioComp = new ƒ.ComponentAudio(new ƒ.Audio("Sound/Background/10.Cycles.mp3"), true); //TODO:Move sound to recourses
             //Sound by IXION!
             audioComp.volume = 0.1;
             audioComp.play(true);
-            _mainCamera.camNode.addComponent(audioComp);
+            _mainCamera.camNode.addComponent(audioComp);//TODO: Change to player Camera
+        }
+        private initShip(ship: number) {
+            switch (ship) {
+                case Ship.SHIPS.DESTROYER:
+                    this.destroyer = new Destroyer(ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.ZERO()));
+                    this.addChild(this.destroyer);
+                    this.selectWeapon(this.destroyer.WEAPONS.BEAM_TURRET);
+                    break;
+
+                default:
+                    console.warn("no Ship found: " + ship);
+                    break;
+            }
+
+        }
+        constructor(name: string) {
+            super(name);
+            this.init();
             ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.update);
         }
     }

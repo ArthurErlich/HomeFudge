@@ -256,20 +256,13 @@ var HomeFudge;
         ƒ.Physics.simulate(); // make an update loop just for the Physics. fixed at 30fps
         HomeFudge._deltaSeconds = ƒ.Loop.timeFrameGame / 1000;
         /// ------------T-E-S-T--A-R-E-A------------------\\\
-        if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.DELETE])) {
-            ƒ.Loop.stop();
-            console.log(HomeFudge._worldNode);
-        }
-        //TODO: remove error when frames are dropping
-        if (ƒ.Loop.fpsGameAverage <= 20) {
-            console.warn(ƒ.Loop.fpsGameAverage);
-            console.warn("Active bullets in scene: " + HomeFudge._worldNode.getChildrenByName("BulletGatling").length);
-            ƒ.Loop.stop();
-        }
-        // if(Mouse.isPressedOne([MOUSE_CODE.LEFT])){
-        //   getPosTest();
+        // if(draw){
+        //   _viewport.draw(false);
+        //   draw = false;
+        // }else{
+        //   _viewport.draw(true);
+        //   draw = true;
         // }
-        // let aimPos:ƒ.Vector3 = getAimPos(); //TODO:Remove unused AimingRayCaster
         /// ------------T-E-S-T--A-R-E-A------------------\\\
         HomeFudge._viewport.draw(); //TODO move to a loop of 30 frames per second;
         ƒ.AudioManager.default.update();
@@ -338,10 +331,10 @@ var HomeFudge;
             return new ƒ.Vector3(-v.x, -v.y, -v.z);
         }
         static DegreeToRadiant(degree) {
-            return degree * (180 / Math.PI);
+            return degree * (Math.PI / 180);
         }
         static RadiantToDegree(radiant) {
-            return radiant * (Math.PI / 180);
+            return radiant * (180 / Math.PI);
         }
     }
     HomeFudge.Mathf = Mathf;
@@ -384,7 +377,12 @@ var HomeFudge;
 var HomeFudge;
 (function (HomeFudge) {
     var ƒ = FudgeCore;
+    let SHIPS;
+    (function (SHIPS) {
+        SHIPS[SHIPS["DESTROYER"] = 0] = "DESTROYER";
+    })(SHIPS || (SHIPS = {}));
     class Ship extends ƒ.Node {
+        static SHIPS = SHIPS;
         constructor(name) {
             super("Ship_" + name);
             //register to updater list
@@ -408,14 +406,16 @@ var HomeFudge;
         static graph = null;
         static mesh = null;
         static material = null;
+        beamReady = true;
         rotNode = null;
         beam = null;
-        maxRotSpeed;
-        maxPitch;
-        minPitch;
-        maxBeamTime;
-        maxReloadTime;
-        range;
+        timer = new ƒ.Time();
+        //TODO:readd declaration
+        // private maxRotSpeed: number;
+        // private maxPitch: number;
+        // private minPitch: number;
+        // private maxBeamTime: number;
+        // private maxReloadTime: number;
         async init(side) {
             BeamTurret.graph = await HomeFudge.Resources.getGraphResources(HomeFudge.Config.beamTurret.graphID);
             let resourceNode = await HomeFudge.Resources.getComponentNode("BeamTurret", BeamTurret.graph);
@@ -425,12 +425,12 @@ var HomeFudge;
             }
             this.rotNode = new ƒ.Node("RotNode" + this.name);
             //Init turret configs
-            this.maxRotSpeed = HomeFudge.Config.beamTurret.maxRotSpeed;
-            this.maxPitch = HomeFudge.Config.beamTurret.maxPitch;
-            this.minPitch = HomeFudge.Config.beamTurret.minPitch;
-            this.maxBeamTime = HomeFudge.Config.beamTurret.beamTime;
-            this.maxReloadTime = HomeFudge.Config.beamTurret.reloadTime;
-            this.range = HomeFudge.Config.beamTurret.range;
+            //TODO: re add init...
+            // this.maxRotSpeed = Config.beamTurret.maxRotSpeed;
+            // this.maxPitch = Config.beamTurret.maxPitch;
+            // this.minPitch = Config.beamTurret.minPitch;
+            // this.maxBeamTime = Config.beamTurret.beamTime;
+            // this.maxReloadTime = Config.beamTurret.reloadTime;
             this.addChild(this.rotNode);
             let turretPos = HomeFudge.JSONparser.toVector3(HomeFudge.Config.beamTurret.basePosition);
             switch (side) {
@@ -454,9 +454,9 @@ var HomeFudge;
         }
         addBeam(side) {
             //TODO: BeamMaterial is disabled
-            // let beamPos: ƒ.Vector3 = JSONparser.toVector3(Config.beamTurret.beamPosition);
-            // this.beam = new LaserBeam(side, beamPos)
-            // this.rotNode.addChild(this.beam);
+            let beamPos = HomeFudge.JSONparser.toVector3(HomeFudge.Config.beamTurret.beamPosition);
+            this.beam = new HomeFudge.LaserBeam(side, beamPos);
+            this.rotNode.addChild(this.beam);
         }
         addComponents(position) {
             console.log("attaching mtx translation: " + position);
@@ -482,13 +482,24 @@ var HomeFudge;
             }
         }
         fire() {
-            throw new Error("Method not implemented.");
+            console.log("is beam ready: " + this.beamReady);
+            if (this.beamReady) {
+                this.beamReady = false;
+                //Beam time
+                this.timer.setTimer(4000, 1, () => {
+                    this.beam.getComponent(ƒ.ComponentMesh).activate(false);
+                    //Beam reload
+                    this.timer.setTimer(4000, 1, () => {
+                        this.beamReady = true;
+                    });
+                });
+                this.beam.getComponent(ƒ.ComponentMesh).activate(true);
+            }
         }
         rotateTo(cordY) {
             this.rotate(cordY);
         }
         constructor(side) {
-            2;
             super("BeamTurret");
             this.init(side);
             ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, this.update);
@@ -499,12 +510,12 @@ var HomeFudge;
 var HomeFudge;
 (function (HomeFudge) {
     var ƒ = FudgeCore;
-    let Weapons;
-    (function (Weapons) {
-        Weapons[Weapons["GatlingTurret"] = 0] = "GatlingTurret";
-        Weapons[Weapons["BeamTurret"] = 1] = "BeamTurret";
-        Weapons[Weapons["RocketPod"] = 2] = "RocketPod";
-    })(Weapons || (Weapons = {}));
+    let WEAPONS;
+    (function (WEAPONS) {
+        WEAPONS[WEAPONS["GATLING_TURRET"] = 0] = "GATLING_TURRET";
+        WEAPONS[WEAPONS["BEAM_TURRET"] = 1] = "BEAM_TURRET";
+        WEAPONS[WEAPONS["ROCKET_POD"] = 2] = "ROCKET_POD";
+    })(WEAPONS || (WEAPONS = {}));
     class Destroyer extends HomeFudge.Ship {
         maxSpeed = null;
         maxAcceleration = null;
@@ -517,7 +528,7 @@ var HomeFudge;
         beamTurretList = new Array(2);
         rotThruster = new Array(4);
         //list of weapons
-        weapons = Weapons;
+        WEAPONS = WEAPONS;
         static graph = null;
         static mesh = null;
         static material = null;
@@ -579,9 +590,9 @@ var HomeFudge;
             this.rigidBody.setPosition(startTransform.translation);
             this.rigidBody.setRotation(startTransform.rotation);
             this.rigidBody.effectRotation = new ƒ.Vector3(0, 0.0025, 0);
-            this.rigidBody.restitution = 0;
+            this.rigidBody.restitution = 0.1;
             this.rigidBody.dampRotation = 10;
-            this.rigidBody.dampTranslation = 5;
+            this.rigidBody.dampTranslation = 0.1;
             this.addComponent(this.rigidBody);
         }
         update = () => {
@@ -592,10 +603,16 @@ var HomeFudge;
             //         thruster.getComponent(ƒ.ComponentMesh).activate(false);
             //     });
             // }
+            //TODO: add Y hight check.
             //stops micro rotation
             if (Math.abs(this.rigidBody.getAngularVelocity().y) <= 0.01) {
                 this.rigidBody.setAngularVelocity(ƒ.Vector3.ZERO());
             }
+            //stops micro movement
+            if (Math.abs(HomeFudge.Mathf.vectorLength(this.rigidBody.getVelocity())) <= 0.01) {
+                this.rigidBody.setVelocity(ƒ.Vector3.ZERO());
+            }
+            //TODO: move to own function
             if (this.rigidBody.getAngularVelocity().y < 0) {
                 //RIGHT TURN
                 this.rotThruster[0].getComponent(ƒ.ComponentMesh).activate(true);
@@ -617,15 +634,6 @@ var HomeFudge;
             if (this.maxTurnSpeed <= Math.abs(this.rigidBody.getAngularVelocity().y)) {
                 return;
             }
-            //TODO:remove test of gatling rot
-            ///TEST----------------TEST\\\
-            let tempRotBase = this.gatlingTurret.baseNode.mtxLocal.rotation;
-            this.gatlingTurret.baseNode.mtxLocal.rotation = new ƒ.Vector3(tempRotBase.x, -(HomeFudge.Mouse.position.x - (HomeFudge._viewport.canvas.width / 2)) / Math.PI / 3, tempRotBase.z);
-            let tempRotHead = this.gatlingTurret.headNode.mtxLocal.rotation;
-            this.gatlingTurret.headNode.mtxLocal.rotation = new ƒ.Vector3(tempRotHead.x, tempRotHead.y, -(HomeFudge.Mouse.position.y - (HomeFudge._viewport.canvas.height / 2)) / Math.PI / 4);
-            // this.beamTurretList[0].rotateTo(-(Mouse.position.y - (_viewport.canvas.height / 2)) / Math.PI / 4);
-            // this.beamTurretList[1].rotateTo(-(Mouse.position.y - (_viewport.canvas.height / 2)) / Math.PI / 4);
-            ///TEST----------------TEST\\\
         };
         alive() {
             //console.error("Method not implemented.");
@@ -639,24 +647,24 @@ var HomeFudge;
             //console.error("Method not implemented.");
             return null;
         }
-        fireWeapon(_weapon) {
+        fireWeapon(_weapon, target) {
             switch (_weapon) {
-                case Weapons.BeamTurret:
+                case WEAPONS.BEAM_TURRET:
                     this.fireBeam();
                     break;
-                case Weapons.RocketPod:
+                case WEAPONS.ROCKET_POD:
                     //TODO:Implement Rocket Pod
                     console.error("RocketPod not implement!!");
                     break;
-                case Weapons.GatlingTurret:
-                    this.fireGatling();
+                case WEAPONS.GATLING_TURRET:
+                    this.fireGatling(target);
                     break;
                 default:
                     break;
             }
         }
-        fireGatling() {
-            this.gatlingTurret.fire(this.rigidBody.getVelocity());
+        fireGatling(target) {
+            this.gatlingTurret.fireAt(this.rigidBody.getVelocity(), target);
         }
         fireBeam() {
             this.beamTurretList.forEach(turret => {
@@ -668,7 +676,7 @@ var HomeFudge;
             if (HomeFudge.Mathf.vectorLength(moveDirection) >= 0.001) {
                 moveDirection.normalize();
             }
-            moveDirection.scale(this.maxSpeed * HomeFudge._deltaSeconds);
+            moveDirection.scale(this.maxAcceleration * HomeFudge._deltaSeconds);
             if (HomeFudge.Mathf.vectorLength(this.rigidBody.getVelocity()) <= this.maxSpeed) {
                 //fixes velocity, rotating it to the right direction
                 let mtxRot = new ƒ.Matrix4x4;
@@ -913,6 +921,16 @@ var HomeFudge;
                 this.shootNode.getComponent(ƒ.ComponentAudio).play(true);
             }
         }
+        fireAt(shipVelocity, target) {
+            //Look at rotates Z towards target.
+            //MtxLocal.LookAt
+            //TODO: I need a way to recreate the lookAt function from ƒ to only have vectors and not using the Matrix4x4. And I need a way to have the Y-AchesUp
+            let test = ƒ.Vector3.ZERO();
+            test = target;
+            test.subtract(this.shootNode.mtxLocal.translation);
+            test.normalize(1);
+            console.log(HomeFudge.Mathf.RadiantToDegree(ƒ.Vector3.DOT(test, this.shootNode.mtxLocal.translation)).toString());
+        }
         constructor() {
             super("GatlingTurret");
             this.initConfigAndAllNodes();
@@ -941,6 +959,7 @@ var HomeFudge;
             this.addComponent(new ƒ.ComponentMaterial(this.material));
             this.addComponent(new ƒ.ComponentMesh(LaserBeam.mesh));
             this.addComponent(new ƒ.ComponentTransform(ƒ.Matrix4x4.TRANSLATION(pos)));
+            this.getComponent(ƒ.ComponentMesh).activate(false);
         }
         constructor(side, position) {
             super("LaserBeam" + side);
@@ -1052,6 +1071,7 @@ var HomeFudge;
     class Mouse {
         static position = new ƒ.Vector2(0, 0);
         static movedDistance = new ƒ.Vector2(0, 0);
+        static isHidden = false;
         /**
          * This array should be the same length as the {@link MOUSE_CODE }
          */
@@ -1175,68 +1195,130 @@ var HomeFudge;
         destroyer = null;
         selectedWeapon = null; //TODO:Check if ok
         moveDirection = ƒ.Vector3.ZERO();
-        camRotBeforeChange = null;
         update = () => {
-            this.camRotBeforeChange = HomeFudge._mainCamera.camComp.mtxPivot.rotation;
             if (HomeFudge.Mouse.isPressedOne([HomeFudge.MOUSE_CODE.LEFT])) {
-                this.destroyer.fireWeapon(this.selectedWeapon);
+                this.destroyer.fireWeapon(this.selectedWeapon, new ƒ.Vector3(100, 100, 0));
             }
-            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.A])) {
-                //LEFT
-                this.destroyer.rotate(1);
+            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ALT_LEFT])) {
+                this.rotateShip();
+                //TODO: PointerLock enabled
             }
-            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.D])) {
-                //RIGHT
-                this.destroyer.rotate(-1);
+            else {
+                //TODO: PointerLock disabled
+                this.updateShipMovement();
             }
-            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.W])) {
-                //FORWARD
-                this.moveDirection = new ƒ.Vector3(1, this.moveDirection.y, this.moveDirection.z);
+            this.updateWeaponSelection();
+            this.destroyer.move(this.moveDirection);
+            this.moveDirection = ƒ.Vector3.ZERO();
+            // //TODO: use PlayerCamera instant of mainCamera
+            // //TODO: pan camera only a specific threshold
+            //TODO: mouse panning for something elses
+            // _mainCamera.camComp.mtxPivot.rotation = new ƒ.Vector3(
+            //     _mainCamera.camComp.mtxPivot.rotation.x,
+            //     -(Mouse.position.x - (_viewport.canvas.width / 2)) / 100,
+            //     _mainCamera.camComp.mtxPivot.rotation.z
+            // );
+        };
+        selectWeapon(weapon) {
+            switch (weapon) {
+                case this.destroyer.WEAPONS.GATLING_TURRET:
+                    if (this.selectedWeapon != weapon) {
+                        this.selectedWeapon = weapon;
+                        HomeFudge._viewport.canvas.style.cursor = "url(Textures/MouseAimCurser.png) 16 16, crosshair";
+                    }
+                    break;
+                case this.destroyer.WEAPONS.BEAM_TURRET:
+                    if (this.selectedWeapon != weapon) {
+                        this.selectedWeapon = weapon;
+                        HomeFudge._viewport.canvas.style.cursor = "url(Textures/GatlingTurretAimCurser.png) 16 16, crosshair";
+                    }
+                    break;
+                case this.destroyer.WEAPONS.ROCKET_POD:
+                    if (this.selectedWeapon != weapon) {
+                        this.selectedWeapon = weapon;
+                    }
+                    break;
+                default:
+                    console.warn("no WP selected");
+                    break;
             }
-            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.S])) {
-                //BACKWARD
-                this.moveDirection = new ƒ.Vector3(-1, this.moveDirection.y, this.moveDirection.z);
-            }
-            //TODO move if check int a function to initiate the curser
+        }
+        rotateShip() {
+            throw new Error("Method not implemented.");
+        }
+        updateWeaponSelection() {
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ONE])) {
-                //Gatling
-                if (this.selectedWeapon != this.destroyer.weapons.GatlingTurret) {
-                    this.selectedWeapon = this.destroyer.weapons.GatlingTurret;
-                    HomeFudge._viewport.canvas.style.cursor = "url(Textures/MouseAimCurser.png) 16 16, crosshair";
-                }
+                //Gatling -> //TODO: Create Look on with mouse
+                this.selectWeapon(this.destroyer.WEAPONS.GATLING_TURRET);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.TWO])) {
                 //Beam
-                if (this.selectedWeapon != this.destroyer.weapons.BeamTurret) {
-                    this.selectedWeapon = this.destroyer.weapons.BeamTurret;
-                    HomeFudge._viewport.canvas.style.cursor = "url(Textures/GatlingTurretAimCurser.png) 16 16, crosshair";
-                }
+                this.selectWeapon(this.destroyer.WEAPONS.BEAM_TURRET);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.THREE])) {
                 //Rocket
-                if (this.selectedWeapon != this.destroyer.weapons.RocketPod) {
-                    this.selectedWeapon = this.destroyer.weapons.RocketPod;
-                }
+                this.selectWeapon(this.destroyer.WEAPONS.ROCKET_POD);
             }
-            this.destroyer.move(this.moveDirection);
-            this.moveDirection = ƒ.Vector3.ZERO();
-            //TODO: use PlayerCamera instant of mainCamera
-            //TODO: pan camera only a specific threshold
-            HomeFudge._mainCamera.camComp.mtxPivot.rotation = new ƒ.Vector3(HomeFudge._mainCamera.camComp.mtxPivot.rotation.x, -(HomeFudge.Mouse.position.x - (HomeFudge._viewport.canvas.width / 2)) / 100, HomeFudge._mainCamera.camComp.mtxPivot.rotation.z);
-            HomeFudge._mainCamera.camComp.mtxPivot.rotation = this.camRotBeforeChange; // Resets cam rotation before using the cam rot mouse.
-        };
-        constructor(name) {
-            super(name);
-            this.destroyer = new HomeFudge.Destroyer(ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.ZERO()));
-            this.addChild(this.destroyer);
-            this.selectedWeapon = this.destroyer.weapons.GatlingTurret; //Set WP to one
-            HomeFudge._viewport.canvas.style.cursor = "url(Textures/MouseAimCurser.png) 16 16, crosshair"; //TODO: remove temp setting
+        }
+        updateShipMovement() {
+            /*
+            Rotation :
+             left ->this.destroyer.rotate(1);
+             RIGHT ->this.destroyer.rotate(-1);
+
+            */
+            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.A])) {
+                //LEFT STARVE
+                this.moveDirection.set(this.moveDirection.x, this.moveDirection.y, -1);
+            }
+            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.D])) {
+                //RIGHT STARVE
+                this.moveDirection.set(this.moveDirection.x, this.moveDirection.y, 1);
+            }
+            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.W])) {
+                //FORWARD
+                this.moveDirection.set(1, this.moveDirection.y, this.moveDirection.z);
+            }
+            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.S])) {
+                //BACKWARD
+                this.moveDirection.set(-1, this.moveDirection.y, this.moveDirection.z);
+            }
+            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.SHIFT_LEFT])) {
+                //BACKWARD
+                this.moveDirection.set(this.moveDirection.z, this.moveDirection.y, this.moveDirection.z);
+            }
+            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.CTRL_LEFT])) {
+                //BACKWARD
+                this.moveDirection = new ƒ.Vector3(this.moveDirection.z, this.moveDirection.y, this.moveDirection.z);
+            }
+        }
+        init() {
+            this.initAudio();
+            this.initShip(HomeFudge.Ship.SHIPS.DESTROYER);
+        }
+        initAudio() {
             //inits Music Soundtrack
             let audioComp = new ƒ.ComponentAudio(new ƒ.Audio("Sound/Background/10.Cycles.mp3"), true); //TODO:Move sound to recourses
             //Sound by IXION!
             audioComp.volume = 0.1;
             audioComp.play(true);
-            HomeFudge._mainCamera.camNode.addComponent(audioComp);
+            HomeFudge._mainCamera.camNode.addComponent(audioComp); //TODO: Change to player Camera
+        }
+        initShip(ship) {
+            switch (ship) {
+                case HomeFudge.Ship.SHIPS.DESTROYER:
+                    this.destroyer = new HomeFudge.Destroyer(ƒ.Matrix4x4.TRANSLATION(ƒ.Vector3.ZERO()));
+                    this.addChild(this.destroyer);
+                    this.selectWeapon(this.destroyer.WEAPONS.BEAM_TURRET);
+                    break;
+                default:
+                    console.warn("no Ship found: " + ship);
+                    break;
+            }
+        }
+        constructor(name) {
+            super(name);
+            this.init();
             ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, this.update);
         }
     }

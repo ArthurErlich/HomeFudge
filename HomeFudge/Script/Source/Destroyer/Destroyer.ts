@@ -1,9 +1,9 @@
 namespace HomeFudge {
     import ƒ = FudgeCore;
-    enum Weapons {
-        GatlingTurret,
-        BeamTurret,
-        RocketPod
+    enum WEAPONS {
+        GATLING_TURRET,
+        BEAM_TURRET,
+        ROCKET_POD
     }
     export class Destroyer extends Ship {
         protected maxSpeed: number = null;
@@ -22,7 +22,7 @@ namespace HomeFudge {
         private rotThruster: RotThrusters[] = new Array(4);
 
         //list of weapons
-        public weapons = Weapons;
+        public WEAPONS = WEAPONS;
 
         private static graph: ƒ.Graph = null;
         static mesh: ƒ.Mesh = null;
@@ -107,9 +107,9 @@ namespace HomeFudge {
             this.rigidBody.setPosition(startTransform.translation);
             this.rigidBody.setRotation(startTransform.rotation);
             this.rigidBody.effectRotation = new ƒ.Vector3(0, 0.0025, 0);
-            this.rigidBody.restitution = 0;
+            this.rigidBody.restitution = 0.1;
             this.rigidBody.dampRotation = 10;
-            this.rigidBody.dampTranslation = 5;
+            this.rigidBody.dampTranslation = 0.1;
             this.addComponent(this.rigidBody);
         }
 
@@ -122,16 +122,23 @@ namespace HomeFudge {
             //     });
             // }
 
+            //TODO: add Y hight check.
+
             //stops micro rotation
-            if(Math.abs(this.rigidBody.getAngularVelocity().y) <= 0.01){
+            if (Math.abs(this.rigidBody.getAngularVelocity().y) <= 0.01) {
                 this.rigidBody.setAngularVelocity(ƒ.Vector3.ZERO());
             }
+            //stops micro movement
+            if (Math.abs(Mathf.vectorLength(this.rigidBody.getVelocity())) <= 0.01) {
+                this.rigidBody.setVelocity(ƒ.Vector3.ZERO());
+            }
 
+            //TODO: move to own function
             if (this.rigidBody.getAngularVelocity().y < 0) {
                 //RIGHT TURN
                 this.rotThruster[0].getComponent(ƒ.ComponentMesh).activate(true);
                 this.rotThruster[3].getComponent(ƒ.ComponentMesh).activate(true);
-            }else{
+            } else {
                 this.rotThruster[0].getComponent(ƒ.ComponentMesh).activate(false);
                 this.rotThruster[3].getComponent(ƒ.ComponentMesh).activate(false);
             }
@@ -139,31 +146,13 @@ namespace HomeFudge {
                 //LEFT TURN
                 this.rotThruster[1].getComponent(ƒ.ComponentMesh).activate(true);
                 this.rotThruster[2].getComponent(ƒ.ComponentMesh).activate(true);
-            }else{
+            } else {
                 this.rotThruster[1].getComponent(ƒ.ComponentMesh).activate(false);
                 this.rotThruster[2].getComponent(ƒ.ComponentMesh).activate(false);
             }
             if (this.maxTurnSpeed <= Math.abs(this.rigidBody.getAngularVelocity().y)) {
                 return;
             }
-            //TODO:remove test of gatling rot
-            ///TEST----------------TEST\\\
-            let tempRotBase: ƒ.Vector3 = this.gatlingTurret.baseNode.mtxLocal.rotation;
-            this.gatlingTurret.baseNode.mtxLocal.rotation = new ƒ.Vector3(
-                tempRotBase.x,
-                -(Mouse.position.x - (_viewport.canvas.width / 2)) / Math.PI / 3,
-                tempRotBase.z
-            );
-            let tempRotHead: ƒ.Vector3 = this.gatlingTurret.headNode.mtxLocal.rotation;
-            this.gatlingTurret.headNode.mtxLocal.rotation = new ƒ.Vector3(
-                tempRotHead.x,
-                tempRotHead.y,
-                -(Mouse.position.y - (_viewport.canvas.height / 2)) / Math.PI / 4,
-
-            );
-            // this.beamTurretList[0].rotateTo(-(Mouse.position.y - (_viewport.canvas.height / 2)) / Math.PI / 4);
-            // this.beamTurretList[1].rotateTo(-(Mouse.position.y - (_viewport.canvas.height / 2)) / Math.PI / 4);
-            ///TEST----------------TEST\\\
         }
         public alive(): boolean {
             //console.error("Method not implemented.");
@@ -177,25 +166,25 @@ namespace HomeFudge {
             //console.error("Method not implemented.");
             return null;
         }
-        public fireWeapon(_weapon: Weapons) {
+        public fireWeapon(_weapon: WEAPONS, target: ƒ.Vector3) {
             switch (_weapon) {
-                case Weapons.BeamTurret:
+                case WEAPONS.BEAM_TURRET:
                     this.fireBeam();
                     break;
-                case Weapons.RocketPod:
+                case WEAPONS.ROCKET_POD:
                     //TODO:Implement Rocket Pod
                     console.error("RocketPod not implement!!");
                     break;
-                case Weapons.GatlingTurret:
-                    this.fireGatling();
+                case WEAPONS.GATLING_TURRET:
+                    this.fireGatling(target);
                     break;
 
                 default:
                     break;
             }
         }
-        public fireGatling() {
-            this.gatlingTurret.fire(this.rigidBody.getVelocity());
+        public fireGatling(target: ƒ.Vector3) {
+            this.gatlingTurret.fireAt(this.rigidBody.getVelocity(), target);
         }
         public fireBeam() {
             this.beamTurretList.forEach(turret => {
@@ -207,7 +196,7 @@ namespace HomeFudge {
             if (Mathf.vectorLength(moveDirection) >= 0.001) {
                 moveDirection.normalize();
             }
-            moveDirection.scale(this.maxSpeed * _deltaSeconds);
+            moveDirection.scale(this.maxAcceleration * _deltaSeconds);
             if (Mathf.vectorLength(this.rigidBody.getVelocity()) <= this.maxSpeed) {
 
                 //fixes velocity, rotating it to the right direction

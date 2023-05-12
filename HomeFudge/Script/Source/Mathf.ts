@@ -39,10 +39,10 @@ namespace HomeFudge {
             return new ƒ.Vector3(-v.x,-v.y,-v.z);
         }
         public static DegreeToRadiant(degree:number):number{
-            return degree * (180/Math.PI);
+            return degree * (Math.PI/180);
         }
         public static RadiantToDegree(radiant:number):number{
-            return radiant * (Math.PI/180);
+            return radiant * (180/Math.PI);
         }
     }
 

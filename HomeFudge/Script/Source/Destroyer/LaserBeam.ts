@@ -19,6 +19,7 @@ namespace HomeFudge {
             this.addComponent(new ƒ.ComponentMaterial(this.material));
             this.addComponent(new ƒ.ComponentMesh(LaserBeam.mesh));
             this.addComponent(new ƒ.ComponentTransform(ƒ.Matrix4x4.TRANSLATION(pos)));
+            this.getComponent(ƒ.ComponentMesh).activate(false);
         }
 
         constructor(side: string,position:ƒ.Vector3) {

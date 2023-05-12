@@ -144,6 +144,17 @@ namespace HomeFudge {
                 this.shootNode.getComponent(ƒ.ComponentAudio).play(true);
             }
         }
+        public fireAt(shipVelocity:ƒ.Vector3,target:ƒ.Vector3){
+            //Look at rotates Z towards target.
+            //MtxLocal.LookAt
+            //TODO: I need a way to recreate the lookAt function from ƒ to only have vectors and not using the Matrix4x4. And I need a way to have the Y-AchesUp
+            let test:ƒ.Vector3 = ƒ.Vector3.ZERO();
+            test = target;
+            test.subtract(this.shootNode.mtxLocal.translation);
+            test.normalize(1);
+            console.log(Mathf.RadiantToDegree(ƒ.Vector3.DOT(test,this.shootNode.mtxLocal.translation)).toString());
+            
+        }
         constructor() {
             super("GatlingTurret");
             this.initConfigAndAllNodes();

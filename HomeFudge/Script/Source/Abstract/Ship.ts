@@ -1,6 +1,10 @@
 namespace HomeFudge{
     import ƒ = FudgeCore;
+    enum SHIPS{
+        DESTROYER
+    }
     export abstract class Ship extends ƒ.Node{
+        public static SHIPS = SHIPS;
         protected abstract maxSpeed:number;
         protected abstract maxAcceleration:number;
         protected abstract maxTurnSpeed:number;

@@ -167,7 +167,11 @@ declare namespace HomeFudge {
 }
 declare namespace HomeFudge {
     import ƒ = FudgeCore;
-    abstract class Ship extends ƒ.Node {
+    enum SHIPS {
+        DESTROYER = 0
+    }
+    export abstract class Ship extends ƒ.Node {
+        static SHIPS: typeof SHIPS;
         protected abstract maxSpeed: number;
         protected abstract maxAcceleration: number;
         protected abstract maxTurnSpeed: number;
@@ -177,6 +181,7 @@ declare namespace HomeFudge {
         abstract toString(): string;
         constructor(name: string);
     }
+    export {};
 }
 declare namespace HomeFudge {
     import ƒ = FudgeCore;
@@ -189,14 +194,10 @@ declare namespace HomeFudge {
         private static graph;
         private static mesh;
         private static material;
+        private beamReady;
         private rotNode;
         private beam;
-        private maxRotSpeed;
-        private maxPitch;
-        private minPitch;
-        private maxBeamTime;
-        private maxReloadTime;
-        private range;
+        private timer;
         private init;
         private addBeam;
         private addComponents;
@@ -210,10 +211,10 @@ declare namespace HomeFudge {
 }
 declare namespace HomeFudge {
     import ƒ = FudgeCore;
-    enum Weapons {
-        GatlingTurret = 0,
-        BeamTurret = 1,
-        RocketPod = 2
+    enum WEAPONS {
+        GATLING_TURRET = 0,
+        BEAM_TURRET = 1,
+        ROCKET_POD = 2
     }
     export class Destroyer extends Ship {
         protected maxSpeed: number;
@@ -226,7 +227,7 @@ declare namespace HomeFudge {
         private gatlingTurret;
         private beamTurretList;
         private rotThruster;
-        weapons: typeof Weapons;
+        WEAPONS: typeof WEAPONS;
         private static graph;
         static mesh: ƒ.Mesh;
         static material: ƒ.Material;
@@ -240,8 +241,8 @@ declare namespace HomeFudge {
         alive(): boolean;
         destroyNode(): void;
         toString(): string;
-        fireWeapon(_weapon: Weapons): void;
-        fireGatling(): void;
+        fireWeapon(_weapon: WEAPONS, target: ƒ.Vector3): void;
+        fireGatling(target: ƒ.Vector3): void;
         fireBeam(): void;
         move(moveDirection: ƒ.Vector3): void;
         rotate(rotateY: number): void;
@@ -291,6 +292,7 @@ declare namespace HomeFudge {
         private update;
         moveTurret(xRot: number, yRot: number): void;
         fire(shipVelocity: ƒ.Vector3): void;
+        fireAt(shipVelocity: ƒ.Vector3, target: ƒ.Vector3): void;
         constructor();
     }
 }
@@ -342,6 +344,7 @@ declare namespace HomeFudge {
     class Mouse {
         static position: ƒ.Vector2;
         static movedDistance: ƒ.Vector2;
+        static isHidden: boolean;
         /**
          * This array should be the same length as the {@link MOUSE_CODE }
          */
@@ -413,8 +416,14 @@ declare namespace HomeFudge {
         destroyer: Destroyer;
         private selectedWeapon;
         private moveDirection;
-        private camRotBeforeChange;
         private update;
+        private selectWeapon;
+        private rotateShip;
+        private updateWeaponSelection;
+        private updateShipMovement;
+        private init;
+        private initAudio;
+        private initShip;
         constructor(name: string);
     }
 }

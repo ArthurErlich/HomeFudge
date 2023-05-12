@@ -12,12 +12,12 @@ namespace HomeFudge {
 
         public static position: ƒ.Vector2 = new ƒ.Vector2(0, 0);
         public static movedDistance: ƒ.Vector2 = new ƒ.Vector2(0, 0);
+        public static isHidden: boolean = false;
 
         /**
          * This array should be the same length as the {@link MOUSE_CODE }
          */
         private static isPressed: Array<MOUSE_CODE> = new Array<MOUSE_CODE>(3); // length of MOUSE_CODE enum
-
         private static tempPos: ƒ.Vector2 = new ƒ.Vector2(0, 0);
 
         /**
@@ -31,7 +31,6 @@ namespace HomeFudge {
             _viewport.canvas.addEventListener("mouseup", Mouse.mouseUp);
             ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, Mouse.update);
         }
-
         /** 
          * This is a private static arrow function called `update` that is used to update the
          * `movedDistance` property of the `Mouse` class. It calculates the distance the mouse has
@@ -57,8 +56,8 @@ namespace HomeFudge {
         */
         private static moveUpdate = (_event: MouseEvent): void => {
             //switched to set for performance reasons.
-            Mouse.movedDistance.set(_event.movementX,_event.movementY);
-            Mouse.position.set(_event.clientX,_event.clientY);    
+            Mouse.movedDistance.set(_event.movementX, _event.movementY);
+            Mouse.position.set(_event.clientX, _event.clientY);
         }
 
         /**
