@@ -221,6 +221,17 @@ declare namespace HomeFudge {
         BEAM_TURRET = 1,
         ROCKET_POD = 2
     }
+    enum THRUSTER_DIRECTION {
+        FORWARDS = 0,
+        BACKWARDS = 1,
+        LEFT = 2,
+        RIGHT = 3,
+        YAW_LEFT = 4,
+        YAW_RIGHT = 5,
+        PITCH_UP = 6,
+        PITCH_DOWN = 7,
+        OFF = 8
+    }
     export class Destroyer extends Ship {
         protected maxSpeed: number;
         protected maxAcceleration: number;
@@ -232,6 +243,8 @@ declare namespace HomeFudge {
         private gatlingTurret;
         private beamTurretList;
         private rotThruster;
+        private inputRot;
+        private inputAcc;
         WEAPONS: typeof WEAPONS;
         private static graph;
         static mesh: ƒ.Mesh;
@@ -242,6 +255,7 @@ declare namespace HomeFudge {
         private addThrusters;
         private setAllComponents;
         private addRigidBody;
+        private updateThrusters;
         protected update: () => void;
         alive(): boolean;
         destroyNode(): void;
@@ -251,6 +265,7 @@ declare namespace HomeFudge {
         fireBeam(): void;
         move(moveDirection: ƒ.Vector3): void;
         rotate(rotateY: number): void;
+        fireThrusters(direction: THRUSTER_DIRECTION): void;
         constructor(startTransform: ƒ.Matrix4x4);
     }
     export {};
@@ -319,8 +334,11 @@ declare namespace HomeFudge {
         private static mesh;
         private static material;
         private static animation;
+        private meshComp;
         private init;
         private createComponents;
+        activate(activate: boolean): void;
+        isActivated(): boolean;
         constructor(side: string, position: ƒ.Vector3);
     }
 }

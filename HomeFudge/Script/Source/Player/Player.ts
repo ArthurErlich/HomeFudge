@@ -89,19 +89,21 @@ namespace HomeFudge {
 
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.A])) {
                 //LEFT STARVE
-                this.moveDirection.set(
-                    this.moveDirection.x,
-                    this.moveDirection.y,
-                    -1
-                );
+                this.destroyer.rotate(1); //TODO:REMOVE DEBUG
+                // this.moveDirection.set(
+                //     this.moveDirection.x,
+                //     this.moveDirection.y,
+                //     -1
+                // );
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.D])) {
                 //RIGHT STARVE
-                this.moveDirection.set(
-                    this.moveDirection.x,
-                    this.moveDirection.y,
-                    1
-                );
+                this.destroyer.rotate(-1); //TODO:REMOVE DEBUG
+                // this.moveDirection.set(
+                //     this.moveDirection.x,
+                //     this.moveDirection.y,
+                //     1
+                // );
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.W])) {
                 //FORWARD

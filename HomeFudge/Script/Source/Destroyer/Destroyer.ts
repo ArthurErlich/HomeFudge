@@ -5,6 +5,17 @@ namespace HomeFudge {
         BEAM_TURRET,
         ROCKET_POD
     }
+    enum THRUSTER_DIRECTION {
+        FORWARDS,
+        BACKWARDS,
+        LEFT,
+        RIGHT,
+        YAW_LEFT,
+        YAW_RIGHT,
+        PITCH_UP,
+        PITCH_DOWN,
+        OFF
+    }
     export class Destroyer extends Ship {
         protected maxSpeed: number = null;
         protected maxAcceleration: number = null;
@@ -20,6 +31,10 @@ namespace HomeFudge {
         private beamTurretList: BeamTurret[] = new Array(2);
 
         private rotThruster: RotThrusters[] = new Array(4);
+
+        //True when the Player interacts with the Thrusters
+        private inputRot: boolean = false;
+        private inputAcc: boolean = false;
 
         //list of weapons
         public WEAPONS = WEAPONS;
@@ -108,9 +123,34 @@ namespace HomeFudge {
             this.rigidBody.setRotation(startTransform.rotation);
             this.rigidBody.effectRotation = new ƒ.Vector3(0, 0.0025, 0);
             this.rigidBody.restitution = 0.1;
-            this.rigidBody.dampRotation = 10;
-            this.rigidBody.dampTranslation = 0.1;
+            //TODO:Add damping wiht trusters
+            // this.rigidBody.dampRotation = 10;
+            // this.rigidBody.dampTranslation = 0.1;
             this.addComponent(this.rigidBody);
+        }
+        private updateThrusters() {
+            //TODO: move to own function
+            if (this.rotThruster[0].getComponent(ƒ.ComponentMesh) == null) {
+                return;
+            }
+            if (this.rigidBody.getAngularVelocity().y < 0) {
+                this.fireThrusters(THRUSTER_DIRECTION.YAW_RIGHT);
+                //RIGHT TURN
+                // this.rotThruster[0].activate(true);
+                // this.rotThruster[3].activate(true);
+            } else {
+                this.fireThrusters(THRUSTER_DIRECTION.OFF);
+                // this.rotThruster[0].getComponent(ƒ.ComponentMesh).activate(false);
+                // this.rotThruster[3].getComponent(ƒ.ComponentMesh).activate(false);
+            }
+            if (this.rigidBody.getAngularVelocity().y > 0) {
+                //LEFT TURN
+                this.rotThruster[1].getComponent(ƒ.ComponentMesh).activate(true);
+                this.rotThruster[2].getComponent(ƒ.ComponentMesh).activate(true);
+            } else {
+                this.rotThruster[1].getComponent(ƒ.ComponentMesh).activate(false);
+                this.rotThruster[2].getComponent(ƒ.ComponentMesh).activate(false);
+            }
         }
 
         protected update = (): void => {
@@ -134,40 +174,17 @@ namespace HomeFudge {
                 this.rigidBody.setVelocity(ƒ.Vector3.ZERO());
             }
 
-            //TODO: move to own function
-            if(this.rotThruster[0].getComponent(ƒ.ComponentMesh) == null){
-                return;
-            }
-            if (this.rigidBody.getAngularVelocity().y < 0) {
-                //RIGHT TURN
-                this.rotThruster[0].getComponent(ƒ.ComponentMesh).activate(true);
-                this.rotThruster[3].getComponent(ƒ.ComponentMesh).activate(true);
-            } else {
-                this.rotThruster[0].getComponent(ƒ.ComponentMesh).activate(false);
-                this.rotThruster[3].getComponent(ƒ.ComponentMesh).activate(false);
-            }
-            if (this.rigidBody.getAngularVelocity().y > 0) {
-                //LEFT TURN
-                this.rotThruster[1].getComponent(ƒ.ComponentMesh).activate(true);
-                this.rotThruster[2].getComponent(ƒ.ComponentMesh).activate(true);
-            } else {
-                this.rotThruster[1].getComponent(ƒ.ComponentMesh).activate(false);
-                this.rotThruster[2].getComponent(ƒ.ComponentMesh).activate(false);
-            }
-            if (this.maxTurnSpeed <= Math.abs(this.rigidBody.getAngularVelocity().y)) {
-                return;
-            }
         }
         public alive(): boolean {
-            //console.error("Method not implemented.");
+            console.error("Method not implemented.");
             return true;
         }
         public destroyNode(): void {
-            //console.error("Method not implemented.");
+            console.error("Method not implemented.");
             return null;
         }
         public toString(): string {
-            //console.error("Method not implemented.");
+            console.error("Method not implemented.");
             return null;
         }
         public fireWeapon(_weapon: WEAPONS, target: ƒ.Vector3) {
@@ -212,7 +229,55 @@ namespace HomeFudge {
             //add acceleration
         }
         public rotate(rotateY: number) {
+            //stops rotation if rotation is maxed
+            if (this.maxTurnSpeed <= Math.abs(this.rigidBody.getAngularVelocity().y)) {
+                let yAngularVelocity: number = this.rigidBody.getAngularVelocity().y;
+
+                console.log(yAngularVelocity);
+                //TODO: Fix clamp, somehow setting the velocity add/subtracts it only. Weird....
+                if (yAngularVelocity >= 0) {
+                    yAngularVelocity - 1000;
+                } else {
+                    yAngularVelocity + 1000;
+                }
+                this.rigidBody.setAngularVelocity(new ƒ.Vector3(
+                    this.rigidBody.getAngularVelocity().x,
+                    yAngularVelocity,
+                    this.rigidBody.getAngularVelocity().z
+                ));
+                return;
+            }
             this.rigidBody.addAngularVelocity(new ƒ.Vector3(0, rotateY * this.maxTurnAcceleration * _deltaSeconds, 0))
+        }
+        public fireThrusters(direction: THRUSTER_DIRECTION) {
+            switch (direction) {
+                case THRUSTER_DIRECTION.FORWARDS:
+                    break;
+                case THRUSTER_DIRECTION.BACKWARDS:
+                    break;
+                case THRUSTER_DIRECTION.LEFT:
+                    break;
+                case THRUSTER_DIRECTION.RIGHT:
+                    break;
+                case THRUSTER_DIRECTION.YAW_LEFT:
+                    break;
+                case THRUSTER_DIRECTION.YAW_RIGHT:
+                    this.rotThruster[0].activate(true);
+                    this.rotThruster[3].activate(true);
+                    break;
+                case THRUSTER_DIRECTION.PITCH_UP:
+                    break;
+                case THRUSTER_DIRECTION.PITCH_DOWN:
+                    break;
+                case THRUSTER_DIRECTION.OFF:
+                    //Disables the Thrusters on default
+                    this.rotThruster.forEach(thruster => {
+                        if (thruster.isActivated()) {
+                            thruster.activate(false);
+                        }
+                    });
+                    break;
+            }
         }
         constructor(startTransform: ƒ.Matrix4x4) {
             super("Destroyer");

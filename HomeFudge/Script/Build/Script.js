@@ -215,7 +215,7 @@ var HomeFudge;
     ///World Node\\\
     HomeFudge._worldNode = null;
     ///DeltaSeconds\\\
-    HomeFudge._deltaSeconds = null;
+    HomeFudge._deltaSeconds = 0; //init deltaSeconds to zero for the first frame
     ///Viewport\\\
     HomeFudge._viewport = null;
     ///Player\\\
@@ -247,25 +247,18 @@ var HomeFudge;
             ƒ.Physics.setGravity(ƒ.Vector3.ZERO());
         }
         /// ------------T-E-S-T--A-R-E-A------------------\\\
+        //TODO: Before the loop starts. Add an Game Menu draws on frame while updating
         /// ------------T-E-S-T--A-R-E-A------------------\\\
         ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, update);
-        //TODO: Before the loop starts. Add an Game Menu draws on frame while updating
         ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 35); // start the game loop to continuously draw the _viewport, update the audiosystem and drive the physics i/a
     }
     function update(_event) {
         ƒ.Physics.simulate(); // make an update loop just for the Physics. fixed at 30fps
-        HomeFudge._deltaSeconds = ƒ.Loop.timeFrameGame / 1000;
         /// ------------T-E-S-T--A-R-E-A------------------\\\
-        // if(draw){
-        //   _viewport.draw(false);
-        //   draw = false;
-        // }else{
-        //   _viewport.draw(true);
-        //   draw = true;
-        // }
         /// ------------T-E-S-T--A-R-E-A------------------\\\
-        HomeFudge._viewport.draw(); //TODO move to a loop of 30 frames per second;
         ƒ.AudioManager.default.update();
+        HomeFudge._viewport.draw();
+        HomeFudge._deltaSeconds = ƒ.Loop.timeFrameGame / 1000;
     }
     /// ------------T-E-S-T--A-R-E-A------------------\\\
     // function getPosTest(): void {
@@ -283,12 +276,15 @@ var HomeFudge;
     //   console.log("-------------");
     // }
     /// ------------T-E-S-T--A-R-E-A------------------\\\
-    //DEBUG
+    /// ------------T-E-S-T--A-R-E-A------------------\\\
+    //TODO: add a start stop Loop for Debug
+    //TODO: add respawn / reset timers and more
     function continueLoop(event) {
         if (event.code == "Insert") {
             ƒ.Loop.continue();
         }
     }
+    /// ------------T-E-S-T--A-R-E-A------------------\\\
 })(HomeFudge || (HomeFudge = {}));
 var HomeFudge;
 (function (HomeFudge) {
@@ -520,6 +516,18 @@ var HomeFudge;
         WEAPONS[WEAPONS["BEAM_TURRET"] = 1] = "BEAM_TURRET";
         WEAPONS[WEAPONS["ROCKET_POD"] = 2] = "ROCKET_POD";
     })(WEAPONS || (WEAPONS = {}));
+    let THRUSTER_DIRECTION;
+    (function (THRUSTER_DIRECTION) {
+        THRUSTER_DIRECTION[THRUSTER_DIRECTION["FORWARDS"] = 0] = "FORWARDS";
+        THRUSTER_DIRECTION[THRUSTER_DIRECTION["BACKWARDS"] = 1] = "BACKWARDS";
+        THRUSTER_DIRECTION[THRUSTER_DIRECTION["LEFT"] = 2] = "LEFT";
+        THRUSTER_DIRECTION[THRUSTER_DIRECTION["RIGHT"] = 3] = "RIGHT";
+        THRUSTER_DIRECTION[THRUSTER_DIRECTION["YAW_LEFT"] = 4] = "YAW_LEFT";
+        THRUSTER_DIRECTION[THRUSTER_DIRECTION["YAW_RIGHT"] = 5] = "YAW_RIGHT";
+        THRUSTER_DIRECTION[THRUSTER_DIRECTION["PITCH_UP"] = 6] = "PITCH_UP";
+        THRUSTER_DIRECTION[THRUSTER_DIRECTION["PITCH_DOWN"] = 7] = "PITCH_DOWN";
+        THRUSTER_DIRECTION[THRUSTER_DIRECTION["OFF"] = 8] = "OFF";
+    })(THRUSTER_DIRECTION || (THRUSTER_DIRECTION = {}));
     class Destroyer extends HomeFudge.Ship {
         maxSpeed = null;
         maxAcceleration = null;
@@ -531,6 +539,9 @@ var HomeFudge;
         gatlingTurret = null;
         beamTurretList = new Array(2);
         rotThruster = new Array(4);
+        //True when the Player interacts with the Thrusters
+        inputRot = false;
+        inputAcc = false;
         //list of weapons
         WEAPONS = WEAPONS;
         static graph = null;
@@ -595,9 +606,36 @@ var HomeFudge;
             this.rigidBody.setRotation(startTransform.rotation);
             this.rigidBody.effectRotation = new ƒ.Vector3(0, 0.0025, 0);
             this.rigidBody.restitution = 0.1;
-            this.rigidBody.dampRotation = 10;
-            this.rigidBody.dampTranslation = 0.1;
+            //TODO:Add damping wiht trusters
+            // this.rigidBody.dampRotation = 10;
+            // this.rigidBody.dampTranslation = 0.1;
             this.addComponent(this.rigidBody);
+        }
+        updateThrusters() {
+            //TODO: move to own function
+            if (this.rotThruster[0].getComponent(ƒ.ComponentMesh) == null) {
+                return;
+            }
+            if (this.rigidBody.getAngularVelocity().y < 0) {
+                this.fireThrusters(THRUSTER_DIRECTION.YAW_RIGHT);
+                //RIGHT TURN
+                // this.rotThruster[0].activate(true);
+                // this.rotThruster[3].activate(true);
+            }
+            else {
+                this.fireThrusters(THRUSTER_DIRECTION.OFF);
+                // this.rotThruster[0].getComponent(ƒ.ComponentMesh).activate(false);
+                // this.rotThruster[3].getComponent(ƒ.ComponentMesh).activate(false);
+            }
+            if (this.rigidBody.getAngularVelocity().y > 0) {
+                //LEFT TURN
+                this.rotThruster[1].getComponent(ƒ.ComponentMesh).activate(true);
+                this.rotThruster[2].getComponent(ƒ.ComponentMesh).activate(true);
+            }
+            else {
+                this.rotThruster[1].getComponent(ƒ.ComponentMesh).activate(false);
+                this.rotThruster[2].getComponent(ƒ.ComponentMesh).activate(false);
+            }
         }
         update = () => {
             //DISABLE THRUSTERS
@@ -617,42 +655,17 @@ var HomeFudge;
             if (Math.abs(HomeFudge.Mathf.vectorLength(this.rigidBody.getVelocity())) <= 0.01) {
                 this.rigidBody.setVelocity(ƒ.Vector3.ZERO());
             }
-            //TODO: move to own function
-            if (this.rotThruster[0].getComponent(ƒ.ComponentMesh) == null) {
-                return;
-            }
-            if (this.rigidBody.getAngularVelocity().y < 0) {
-                //RIGHT TURN
-                this.rotThruster[0].getComponent(ƒ.ComponentMesh).activate(true);
-                this.rotThruster[3].getComponent(ƒ.ComponentMesh).activate(true);
-            }
-            else {
-                this.rotThruster[0].getComponent(ƒ.ComponentMesh).activate(false);
-                this.rotThruster[3].getComponent(ƒ.ComponentMesh).activate(false);
-            }
-            if (this.rigidBody.getAngularVelocity().y > 0) {
-                //LEFT TURN
-                this.rotThruster[1].getComponent(ƒ.ComponentMesh).activate(true);
-                this.rotThruster[2].getComponent(ƒ.ComponentMesh).activate(true);
-            }
-            else {
-                this.rotThruster[1].getComponent(ƒ.ComponentMesh).activate(false);
-                this.rotThruster[2].getComponent(ƒ.ComponentMesh).activate(false);
-            }
-            if (this.maxTurnSpeed <= Math.abs(this.rigidBody.getAngularVelocity().y)) {
-                return;
-            }
         };
         alive() {
-            //console.error("Method not implemented.");
+            console.error("Method not implemented.");
             return true;
         }
         destroyNode() {
-            //console.error("Method not implemented.");
+            console.error("Method not implemented.");
             return null;
         }
         toString() {
-            //console.error("Method not implemented.");
+            console.error("Method not implemented.");
             return null;
         }
         fireWeapon(_weapon, target) {
@@ -695,7 +708,51 @@ var HomeFudge;
             //add acceleration
         }
         rotate(rotateY) {
+            //stops rotation if rotation is maxed
+            if (this.maxTurnSpeed <= Math.abs(this.rigidBody.getAngularVelocity().y)) {
+                let yAngularVelocity = this.rigidBody.getAngularVelocity().y;
+                console.log(yAngularVelocity);
+                //TODO: Fix clamp, somehow setting the velocity add/subtracts it only. Weird....
+                if (yAngularVelocity >= 0) {
+                    yAngularVelocity - 1000;
+                }
+                else {
+                    yAngularVelocity + 1000;
+                }
+                this.rigidBody.setAngularVelocity(new ƒ.Vector3(this.rigidBody.getAngularVelocity().x, yAngularVelocity, this.rigidBody.getAngularVelocity().z));
+                return;
+            }
             this.rigidBody.addAngularVelocity(new ƒ.Vector3(0, rotateY * this.maxTurnAcceleration * HomeFudge._deltaSeconds, 0));
+        }
+        fireThrusters(direction) {
+            switch (direction) {
+                case THRUSTER_DIRECTION.FORWARDS:
+                    break;
+                case THRUSTER_DIRECTION.BACKWARDS:
+                    break;
+                case THRUSTER_DIRECTION.LEFT:
+                    break;
+                case THRUSTER_DIRECTION.RIGHT:
+                    break;
+                case THRUSTER_DIRECTION.YAW_LEFT:
+                    break;
+                case THRUSTER_DIRECTION.YAW_RIGHT:
+                    this.rotThruster[0].activate(true);
+                    this.rotThruster[3].activate(true);
+                    break;
+                case THRUSTER_DIRECTION.PITCH_UP:
+                    break;
+                case THRUSTER_DIRECTION.PITCH_DOWN:
+                    break;
+                case THRUSTER_DIRECTION.OFF:
+                    //Disables the Thrusters on default
+                    this.rotThruster.forEach(thruster => {
+                        if (thruster.isActivated()) {
+                            thruster.activate(false);
+                        }
+                    });
+                    break;
+            }
         }
         constructor(startTransform) {
             super("Destroyer");
@@ -985,6 +1042,7 @@ var HomeFudge;
         static mesh = null;
         static material = null;
         static animation = null;
+        meshComp;
         async init(side, position) {
             //TODO: remove debug
             //console.log("addling: "+ this.name);
@@ -1015,12 +1073,19 @@ var HomeFudge;
             }
         }
         createComponents(position) {
-            this.addComponent(new ƒ.ComponentMesh(RotThrusters.mesh));
+            this.meshComp = new ƒ.ComponentMesh(RotThrusters.mesh);
+            this.addComponent(this.meshComp);
             this.addComponent(new ƒ.ComponentMaterial(RotThrusters.material));
             this.addComponent(new ƒ.ComponentTransform(ƒ.Matrix4x4.TRANSLATION(position)));
             let animator = new ƒ.ComponentAnimator(RotThrusters.animation);
             animator.quantization = ƒ.ANIMATION_QUANTIZATION.DISCRETE;
             this.addComponent(animator);
+        }
+        activate(activate) {
+            this.meshComp.activate(activate);
+        }
+        isActivated() {
+            return this.meshComp.isActive;
         }
         constructor(side, position) {
             super(side + "RotThruster");
@@ -1281,11 +1346,21 @@ var HomeFudge;
             */
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.A])) {
                 //LEFT STARVE
-                this.moveDirection.set(this.moveDirection.x, this.moveDirection.y, -1);
+                this.destroyer.rotate(1); //TODO:REMOVE DEBUG
+                // this.moveDirection.set(
+                //     this.moveDirection.x,
+                //     this.moveDirection.y,
+                //     -1
+                // );
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.D])) {
                 //RIGHT STARVE
-                this.moveDirection.set(this.moveDirection.x, this.moveDirection.y, 1);
+                this.destroyer.rotate(-1); //TODO:REMOVE DEBUG
+                // this.moveDirection.set(
+                //     this.moveDirection.x,
+                //     this.moveDirection.y,
+                //     1
+                // );
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.W])) {
                 //FORWARD

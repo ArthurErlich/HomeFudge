@@ -7,6 +7,8 @@ namespace HomeFudge {
         private static material: ƒ.Material = null;
         private static animation: ƒ.Animation = null;
 
+        private meshComp: ƒ.ComponentMesh;
+
         private async init(side: string, position: ƒ.Vector3) {
             //TODO: remove debug
             //console.log("addling: "+ this.name);
@@ -41,14 +43,20 @@ namespace HomeFudge {
             }
         }
         private createComponents(position: ƒ.Vector3): void {
-            this.addComponent(new ƒ.ComponentMesh(RotThrusters.mesh));
+            this.meshComp = new ƒ.ComponentMesh(RotThrusters.mesh);
+            this.addComponent(this.meshComp);
             this.addComponent(new ƒ.ComponentMaterial(RotThrusters.material));
             this.addComponent(new ƒ.ComponentTransform(ƒ.Matrix4x4.TRANSLATION(position)));
             let animator = new ƒ.ComponentAnimator(RotThrusters.animation);
             animator.quantization = ƒ.ANIMATION_QUANTIZATION.DISCRETE;
             this.addComponent(animator);
         }
-
+        public activate(activate:boolean){
+            this.meshComp.activate(activate);
+        }
+        public isActivated():boolean{
+            return this.meshComp.isActive;
+        }
         constructor(side: string, position: ƒ.Vector3) {
             super(side + "RotThruster");
             this.init(side, position);
