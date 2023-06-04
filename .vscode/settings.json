@@ -2,8 +2,10 @@
     "cSpell.words": [
         "audiosystem",
         "Autoview",
+        "DEBUGMODE",
         "Mathf",
         "Oimo",
         "Rigidbody"
-    ]
+    ],
+    "liveServer.settings.port": 5523
 }
