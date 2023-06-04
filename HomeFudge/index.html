@@ -2,6 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <title>HomeFudge</title>
+<link rel="icon" href="Images/Home Fudge Logo.png" type="image/png" />
 <meta charset="utf-8" />
 <link rel="stylesheet" href="styles.css" />
 
@@ -26,12 +27,14 @@
 <body>
 <!--Dialog shown at startup only-->
 <dialog>
-<p>FUDGE Autoview</p>
-<h1>Title (will be replaced by Autoview)</h1>
-<p>click to start</p>
-</dialog>
-<!--Canvas for FUDGE to render to-->
-<canvas class="fullscreen">
+    <div id="HFAutoview">
+        <p>FUDGE Autoview</p>
+        <h1>Title (will be replaced by Autoview)</h1>
+        <p>click to start</p>
+    </dialog>
+    <!--Canvas for FUDGE to render to-->
+    <canvas class="fullscreen">
+</div>
 </canvas>
 
 <img id="loadingIMG" src="Images/FudgeHome_LoadingHackSpinner.apng" alt="" width="100" height="100" hidden="true" loading="lazy" />

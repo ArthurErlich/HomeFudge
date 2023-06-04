@@ -14,3 +14,15 @@ canvas.fullscreen {
   width: 100vw; 
   height: 100vh; 
 }
+#HFAutoview{
+  background-image: url("Images/Home Fudge Logo 60 opacity.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.6;
+  transition: opacity 0.3s;
+}
+#HFAutoview:hover{
+  opacity: 2;
+  transition: opacity 1s;
+}
