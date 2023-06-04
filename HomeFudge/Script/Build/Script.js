@@ -228,13 +228,12 @@ var HomeFudge;
         HomeFudge._worldNode = HomeFudge._viewport.getBranch();
         // _viewport.physicsDebugMode =ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
         console.log(HomeFudge._viewport);
-        //Loads Config then initilizes the world in the right order
+        //Loads Config then initializes the world in the right order
         await loadConfig().then(initWorld).then(() => {
             console.warn("ConfigsLoaded and world Initialized");
-        }); // to create ships. first load configs than the ships etc
+        }); // to create ships. first load configs than the ships etc..
         async function loadConfig() {
             //loads configs
-            performance.now();
             console.warn("LoadingConfigs");
             await HomeFudge.Config.initConfigs();
             HomeFudge.Mouse.init();
@@ -250,6 +249,7 @@ var HomeFudge;
         /// ------------T-E-S-T--A-R-E-A------------------\\\
         /// ------------T-E-S-T--A-R-E-A------------------\\\
         ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, update);
+        //TODO: Before the loop starts. Add an Game Menu draws on frame while updating
         ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 35); // start the game loop to continuously draw the _viewport, update the audiosystem and drive the physics i/a
     }
     function update(_event) {
@@ -411,11 +411,11 @@ var HomeFudge;
         beam = null;
         timer = new ƒ.Time();
         //TODO:readd declaration
-        // private maxRotSpeed: number;
-        // private maxPitch: number;
-        // private minPitch: number;
-        // private maxBeamTime: number;
-        // private maxReloadTime: number;
+        maxRotSpeed = null;
+        maxPitch = null;
+        minPitch = null;
+        maxBeamTime = null;
+        maxReloadTime = null;
         async init(side) {
             BeamTurret.graph = await HomeFudge.Resources.getGraphResources(HomeFudge.Config.beamTurret.graphID);
             let resourceNode = await HomeFudge.Resources.getComponentNode("BeamTurret", BeamTurret.graph);
@@ -425,17 +425,18 @@ var HomeFudge;
             }
             this.rotNode = new ƒ.Node("RotNode" + this.name);
             //Init turret configs
-            //TODO: re add init...
-            // this.maxRotSpeed = Config.beamTurret.maxRotSpeed;
-            // this.maxPitch = Config.beamTurret.maxPitch;
-            // this.minPitch = Config.beamTurret.minPitch;
-            // this.maxBeamTime = Config.beamTurret.beamTime;
-            // this.maxReloadTime = Config.beamTurret.reloadTime;
+            //TODO: readd init...
+            this.maxRotSpeed = HomeFudge.Config.beamTurret.maxRotSpeed;
+            this.maxPitch = HomeFudge.Config.beamTurret.maxPitch;
+            this.minPitch = HomeFudge.Config.beamTurret.minPitch;
+            this.maxBeamTime = HomeFudge.Config.beamTurret.beamTime;
+            this.maxReloadTime = HomeFudge.Config.beamTurret.reloadTime;
             this.addChild(this.rotNode);
             let turretPos = HomeFudge.JSONparser.toVector3(HomeFudge.Config.beamTurret.basePosition);
             switch (side) {
                 case 0:
-                    console.log("adding Beam: LEFT");
+                    // TODO: remove debug
+                    // console.log("adding Beam: LEFT");
                     this.addBeam("LEFT");
                     turretPos.set(turretPos.x, turretPos.y, -turretPos.z);
                     this.addComponents(turretPos);
@@ -443,7 +444,8 @@ var HomeFudge;
                     ;
                     break;
                 case 1:
-                    console.log("adding Beam: RIGHT");
+                    // TODO: remove debug
+                    // console.log("adding Beam: RIGHT");
                     this.addBeam("RIGHT");
                     this.addComponents(turretPos);
                     this.mtxLocal.rotateX(90);
@@ -453,13 +455,14 @@ var HomeFudge;
             }
         }
         addBeam(side) {
-            //TODO: BeamMaterial is disabled
+            //TODO: BeamMaterial is buggy
             let beamPos = HomeFudge.JSONparser.toVector3(HomeFudge.Config.beamTurret.beamPosition);
             this.beam = new HomeFudge.LaserBeam(side, beamPos);
             this.rotNode.addChild(this.beam);
         }
         addComponents(position) {
-            console.log("attaching mtx translation: " + position);
+            // TODO: remove debug
+            // console.log("attaching mtx translation: " + position);
             this.addComponent(new ƒ.ComponentTransform(ƒ.Matrix4x4.TRANSLATION(position)));
             this.rotNode.addComponent(new ƒ.ComponentTransform());
             this.rotNode.addComponent(new ƒ.ComponentMaterial(BeamTurret.material));
@@ -497,6 +500,7 @@ var HomeFudge;
             }
         }
         rotateTo(cordY) {
+            //TODO: add rotation to logic, smooth rotate towards.
             this.rotate(cordY);
         }
         constructor(side) {
@@ -604,6 +608,7 @@ var HomeFudge;
             //     });
             // }
             //TODO: add Y hight check.
+            //TODO: remove drag from Physics. Use thrusters to stop the player. Check if the player gives thruster command or not
             //stops micro rotation
             if (Math.abs(this.rigidBody.getAngularVelocity().y) <= 0.01) {
                 this.rigidBody.setAngularVelocity(ƒ.Vector3.ZERO());
@@ -613,6 +618,9 @@ var HomeFudge;
                 this.rigidBody.setVelocity(ƒ.Vector3.ZERO());
             }
             //TODO: move to own function
+            if (this.rotThruster[0].getComponent(ƒ.ComponentMesh) == null) {
+                return;
+            }
             if (this.rigidBody.getAngularVelocity().y < 0) {
                 //RIGHT TURN
                 this.rotThruster[0].getComponent(ƒ.ComponentMesh).activate(true);
@@ -930,6 +938,7 @@ var HomeFudge;
             test.subtract(this.shootNode.mtxLocal.translation);
             test.normalize(1);
             console.log(HomeFudge.Mathf.RadiantToDegree(ƒ.Vector3.DOT(test, this.shootNode.mtxLocal.translation)).toString());
+            shipVelocity;
         }
         constructor() {
             super("GatlingTurret");
@@ -977,7 +986,8 @@ var HomeFudge;
         static material = null;
         static animation = null;
         async init(side, position) {
-            console.log("addling: " + this.name);
+            //TODO: remove debug
+            //console.log("addling: "+ this.name);
             RotThrusters.graph = await HomeFudge.Resources.getGraphResources(HomeFudge.Config.destroyer.graphID);
             let node = await HomeFudge.Resources.getComponentNode("ThrustExhaust", RotThrusters.graph);
             if (RotThrusters.material == null || RotThrusters.mesh == null) {
@@ -1192,12 +1202,14 @@ var HomeFudge;
 (function (HomeFudge) {
     var ƒ = FudgeCore;
     class Player extends ƒ.Node {
+        //temporary value
+        tempAimTarget = new ƒ.Vector3(100, 100, 0);
         destroyer = null;
         selectedWeapon = null; //TODO:Check if ok
         moveDirection = ƒ.Vector3.ZERO();
         update = () => {
             if (HomeFudge.Mouse.isPressedOne([HomeFudge.MOUSE_CODE.LEFT])) {
-                this.destroyer.fireWeapon(this.selectedWeapon, new ƒ.Vector3(100, 100, 0));
+                this.destroyer.fireWeapon(this.selectedWeapon, this.tempAimTarget);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ALT_LEFT])) {
                 this.rotateShip();

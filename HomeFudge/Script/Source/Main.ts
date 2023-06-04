@@ -13,7 +13,7 @@ namespace HomeFudge {
   export let _worldNode: ƒ.Node = null;
 
   ///DeltaSeconds\\\
-  export let _deltaSeconds: number = null;
+  export let _deltaSeconds: number = 0; //init deltaSeconds to zero for the first frame
 
   ///Viewport\\\
   export let _viewport: ƒ.Viewport = null;
@@ -35,13 +35,12 @@ namespace HomeFudge {
     // _viewport.physicsDebugMode =ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
 
     console.log(_viewport);
-    //Loads Config then initilizes the world in the right order
+    //Loads Config then initializes the world in the right order
     await loadConfig().then(initWorld).then(() => {
       console.warn("ConfigsLoaded and world Initialized");
-    });// to create ships. first load configs than the ships etc
+    });// to create ships. first load configs than the ships etc..
     async function loadConfig() {
       //loads configs
-      performance.now();
       console.warn("LoadingConfigs");
       await Config.initConfigs();
       Mouse.init();
@@ -56,6 +55,7 @@ namespace HomeFudge {
     }
 
     /// ------------T-E-S-T--A-R-E-A------------------\\\
+    //TODO: Before the loop starts. Add an Game Menu draws on frame while updating
     /// ------------T-E-S-T--A-R-E-A------------------\\\
 
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);
@@ -64,19 +64,13 @@ namespace HomeFudge {
 
   function update(_event: Event): void {
     ƒ.Physics.simulate();  // make an update loop just for the Physics. fixed at 30fps
-    _deltaSeconds = ƒ.Loop.timeFrameGame / 1000;
     
     /// ------------T-E-S-T--A-R-E-A------------------\\\
-    // if(draw){
-    //   _viewport.draw(false);
-    //   draw = false;
-    // }else{
-    //   _viewport.draw(true);
-    //   draw = true;
-    // }
     /// ------------T-E-S-T--A-R-E-A------------------\\\
-    _viewport.draw();//TODO move to a loop of 30 frames per second;
+    
     ƒ.AudioManager.default.update();
+    _viewport.draw();
+    _deltaSeconds = ƒ.Loop.timeFrameGame / 1000;
 
   }
 
@@ -98,10 +92,15 @@ namespace HomeFudge {
   // }
   /// ------------T-E-S-T--A-R-E-A------------------\\\
 
-  //DEBUG
+
+
+  /// ------------T-E-S-T--A-R-E-A------------------\\\
+  //TODO: add a start stop Loop for Debug
+  //TODO: add respawn / reset timers and more
   function continueLoop(event: KeyboardEvent) {
     if (event.code == "Insert") {
       ƒ.Loop.continue();
     }
   }
+  /// ------------T-E-S-T--A-R-E-A------------------\\\
 }

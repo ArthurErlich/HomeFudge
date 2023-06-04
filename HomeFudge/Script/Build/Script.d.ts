@@ -198,6 +198,11 @@ declare namespace HomeFudge {
         private rotNode;
         private beam;
         private timer;
+        private maxRotSpeed;
+        private maxPitch;
+        private minPitch;
+        private maxBeamTime;
+        private maxReloadTime;
         private init;
         private addBeam;
         private addComponents;
@@ -413,6 +418,7 @@ declare namespace HomeFudge {
 declare namespace HomeFudge {
     import ƒ = FudgeCore;
     class Player extends ƒ.Node {
+        private tempAimTarget;
         destroyer: Destroyer;
         private selectedWeapon;
         private moveDirection;

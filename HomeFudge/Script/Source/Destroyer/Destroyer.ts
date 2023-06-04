@@ -123,6 +123,7 @@ namespace HomeFudge {
             // }
 
             //TODO: add Y hight check.
+            //TODO: remove drag from Physics. Use thrusters to stop the player. Check if the player gives thruster command or not
 
             //stops micro rotation
             if (Math.abs(this.rigidBody.getAngularVelocity().y) <= 0.01) {
@@ -134,6 +135,9 @@ namespace HomeFudge {
             }
 
             //TODO: move to own function
+            if(this.rotThruster[0].getComponent(ƒ.ComponentMesh) == null){
+                return;
+            }
             if (this.rigidBody.getAngularVelocity().y < 0) {
                 //RIGHT TURN
                 this.rotThruster[0].getComponent(ƒ.ComponentMesh).activate(true);

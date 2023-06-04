@@ -19,11 +19,11 @@ namespace HomeFudge {
         private timer: ƒ.Time = new ƒ.Time();
 
         //TODO:readd declaration
-        // private maxRotSpeed: number;
-        // private maxPitch: number;
-        // private minPitch: number;
-        // private maxBeamTime: number;
-        // private maxReloadTime: number;
+        private maxRotSpeed: number = null;
+        private maxPitch: number = null;
+        private minPitch: number = null;
+        private maxBeamTime: number = null;
+        private maxReloadTime: number = null;
 
 
 
@@ -38,25 +38,27 @@ namespace HomeFudge {
             this.rotNode = new ƒ.Node("RotNode" + this.name);
             //Init turret configs
 
-            //TODO: re add init...
-            // this.maxRotSpeed = Config.beamTurret.maxRotSpeed;
-            // this.maxPitch = Config.beamTurret.maxPitch;
-            // this.minPitch = Config.beamTurret.minPitch;
-            // this.maxBeamTime = Config.beamTurret.beamTime;
-            // this.maxReloadTime = Config.beamTurret.reloadTime;
+            //TODO: readd init...
+            this.maxRotSpeed = Config.beamTurret.maxRotSpeed;
+            this.maxPitch = Config.beamTurret.maxPitch;
+            this.minPitch = Config.beamTurret.minPitch;
+            this.maxBeamTime = Config.beamTurret.beamTime;
+            this.maxReloadTime = Config.beamTurret.reloadTime;
 
             this.addChild(this.rotNode);
             let turretPos: ƒ.Vector3 = JSONparser.toVector3(Config.beamTurret.basePosition)
             switch (side) {
                 case 0:
-                    console.log("adding Beam: LEFT");
+                    // TODO: remove debug
+                    // console.log("adding Beam: LEFT");
                     this.addBeam("LEFT");
                     turretPos.set(turretPos.x, turretPos.y, -turretPos.z)
                     this.addComponents(turretPos);
                     this.mtxLocal.rotateX(-90);;
                     break;
                 case 1:
-                    console.log("adding Beam: RIGHT");
+                    // TODO: remove debug
+                    // console.log("adding Beam: RIGHT");
                     this.addBeam("RIGHT");
                     this.addComponents(turretPos);
                     this.mtxLocal.rotateX(90);
@@ -66,7 +68,7 @@ namespace HomeFudge {
             }
         }
         private addBeam(side: string): void {
-            //TODO: BeamMaterial is disabled
+            //TODO: BeamMaterial is buggy
             let beamPos: ƒ.Vector3 = JSONparser.toVector3(Config.beamTurret.beamPosition);
             this.beam = new LaserBeam(side, beamPos)
             this.rotNode.addChild(this.beam);
@@ -74,7 +76,8 @@ namespace HomeFudge {
 
         }
         private addComponents(position: ƒ.Vector3) {
-            console.log("attaching mtx translation: " + position);
+            // TODO: remove debug
+            // console.log("attaching mtx translation: " + position);
             this.addComponent(new ƒ.ComponentTransform(ƒ.Matrix4x4.TRANSLATION(position)));
             this.rotNode.addComponent(new ƒ.ComponentTransform());
             this.rotNode.addComponent(new ƒ.ComponentMaterial(BeamTurret.material));
@@ -104,11 +107,9 @@ namespace HomeFudge {
                 this.beamReady = false
                 //Beam time
                 this.timer.setTimer(4000, 1, () => {
-
                     this.beam.getComponent(ƒ.ComponentMesh).activate(false);
                     //Beam reload
                     this.timer.setTimer(4000, 1, () => {
-
                         this.beamReady = true;
                     });
                 });
@@ -117,6 +118,7 @@ namespace HomeFudge {
 
         }
         public rotateTo(cordY: number) {
+            //TODO: add rotation to logic, smooth rotate towards.
             this.rotate(cordY);
         }
 
