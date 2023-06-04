@@ -1,6 +1,9 @@
 namespace HomeFudge {
     import ƒ = FudgeCore;
     export class Player extends ƒ.Node {
+        //temporary value
+        private tempAimTarget = new ƒ.Vector3(100,100,0);
+       
         public destroyer: Destroyer = null;
         private selectedWeapon: number = null; //TODO:Check if ok
 
@@ -9,7 +12,7 @@ namespace HomeFudge {
         private update = (): void => {
             
             if (Mouse.isPressedOne([MOUSE_CODE.LEFT])) {
-                this.destroyer.fireWeapon(this.selectedWeapon,new ƒ.Vector3(100,100,0));
+                this.destroyer.fireWeapon(this.selectedWeapon, this.tempAimTarget);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ALT_LEFT])) {
                 this.rotateShip();
