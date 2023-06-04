@@ -1,4 +1,4 @@
-# heWelcome to the Document about HomeFudge
+# Welcome to the Document about HomeFudge
 
 [Arthur Erlich](https://github.com/ArthurErlich/PRIMA) [![wakatime](https://wakatime.com/badge/github/ArthurErlich/PRIMA.svg)](https://wakatime.com/badge/github/ArthurErlich/PRIMA)
 
