@@ -174,6 +174,8 @@ namespace HomeFudge {
                 this.rigidBody.setVelocity(ƒ.Vector3.ZERO());
             }
 
+            //starts stops thrusters
+            this.updateThrusters();
         }
         public alive(): boolean {
             console.error("Method not implemented.");
@@ -229,26 +231,65 @@ namespace HomeFudge {
             //add acceleration
         }
         public rotate(rotateY: number) {
-            //stops rotation if rotation is maxed
-            if (this.maxTurnSpeed <= Math.abs(this.rigidBody.getAngularVelocity().y)) {
-                let yAngularVelocity: number = this.rigidBody.getAngularVelocity().y;
+            /*
+            Rotation Direction : 
+             left -> 1
+             RIGHT -> -1
 
-                console.log(yAngularVelocity);
-                //TODO: Fix clamp, somehow setting the velocity add/subtracts it only. Weird....
-                if (yAngularVelocity >= 0) {
-                    yAngularVelocity - 1000;
-                } else {
-                    yAngularVelocity + 1000;
-                }
-                this.rigidBody.setAngularVelocity(new ƒ.Vector3(
-                    this.rigidBody.getAngularVelocity().x,
-                    yAngularVelocity,
-                    this.rigidBody.getAngularVelocity().z
-                ));
+            */
+            let shipRotationY: number = this.rigidBody.getAngularVelocity().y;
+
+            //sets the rotation direction flag to false for later use
+            let rotLeft: boolean = false;
+            let rotRight: boolean = false;
+
+            this.inputRot = true;
+
+            if (rotateY < 0) {
+                rotRight = true;
+                //TODO:remove Debug
+                // console.log("RotRIGHT");
+                // console.log(shipRotationY);
+
+
+            } else if (rotateY > 0) {
+                rotLeft = true;
+                // console.log("RotLEFT");
+                // console.log(shipRotationY);
+
+            }
+            // -1 && -100 < max
+            //Stops applaying more force to the rotatin if the maximum rotatin speed is gainend
+            if (rotRight && shipRotationY <= -this.maxTurnSpeed) {
+                rotateY = 0;
                 return;
             }
-            this.rigidBody.addAngularVelocity(new ƒ.Vector3(0, rotateY * this.maxTurnAcceleration * _deltaSeconds, 0))
+            if (rotLeft && shipRotationY >= this.maxTurnSpeed) {
+                rotateY = 0;
+                return;
+
+            }
+
+            //stops rotation if rotation is maxed
+            // if (this.maxTurnSpeed <= Math.abs(this.rigidBody.getAngularVelocity().y)) {
+            //     let yAngularVelocity: number = this.rigidBody.getAngularVelocity().y;
+
+            //     console.log(yAngularVelocity);
+            //     if (yAngularVelocity >= 0) {
+            //         yAngularVelocity - 1000;
+            //     } else {
+            //         yAngularVelocity + 1000;
+            //     }
+            //     this.rigidBody.setAngularVelocity(new ƒ.Vector3(
+            //         this.rigidBody.getAngularVelocity().x,
+            //         yAngularVelocity,
+            //         this.rigidBody.getAngularVelocity().z
+            //     ));
+            //     return;
+            // }
+            this.rigidBody.addAngularVelocity(new ƒ.Vector3(0, (rotateY * this.maxTurnAcceleration) * _deltaSeconds, 0))
         }
+        //TODO: Fill out the Switch case (move the thruster down)
         public fireThrusters(direction: THRUSTER_DIRECTION) {
             switch (direction) {
                 case THRUSTER_DIRECTION.FORWARDS:

@@ -17,6 +17,7 @@ namespace HomeFudge {
 
   ///Viewport\\\
   export let _viewport: ƒ.Viewport = null;
+  //TODO: implement an UI _viewport.pointWorldToClient();//
 
   ///Player\\\
   let p1: Player = null;
@@ -63,15 +64,15 @@ namespace HomeFudge {
   }
 
   function update(_event: Event): void {
-    ƒ.Physics.simulate();  // make an update loop just for the Physics. fixed at 30fps
     
     /// ------------T-E-S-T--A-R-E-A------------------\\\
     /// ------------T-E-S-T--A-R-E-A------------------\\\
     
-    ƒ.AudioManager.default.update();
-    _viewport.draw();
     _deltaSeconds = ƒ.Loop.timeFrameGame / 1000;
-
+    ƒ.AudioManager.default.update();
+    ƒ.Physics.simulate();  // make an update loop just for the Physics. fixed at 30fps
+    _viewport.draw();
+    
   }
 
   /// ------------T-E-S-T--A-R-E-A------------------\\\

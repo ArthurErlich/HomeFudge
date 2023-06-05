@@ -2,7 +2,7 @@
     "graphID": "Graph|2023-04-25T14:30:46.195Z|98798",
     "maxAcceleration": 400,
     "maxSpeed": 5000,
-    "maxTurnSpeed": 1,
+    "maxTurnSpeed": 2,
     "maxTurnAcceleration": 10,
     "maxHealthPoints": 1000,
     "mass": 2000,

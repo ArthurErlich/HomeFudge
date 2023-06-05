@@ -23,6 +23,8 @@ namespace HomeFudge {
             }
             this.createComponents(position);
             this.mtxLocal.scale(new ƒ.Vector3(4,4,4));
+            this.meshComp.activate(false);
+            
 
             switch (side) {
                 case "FL":

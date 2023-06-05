@@ -253,12 +253,12 @@ var HomeFudge;
         ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 35); // start the game loop to continuously draw the _viewport, update the audiosystem and drive the physics i/a
     }
     function update(_event) {
-        ƒ.Physics.simulate(); // make an update loop just for the Physics. fixed at 30fps
         /// ------------T-E-S-T--A-R-E-A------------------\\\
         /// ------------T-E-S-T--A-R-E-A------------------\\\
-        ƒ.AudioManager.default.update();
-        HomeFudge._viewport.draw();
         HomeFudge._deltaSeconds = ƒ.Loop.timeFrameGame / 1000;
+        ƒ.AudioManager.default.update();
+        ƒ.Physics.simulate(); // make an update loop just for the Physics. fixed at 30fps
+        HomeFudge._viewport.draw();
     }
     /// ------------T-E-S-T--A-R-E-A------------------\\\
     // function getPosTest(): void {
@@ -655,6 +655,8 @@ var HomeFudge;
             if (Math.abs(HomeFudge.Mathf.vectorLength(this.rigidBody.getVelocity())) <= 0.01) {
                 this.rigidBody.setVelocity(ƒ.Vector3.ZERO());
             }
+            //starts stops thrusters
+            this.updateThrusters();
         };
         alive() {
             console.error("Method not implemented.");
@@ -708,22 +710,57 @@ var HomeFudge;
             //add acceleration
         }
         rotate(rotateY) {
-            //stops rotation if rotation is maxed
-            if (this.maxTurnSpeed <= Math.abs(this.rigidBody.getAngularVelocity().y)) {
-                let yAngularVelocity = this.rigidBody.getAngularVelocity().y;
-                console.log(yAngularVelocity);
-                //TODO: Fix clamp, somehow setting the velocity add/subtracts it only. Weird....
-                if (yAngularVelocity >= 0) {
-                    yAngularVelocity - 1000;
-                }
-                else {
-                    yAngularVelocity + 1000;
-                }
-                this.rigidBody.setAngularVelocity(new ƒ.Vector3(this.rigidBody.getAngularVelocity().x, yAngularVelocity, this.rigidBody.getAngularVelocity().z));
+            /*
+            Rotation Direction :
+             left -> 1
+             RIGHT -> -1
+
+            */
+            let shipRotationY = this.rigidBody.getAngularVelocity().y;
+            //sets the rotation direction flag to false for later use
+            let rotLeft = false;
+            let rotRight = false;
+            this.inputRot = true;
+            if (rotateY < 0) {
+                rotRight = true;
+                //TODO:remove Debug
+                // console.log("RotRIGHT");
+                // console.log(shipRotationY);
+            }
+            else if (rotateY > 0) {
+                rotLeft = true;
+                // console.log("RotLEFT");
+                // console.log(shipRotationY);
+            }
+            // -1 && -100 < max
+            //Stops applaying more force to the rotatin if the maximum rotatin speed is gainend
+            if (rotRight && shipRotationY <= -this.maxTurnSpeed) {
+                rotateY = 0;
                 return;
             }
-            this.rigidBody.addAngularVelocity(new ƒ.Vector3(0, rotateY * this.maxTurnAcceleration * HomeFudge._deltaSeconds, 0));
+            if (rotLeft && shipRotationY >= this.maxTurnSpeed) {
+                rotateY = 0;
+                return;
+            }
+            //stops rotation if rotation is maxed
+            // if (this.maxTurnSpeed <= Math.abs(this.rigidBody.getAngularVelocity().y)) {
+            //     let yAngularVelocity: number = this.rigidBody.getAngularVelocity().y;
+            //     console.log(yAngularVelocity);
+            //     if (yAngularVelocity >= 0) {
+            //         yAngularVelocity - 1000;
+            //     } else {
+            //         yAngularVelocity + 1000;
+            //     }
+            //     this.rigidBody.setAngularVelocity(new ƒ.Vector3(
+            //         this.rigidBody.getAngularVelocity().x,
+            //         yAngularVelocity,
+            //         this.rigidBody.getAngularVelocity().z
+            //     ));
+            //     return;
+            // }
+            this.rigidBody.addAngularVelocity(new ƒ.Vector3(0, (rotateY * this.maxTurnAcceleration) * HomeFudge._deltaSeconds, 0));
         }
+        //TODO: Fill out the Switch case (move the thruster down)
         fireThrusters(direction) {
             switch (direction) {
                 case THRUSTER_DIRECTION.FORWARDS:
@@ -1055,6 +1092,7 @@ var HomeFudge;
             }
             this.createComponents(position);
             this.mtxLocal.scale(new ƒ.Vector3(4, 4, 4));
+            this.meshComp.activate(false);
             switch (side) {
                 case "FL":
                     this.mtxLocal.rotateY(-90);
