@@ -23,6 +23,8 @@ namespace HomeFudge {
   let p1: Player = null;
 
 
+  ///Destroyer\\\
+  let destroyer:Destroyer = null;
   /// ------------T-E-S-T--A-R-E-A------------------\\\
 
 
@@ -50,7 +52,7 @@ namespace HomeFudge {
       p1 = new Player("test_P1");
       _viewport.getBranch().addChild(p1);
       _mainCamera.attachToShip(p1.destroyer);
-      let destroyer = new Destroyer(ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(500,0,0)));
+      destroyer = new Destroyer(ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(500,0,0)));
       _worldNode.appendChild(destroyer);
       ƒ.Physics.setGravity(ƒ.Vector3.ZERO());
     }
@@ -66,6 +68,9 @@ namespace HomeFudge {
   function update(_event: Event): void {
     
     /// ------------T-E-S-T--A-R-E-A------------------\\\
+  
+  console.log(_viewport.pointWorldToClient(new ƒ.Vector3(destroyer.mtxWorld.translation.y /_viewport.canvas.width,0,0)).toString());
+
     /// ------------T-E-S-T--A-R-E-A------------------\\\
     
     _deltaSeconds = ƒ.Loop.timeFrameGame / 1000;

@@ -451,3 +451,10 @@ declare namespace HomeFudge {
         constructor(name: string);
     }
 }
+declare namespace HomeFudge {
+    import ƒ = FudgeCore;
+    class UI_Astroid extends ƒ.Mutable {
+        selection: any;
+        protected reduceMutator(_mutator: ƒ.Mutator): void;
+    }
+}
