@@ -218,8 +218,12 @@ var HomeFudge;
     HomeFudge._deltaSeconds = 0; //init deltaSeconds to zero for the first frame
     ///Viewport\\\
     HomeFudge._viewport = null;
+    //TODO: implement an UI _viewport.pointWorldToClient();//
     ///Player\\\
     let p1 = null;
+    ///Destroyer\\\
+    let destroyer = null;
+    //TODO: remove debug Destroyer
     /// ------------T-E-S-T--A-R-E-A------------------\\\
     /// ------------T-E-S-T--A-R-E-A------------------\\\
     async function start(_event) {
@@ -242,7 +246,7 @@ var HomeFudge;
             p1 = new HomeFudge.Player("test_P1");
             HomeFudge._viewport.getBranch().addChild(p1);
             HomeFudge._mainCamera.attachToShip(p1.destroyer);
-            let destroyer = new HomeFudge.Destroyer(ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(500, 0, 0)));
+            destroyer = new HomeFudge.Destroyer(ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(500, 0, 0)));
             HomeFudge._worldNode.appendChild(destroyer);
             ƒ.Physics.setGravity(ƒ.Vector3.ZERO());
         }
@@ -254,6 +258,7 @@ var HomeFudge;
     }
     function update(_event) {
         /// ------------T-E-S-T--A-R-E-A------------------\\\
+        let uiPos = HomeFudge._viewport.pointWorldToClient(destroyer.mtxWorld.translation); //TODO: learn the VUI!
         /// ------------T-E-S-T--A-R-E-A------------------\\\
         HomeFudge._deltaSeconds = ƒ.Loop.timeFrameGame / 1000;
         ƒ.AudioManager.default.update();
@@ -1448,5 +1453,15 @@ var HomeFudge;
         }
     }
     HomeFudge.Player = Player;
+})(HomeFudge || (HomeFudge = {}));
+var HomeFudge;
+(function (HomeFudge) {
+    var ƒ = FudgeCore;
+    class UI_Astroid extends ƒ.Mutable {
+        selection;
+        reduceMutator(_mutator) {
+        }
+    }
+    HomeFudge.UI_Astroid = UI_Astroid;
 })(HomeFudge || (HomeFudge = {}));
 //# sourceMappingURL=Script.js.map
