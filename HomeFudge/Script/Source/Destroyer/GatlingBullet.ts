@@ -17,7 +17,7 @@ namespace HomeFudge {
         //TODO: try faction out.
         // faction: FACTION="FACTION.A";
 
-        public update = (): void => {
+        public update(): void{
 
             //goes out of the update loop as long the date is received into the config variable
             if (this.maxLifeTime == null || GatlingBullet.maxSpeed == null) {
@@ -94,7 +94,7 @@ namespace HomeFudge {
         public destroyNode(): void {
             //remove bullet from viewGraph
             //TODO:Verify if it is a valid approach // I need the Super class Bullet because I extended the Bullet Class to GatlingBullet
-            ƒ.Loop.removeEventListener(ƒ.EVENT.LOOP_FRAME, this.update);
+            ƒ.Loop.removeEventListener(UPDATE_EVENTS.GAME_OBJECTS, this.update);
             try {
                 _worldNode.removeChild(this);
 
@@ -106,7 +106,6 @@ namespace HomeFudge {
         constructor(initVelocity: ƒ.Vector3, spawnTransform: ƒ.Matrix4x4) {
             super("Gatling");
             this.init(initVelocity, spawnTransform);
-            ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.update);
         }
     }
 }
