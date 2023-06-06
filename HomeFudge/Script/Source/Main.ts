@@ -27,7 +27,12 @@ namespace HomeFudge {
   //TODO: remove debug Destroyer
 
 
+
   /// ------------T-E-S-T--A-R-E-A------------------\\\
+  export enum UPDATE_EVENTS {
+    GAME_OBJECTS = "GameObjectUpdate",
+    PLAYER_INPUT = "PlayerInputUpdate",
+  }
   /// ------------T-E-S-T--A-R-E-A------------------\\\
 
   async function start(_event: CustomEvent): Promise<void> {
@@ -50,12 +55,18 @@ namespace HomeFudge {
       Mouse.init();
     }
     async function initWorld(): Promise<void> {
+      ƒ.Physics.setGravity(ƒ.Vector3.ZERO());
       p1 = new Player("test_P1");
       _viewport.getBranch().addChild(p1);
       _mainCamera.attachToShip(p1.destroyer);
-      destroyer = new Destroyer(ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(500, 0, 0)));
-      _worldNode.appendChild(destroyer);
-      ƒ.Physics.setGravity(ƒ.Vector3.ZERO());
+      /// ------------T-E-S-T--A-R-E-A------------------\\\
+      // destroyer = new Destroyer(ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(500, 0, 0)));
+      // let mtx:ƒ.Matrix4x4 = ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(400, 30, 0));
+      // mtx.rotation =new ƒ.Vector3(0,90,0);
+      // let destroyer2 = new Destroyer(mtx);
+      // _worldNode.appendChild(destroyer2);
+      // _worldNode.appendChild(destroyer);
+      /// ------------T-E-S-T--A-R-E-A------------------\\\
     }
 
     /// ------------T-E-S-T--A-R-E-A------------------\\\
@@ -67,14 +78,17 @@ namespace HomeFudge {
   }
 
   function update(_event: Event): void {
-
-    /// ------------T-E-S-T--A-R-E-A------------------\\\
-    let uiPos: ƒ.Vector2 = _viewport.pointWorldToClient(destroyer.mtxWorld.translation); //TODO: learn the VUI!
-    /// ------------T-E-S-T--A-R-E-A------------------\\\
-
     _deltaSeconds = ƒ.Loop.timeFrameGame / 1000;
-    ƒ.AudioManager.default.update();
     ƒ.Physics.simulate();  // make an update loop just for the Physics. fixed at 30fps
+    ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.PLAYER_INPUT));
+    ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.GAME_OBJECTS));
+
+
+    /// ------------T-E-S-T--A-R-E-A------------------\\\
+    // let uiPos: ƒ.Vector2 = _viewport.pointWorldToClient(destroyer.mtxWorld.translation); //TODO: learn the VUI!
+    /// ------------T-E-S-T--A-R-E-A------------------\\\
+
+    ƒ.AudioManager.default.update();
     _viewport.draw();
 
   }
