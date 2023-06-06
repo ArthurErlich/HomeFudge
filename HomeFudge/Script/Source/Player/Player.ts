@@ -10,13 +10,12 @@ namespace HomeFudge {
         private moveDirection: ƒ.Vector3 = ƒ.Vector3.ZERO();
 
         private update = (): void => {
-            
             if (Mouse.isPressedOne([MOUSE_CODE.LEFT])) {
                 this.destroyer.fireWeapon(this.selectedWeapon, this.tempAimTarget);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ALT_LEFT])) {
-                this.rotateShip();
-                //TODO: PointerLock enabled
+                console.error("Switch NOT IMPLEMENTED!!!");
+                
             }else{
                 //TODO: PointerLock disabled
                 this.updateShipMovement();
@@ -62,9 +61,7 @@ namespace HomeFudge {
                     break;
             }
         }
-        private rotateShip():void {
-            throw new Error("Method not implemented.");
-        }
+        
         private updateWeaponSelection(): void {
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ONE])) {
                 //Gatling -> //TODO: Create Look on with mouse
@@ -89,7 +86,7 @@ namespace HomeFudge {
 
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.A])) {
                 //LEFT STARVE
-                this.destroyer.rotate(1); //TODO:REMOVE DEBUG
+                this.destroyer.yaw(1); //TODO:REMOVE DEBUG
                 // this.moveDirection.set(
                 //     this.moveDirection.x,
                 //     this.moveDirection.y,
@@ -98,7 +95,7 @@ namespace HomeFudge {
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.D])) {
                 //RIGHT STARVE
-                this.destroyer.rotate(-1); //TODO:REMOVE DEBUG
+                this.destroyer.yaw(-1); //TODO:REMOVE DEBUG
                 // this.moveDirection.set(
                 //     this.moveDirection.x,
                 //     this.moveDirection.y,
@@ -106,20 +103,28 @@ namespace HomeFudge {
                 // );
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.W])) {
+                //Down
+                this.destroyer.pitch(-1);
+
                 //FORWARD
-                this.moveDirection.set(
-                    1,
-                    this.moveDirection.y,
-                    this.moveDirection.z
-                );
+                // this.moveDirection.set(
+                //     1,
+                //     this.moveDirection.y,
+                //     this.moveDirection.z
+                // );
+
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.S])) {
+                //Up
+                this.destroyer.pitch(1);
+
+
                 //BACKWARD
-                this.moveDirection.set(
-                    -1,
-                    this.moveDirection.y,
-                    this.moveDirection.z
-                );
+                // this.moveDirection.set(
+                //     -1,
+                //     this.moveDirection.y,
+                //     this.moveDirection.z
+                // );
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.SHIFT_LEFT])) {
                 //BACKWARD
@@ -167,7 +172,9 @@ namespace HomeFudge {
         constructor(name: string) {
             super(name);
             this.init();
-            ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.update);
+            ƒ.Loop.addEventListener(UPDATE_EVENTS.PLAYER_INPUT, () => {
+                this.update();
+            });
         }
     }
 }
