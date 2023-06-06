@@ -17,6 +17,9 @@ namespace HomeFudge {
         OFF
     }
     export class Destroyer extends Ship {
+        public remove(): void {
+            throw new Error("Method not implemented.");
+        }
         protected maxSpeed: number = null;
         protected maxAcceleration: number = null;
 
@@ -32,12 +35,19 @@ namespace HomeFudge {
 
         private rotThruster: RotThrusters[] = new Array(4);
 
+
         //True when the Player interacts with the Thrusters
         private inputRot: boolean = false;
         private inputAcc: boolean = false;
 
+        //player rotation Input
+        private desireRotation: ƒ.Vector3 = new ƒ.Vector3(0, 0, 0);
+
         //list of weapons
         public WEAPONS = WEAPONS;
+
+        //dampers can be disabled by the player
+        public damperON = true;
 
         private static graph: ƒ.Graph = null;
         static mesh: ƒ.Mesh = null;
@@ -68,7 +78,6 @@ namespace HomeFudge {
             //init Components
             this.setAllComponents(startTransform);
             this.addRigidBody(node, startTransform);
-            ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.update);
         }
 
         private addWeapons(): void {
@@ -76,8 +85,6 @@ namespace HomeFudge {
             this.beamTurretList[0] = new BeamTurret(BeamTurret.side.LEFT);
             this.beamTurretList[1] = new BeamTurret(BeamTurret.side.RIGHT);
 
-
-            //if one turret is missing
             this.addChild(this.gatlingTurret);
             this.addChild(this.beamTurretList[0]);
             this.addChild(this.beamTurretList[1]);
@@ -121,71 +128,175 @@ namespace HomeFudge {
             this.rigidBody.mtxPivot.scale(new ƒ.Vector3(2, 2, 2)); //Fixes the ConvexHull being 1/2 of the original convex
             this.rigidBody.setPosition(startTransform.translation);
             this.rigidBody.setRotation(startTransform.rotation);
-            this.rigidBody.effectRotation = new ƒ.Vector3(0, 0.0025, 0);
+
+            let rotEffect: number = 0.0025;
+            this.rigidBody.effectRotation = new ƒ.Vector3(rotEffect, rotEffect, rotEffect);
             this.rigidBody.restitution = 0.1;
-            //TODO:Add damping wiht trusters
-            // this.rigidBody.dampRotation = 10;
-            // this.rigidBody.dampTranslation = 0.1;
+            //TODO:Add damping with trusters
+            this.rigidBody.dampRotation = 0;
+            this.rigidBody.dampTranslation = 0;
             this.addComponent(this.rigidBody);
         }
-        private updateThrusters() {
+        private updateThrusters(): void {
             //TODO: move to own function
+            //TODO: fire thrusters only wen player or game moves the ship
             if (this.rotThruster[0].getComponent(ƒ.ComponentMesh) == null) {
                 return;
             }
-            if (this.rigidBody.getAngularVelocity().y < 0) {
-                this.fireThrusters(THRUSTER_DIRECTION.YAW_RIGHT);
-                //RIGHT TURN
-                // this.rotThruster[0].activate(true);
-                // this.rotThruster[3].activate(true);
-            } else {
+            if (this.inputRot) {
                 this.fireThrusters(THRUSTER_DIRECTION.OFF);
-                // this.rotThruster[0].getComponent(ƒ.ComponentMesh).activate(false);
-                // this.rotThruster[3].getComponent(ƒ.ComponentMesh).activate(false);
+                return;
+            }
+
+            //stop turn thrusters
+            if (this.rigidBody.getAngularVelocity().y < 0) {
+                this.fireThrusters(THRUSTER_DIRECTION.YAW_LEFT, true);
+            } else {
+                this.fireThrusters(THRUSTER_DIRECTION.YAW_LEFT, false);
             }
             if (this.rigidBody.getAngularVelocity().y > 0) {
-                //LEFT TURN
-                this.rotThruster[1].getComponent(ƒ.ComponentMesh).activate(true);
-                this.rotThruster[2].getComponent(ƒ.ComponentMesh).activate(true);
+                this.fireThrusters(THRUSTER_DIRECTION.YAW_RIGHT, true);
             } else {
-                this.rotThruster[1].getComponent(ƒ.ComponentMesh).activate(false);
-                this.rotThruster[2].getComponent(ƒ.ComponentMesh).activate(false);
+                this.fireThrusters(THRUSTER_DIRECTION.YAW_RIGHT, false);
             }
         }
+        //TODO: Fill out the Switch case (move the thruster down)
+        private fireThrusters(direction: THRUSTER_DIRECTION, _on?: boolean) {
+            if (_on == null) {
+                _on = false;
+            }
+            switch (direction) {
+                case THRUSTER_DIRECTION.FORWARDS:
+                    break;
+                case THRUSTER_DIRECTION.BACKWARDS:
+                    break;
+                case THRUSTER_DIRECTION.LEFT:
+                    break;
+                case THRUSTER_DIRECTION.RIGHT:
+                    break;
+                case THRUSTER_DIRECTION.YAW_LEFT:
+                    if (_on) {
+                        this.rotThruster[1].activate(true);
+                        this.rotThruster[2].activate(true);
+                    } else {
+                        this.rotThruster[1].activate(false);
+                        this.rotThruster[2].activate(false);
+                    }
+                    break;
+                case THRUSTER_DIRECTION.YAW_RIGHT:
+                    if (_on) {
+                        this.rotThruster[0].activate(true);
+                        this.rotThruster[3].activate(true);
+                    } else {
+                        this.rotThruster[0].activate(false);
+                        this.rotThruster[3].activate(false);
+                    }
+                    break;
+                case THRUSTER_DIRECTION.PITCH_UP:
+                    break;
+                case THRUSTER_DIRECTION.PITCH_DOWN:
+                    break;
+                case THRUSTER_DIRECTION.OFF:
+                    //Disables the Thrusters on default
+                    this.rotThruster.forEach(thruster => {
+                        if (thruster.isActivated()) {
+                            thruster.activate(false);
+                        }
+                    });
+                    break;
+            }
+        }
+        private dampRotation(): void {
+            //If player input is enable, and the damper are on
+            let angularVelocity: ƒ.Vector3 = this.rigidBody.getAngularVelocity()
+            let mtxRigidRotation: ƒ.Matrix4x4 = new ƒ.Matrix4x4();
+            let pitch: number = 1;
+            let yaw: number = 1;
+            if (this.inputRot) {
+                return;
+            }
+            //TODO: fix rotation bug... infitit rotation, it may has something to do with the angular velocity and that the rotation is applayd in world coorodinates
+            mtxRigidRotation.rotation = this.rigidBody.getRotation();
+            //Stops over rotation, aka ping pong rotation I need totranlsate the angular velocity to world coordiantes
+            if (Math.abs(angularVelocity.x) <= 0.1) {
+                this.rigidBody.setAngularVelocity(ƒ.Vector3.TRANSFORMATION(new ƒ.Vector3(0, angularVelocity.y, angularVelocity.z), mtxRigidRotation));
+            }
+            if (Math.abs(angularVelocity.y) <= 0.1) {
+                this.rigidBody.setAngularVelocity(ƒ.Vector3.TRANSFORMATION(new ƒ.Vector3(angularVelocity.x, 0, angularVelocity.z), mtxRigidRotation));
+            }
+            if (Math.abs(angularVelocity.z) <= 0.1) {
+                this.rigidBody.setAngularVelocity(ƒ.Vector3.TRANSFORMATION(new ƒ.Vector3(angularVelocity.x, angularVelocity.y, 0), mtxRigidRotation));
+            }
 
-        protected update = (): void => {
-            //DISABLE THRUSTERS
-            //TODO:Find a new Solution if rotation moves to Player
-            // if (this.rotThruster[0].getComponent(ƒ.ComponentMesh).isActive) {
-            //     this.rotThruster.forEach(thruster => {
-            //         thruster.getComponent(ƒ.ComponentMesh).activate(false);
-            //     });
-            // }
+            if (angularVelocity.z < 0) {
+                // rotUp
+                this.pitch(pitch);
 
-            //TODO: add Y hight check.
+            } else if (angularVelocity.z > 0) {
+                // rotDown
+                this.pitch(-pitch);
+            }
+
+            if (angularVelocity.y < 0) {
+                // rotRight
+                this.yaw(yaw);
+
+            } else if (angularVelocity.y > 0) {
+                // rotLeft
+                this.yaw(-yaw);
+            }
+        }
+        public update(): void {
+            
+            //starts stops thrusters update loop
+            this.updateThrusters();
+
+            //Fixes up rotation so that the ship is on the plain and wont roll
+            let rotation: ƒ.Vector3 = this.rigidBody.getRotation();
+            if (rotation.y <= 0 && rotation.y > 90) {
+                rotation.set(0, rotation.y, rotation.z);
+                this.rigidBody.setRotation(rotation);
+            }
+            if (rotation.y <= -90 && rotation.y > 0) {
+                rotation.set(-180, rotation.y, rotation.z);
+                this.rigidBody.setRotation(rotation);
+            }
+
             //TODO: remove drag from Physics. Use thrusters to stop the player. Check if the player gives thruster command or not
 
+            //TODO:remove DEBUG      
+
             //stops micro rotation
-            if (Math.abs(this.rigidBody.getAngularVelocity().y) <= 0.01) {
-                this.rigidBody.setAngularVelocity(ƒ.Vector3.ZERO());
-            }
+
             //stops micro movement
             if (Math.abs(Mathf.vectorLength(this.rigidBody.getVelocity())) <= 0.01) {
                 this.rigidBody.setVelocity(ƒ.Vector3.ZERO());
             }
+            if (Math.abs(Mathf.vectorLength(this.rigidBody.getAngularVelocity())) <= 0.01) {
+                this.rigidBody.setAngularVelocity(ƒ.Vector3.ZERO());
+            }
 
-            //starts stops thrusters
-            this.updateThrusters();
+            //updates rotation
+            let mtxRot: ƒ.Matrix4x4 = new ƒ.Matrix4x4();
+            mtxRot.rotation = this.rigidBody.getRotation();
+            this.rigidBody.addAngularVelocity(ƒ.Vector3.TRANSFORMATION(this.desireRotation, mtxRot));
+            this.desireRotation = ƒ.Vector3.ZERO();
+
+            //damps rotation
+            this.dampRotation();
+
+
+
+
+            //resets inputs flags
+            this.inputAcc = false;
+            this.inputRot = false;
         }
         public alive(): boolean {
             console.error("Method not implemented.");
             return true;
         }
         public destroyNode(): void {
-            console.error("Method not implemented.");
-            return null;
-        }
-        public toString(): string {
             console.error("Method not implemented.");
             return null;
         }
@@ -202,12 +313,15 @@ namespace HomeFudge {
                     this.fireGatling(target);
                     break;
 
+
                 default:
                     break;
             }
         }
         public fireGatling(target: ƒ.Vector3) {
-            this.gatlingTurret.fireAt(this.rigidBody.getVelocity(), target);
+            // this.gatlingTurret.fireAt(this.rigidBody.getVelocity(), target);
+            this.gatlingTurret.fire(this.rigidBody.getVelocity());
+
         }
         public fireBeam() {
             this.beamTurretList.forEach(turret => {
@@ -223,21 +337,25 @@ namespace HomeFudge {
             if (Mathf.vectorLength(this.rigidBody.getVelocity()) <= this.maxSpeed) {
 
                 //fixes velocity, rotating it to the right direction
-                let mtxRot: ƒ.Matrix4x4 = new ƒ.Matrix4x4;
+                let mtxRot: ƒ.Matrix4x4 = new ƒ.Matrix4x4();
                 mtxRot.rotation = this.mtxWorld.rotation;
                 this.rigidBody.addVelocity(ƒ.Vector3.TRANSFORMATION(moveDirection, mtxRot));
             }
             //TODO:add smooth acceleration
             //add acceleration
         }
-        public rotate(rotateY: number) {
+        public yaw(rotateY: number) {
             /*
             Rotation Direction : 
              left -> 1
              RIGHT -> -1
-
             */
-            let shipRotationY: number = this.rigidBody.getAngularVelocity().y;
+            let mtxRot: ƒ.Matrix4x4 = new ƒ.Matrix4x4();
+            let shipRotation: ƒ.Vector3 = this.rigidBody.getAngularVelocity();
+
+            mtxRot.rotation = this.rigidBody.getRotation();
+            shipRotation = ƒ.Vector3.TRANSFORMATION(shipRotation, mtxRot);
+            console.log(shipRotation.toString());
 
             //sets the rotation direction flag to false for later use
             let rotLeft: boolean = false;
@@ -248,78 +366,66 @@ namespace HomeFudge {
             if (rotateY < 0) {
                 rotRight = true;
                 //TODO:remove Debug
-                // console.log("RotRIGHT");
-                // console.log(shipRotationY);
-
 
             } else if (rotateY > 0) {
                 rotLeft = true;
-                // console.log("RotLEFT");
-                // console.log(shipRotationY);
-
             }
             // -1 && -100 < max
-            //Stops applaying more force to the rotatin if the maximum rotatin speed is gainend
-            if (rotRight && shipRotationY <= -this.maxTurnSpeed) {
+            //Stops applaying more force to the rotatin if the maximum rotatin speed is gainend by jumping out of the function
+
+            if (rotRight && shipRotation.y <= -this.maxTurnSpeed) {
                 rotateY = 0;
                 return;
             }
-            if (rotLeft && shipRotationY >= this.maxTurnSpeed) {
+            if (rotLeft && shipRotation.y >= this.maxTurnSpeed) {
                 rotateY = 0;
                 return;
-
             }
-
-            //stops rotation if rotation is maxed
-            // if (this.maxTurnSpeed <= Math.abs(this.rigidBody.getAngularVelocity().y)) {
-            //     let yAngularVelocity: number = this.rigidBody.getAngularVelocity().y;
-
-            //     console.log(yAngularVelocity);
-            //     if (yAngularVelocity >= 0) {
-            //         yAngularVelocity - 1000;
-            //     } else {
-            //         yAngularVelocity + 1000;
-            //     }
-            //     this.rigidBody.setAngularVelocity(new ƒ.Vector3(
-            //         this.rigidBody.getAngularVelocity().x,
-            //         yAngularVelocity,
-            //         this.rigidBody.getAngularVelocity().z
-            //     ));
-            //     return;
-            // }
-            this.rigidBody.addAngularVelocity(new ƒ.Vector3(0, (rotateY * this.maxTurnAcceleration) * _deltaSeconds, 0))
+            this.desireRotation.set(this.desireRotation.x, (rotateY * this.maxTurnAcceleration) * _deltaSeconds, this.desireRotation.z);
         }
-        //TODO: Fill out the Switch case (move the thruster down)
-        public fireThrusters(direction: THRUSTER_DIRECTION) {
-            switch (direction) {
-                case THRUSTER_DIRECTION.FORWARDS:
-                    break;
-                case THRUSTER_DIRECTION.BACKWARDS:
-                    break;
-                case THRUSTER_DIRECTION.LEFT:
-                    break;
-                case THRUSTER_DIRECTION.RIGHT:
-                    break;
-                case THRUSTER_DIRECTION.YAW_LEFT:
-                    break;
-                case THRUSTER_DIRECTION.YAW_RIGHT:
-                    this.rotThruster[0].activate(true);
-                    this.rotThruster[3].activate(true);
-                    break;
-                case THRUSTER_DIRECTION.PITCH_UP:
-                    break;
-                case THRUSTER_DIRECTION.PITCH_DOWN:
-                    break;
-                case THRUSTER_DIRECTION.OFF:
-                    //Disables the Thrusters on default
-                    this.rotThruster.forEach(thruster => {
-                        if (thruster.isActivated()) {
-                            thruster.activate(false);
-                        }
-                    });
-                    break;
+
+        public pitch(rotateZ: number) {
+            /*
+            Rotation Direction : 
+             UP -> 1
+             DOWN -> -1
+            */
+            let mtxRot: ƒ.Matrix4x4 = new ƒ.Matrix4x4();
+            let shipRotation: ƒ.Vector3 = this.rigidBody.getAngularVelocity();
+
+            mtxRot.rotation = this.rigidBody.getRotation();
+            shipRotation = ƒ.Vector3.TRANSFORMATION(shipRotation, mtxRot);
+            console.log(shipRotation.toString());
+
+
+
+            //sets the rotation direction flag to false for later use
+            let pitchDown: boolean = false;
+            let pitchUp: boolean = false;
+
+            this.inputRot = true;
+
+            if (rotateZ < 0) {
+                pitchDown = true;
+                //TODO:remove Debug
+
+            } else if (rotateZ > 0) {
+                pitchUp = true;
             }
+            // -1 && -100 < max
+            // Stops applaying more force to the rotation if the maximum rotatin speed is gainend by jumping out of the function
+
+            if (pitchDown && shipRotation.z <= -this.maxTurnSpeed) {
+                rotateZ = 0;
+                return;
+            }
+            if (pitchUp && shipRotation.z >= this.maxTurnSpeed) {
+                rotateZ = 0;
+                return;
+            }
+            this.desireRotation.set(this.desireRotation.x, this.desireRotation.y, (rotateZ * this.maxTurnAcceleration) * _deltaSeconds);
         }
+
         constructor(startTransform: ƒ.Matrix4x4) {
             super("Destroyer");
             this.initAllConfigs(startTransform);
