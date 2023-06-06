@@ -1,10 +1,18 @@
+/// <reference path="../Abstract/GameObject.ts" />
 namespace HomeFudge {
     import ƒ = FudgeCore;
     enum SIDE {
         LEFT,
         RIGHT
     }
-    export class BeamTurret extends ƒ.Node {
+    export class BeamTurret extends GameObject {
+        public remove(): void {
+            throw new Error("Method not implemented.");
+        }
+        public alive(): boolean {
+            //TODO:remove beamturret on death
+            return true;
+        }
 
         public static side: typeof SIDE = SIDE;
 
@@ -83,7 +91,7 @@ namespace HomeFudge {
             this.rotNode.addComponent(new ƒ.ComponentMaterial(BeamTurret.material));
             this.rotNode.addComponent(new ƒ.ComponentMesh(BeamTurret.mesh));
         }
-        private update = (): void => {
+        public update(): void{
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_LEFT]))
                 this.rotate(this.maxRotSpeed * _deltaSeconds);
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_RIGHT]))
@@ -125,7 +133,6 @@ namespace HomeFudge {
         constructor(side: number) {
             super("BeamTurret");
             this.init(side);
-            ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, this.update);
         }
     }
 }
