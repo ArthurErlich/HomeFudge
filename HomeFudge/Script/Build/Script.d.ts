@@ -118,6 +118,10 @@ declare namespace HomeFudge {
     let _worldNode: ƒ.Node;
     let _deltaSeconds: number;
     let _viewport: ƒ.Viewport;
+    enum UPDATE_EVENTS {
+        GAME_OBJECTS = "GameObjectUpdate",
+        PLAYER_INPUT = "PlayerInputUpdate"
+    }
 }
 declare namespace HomeFudge {
     import ƒ = FudgeCore;
@@ -157,39 +161,45 @@ declare namespace HomeFudge {
 }
 declare namespace HomeFudge {
     import ƒ = FudgeCore;
-    abstract class Bullet extends ƒ.Node {
-        protected abstract maxLifeTime: number;
+    abstract class GameObject extends ƒ.Node {
         abstract update(): void;
-        abstract destroyNode(): void;
-        abstract toString(): string;
+        abstract alive(): boolean;
+        abstract remove(): void;
         constructor(idString: string);
     }
 }
 declare namespace HomeFudge {
-    import ƒ = FudgeCore;
+    abstract class Bullet extends GameObject {
+        protected abstract maxLifeTime: number;
+        abstract update(): void;
+        abstract destroyNode(): void;
+        constructor(idString: string);
+    }
+}
+declare namespace HomeFudge {
     enum SHIPS {
         DESTROYER = 0
     }
-    export abstract class Ship extends ƒ.Node {
+    export abstract class Ship extends GameObject {
         static SHIPS: typeof SHIPS;
         protected abstract maxSpeed: number;
         protected abstract maxAcceleration: number;
         protected abstract maxTurnSpeed: number;
         protected abstract healthPoints: number;
-        protected abstract update(): void;
+        abstract update(): void;
         abstract destroyNode(): void;
-        abstract toString(): string;
         constructor(name: string);
     }
     export {};
 }
 declare namespace HomeFudge {
-    import ƒ = FudgeCore;
     enum SIDE {
         LEFT = 0,
         RIGHT = 1
     }
-    export class BeamTurret extends ƒ.Node {
+    export class BeamTurret extends GameObject {
+        remove(): void;
+        alive(): boolean;
         static side: typeof SIDE;
         private static graph;
         private static mesh;
@@ -206,7 +216,7 @@ declare namespace HomeFudge {
         private init;
         private addBeam;
         private addComponents;
-        private update;
+        update(): void;
         private rotate;
         fire(): void;
         rotateTo(cordY: number): void;
@@ -221,18 +231,8 @@ declare namespace HomeFudge {
         BEAM_TURRET = 1,
         ROCKET_POD = 2
     }
-    enum THRUSTER_DIRECTION {
-        FORWARDS = 0,
-        BACKWARDS = 1,
-        LEFT = 2,
-        RIGHT = 3,
-        YAW_LEFT = 4,
-        YAW_RIGHT = 5,
-        PITCH_UP = 6,
-        PITCH_DOWN = 7,
-        OFF = 8
-    }
     export class Destroyer extends Ship {
+        remove(): void;
         protected maxSpeed: number;
         protected maxAcceleration: number;
         private static seedRigidBody;
@@ -245,7 +245,9 @@ declare namespace HomeFudge {
         private rotThruster;
         private inputRot;
         private inputAcc;
+        private desireRotation;
         WEAPONS: typeof WEAPONS;
+        damperON: boolean;
         private static graph;
         static mesh: ƒ.Mesh;
         static material: ƒ.Material;
@@ -256,16 +258,17 @@ declare namespace HomeFudge {
         private setAllComponents;
         private addRigidBody;
         private updateThrusters;
-        protected update: () => void;
+        private fireThrusters;
+        private dampRotation;
+        update(): void;
         alive(): boolean;
         destroyNode(): void;
-        toString(): string;
         fireWeapon(_weapon: WEAPONS, target: ƒ.Vector3): void;
         fireGatling(target: ƒ.Vector3): void;
         fireBeam(): void;
         move(moveDirection: ƒ.Vector3): void;
-        rotate(rotateY: number): void;
-        fireThrusters(direction: THRUSTER_DIRECTION): void;
+        yaw(rotateY: number): void;
+        pitch(rotateZ: number): void;
         constructor(startTransform: ƒ.Matrix4x4);
     }
     export {};
@@ -280,7 +283,7 @@ declare namespace HomeFudge {
         private static maxSpeed;
         private static seedRigidBody;
         private rigidBody;
-        update: () => void;
+        update(): void;
         private init;
         private getNodeResources;
         private addComponents;
@@ -340,6 +343,18 @@ declare namespace HomeFudge {
         activate(activate: boolean): void;
         isActivated(): boolean;
         constructor(side: string, position: ƒ.Vector3);
+    }
+}
+declare namespace HomeFudge {
+    class GameLoop {
+        private static objects;
+        static addGameObject(_object: GameObject): void;
+        static update(): void;
+        static removeGarbage(): void;
+    }
+}
+declare namespace FudgeCore {
+    class InputLoop {
     }
 }
 declare namespace HomeFudge {
@@ -442,7 +457,6 @@ declare namespace HomeFudge {
         private moveDirection;
         private update;
         private selectWeapon;
-        private rotateShip;
         private updateWeaponSelection;
         private updateShipMovement;
         private init;
@@ -454,7 +468,6 @@ declare namespace HomeFudge {
 declare namespace HomeFudge {
     import ƒ = FudgeCore;
     class UI_Astroid extends ƒ.Mutable {
-        selection: any;
         protected reduceMutator(_mutator: ƒ.Mutator): void;
     }
 }

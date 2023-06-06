@@ -225,6 +225,11 @@ var HomeFudge;
     let destroyer = null;
     //TODO: remove debug Destroyer
     /// ------------T-E-S-T--A-R-E-A------------------\\\
+    let UPDATE_EVENTS;
+    (function (UPDATE_EVENTS) {
+        UPDATE_EVENTS["GAME_OBJECTS"] = "GameObjectUpdate";
+        UPDATE_EVENTS["PLAYER_INPUT"] = "PlayerInputUpdate";
+    })(UPDATE_EVENTS = HomeFudge.UPDATE_EVENTS || (HomeFudge.UPDATE_EVENTS = {}));
     /// ------------T-E-S-T--A-R-E-A------------------\\\
     async function start(_event) {
         HomeFudge.LoadingScreen.remove();
@@ -243,12 +248,18 @@ var HomeFudge;
             HomeFudge.Mouse.init();
         }
         async function initWorld() {
+            ƒ.Physics.setGravity(ƒ.Vector3.ZERO());
             p1 = new HomeFudge.Player("test_P1");
             HomeFudge._viewport.getBranch().addChild(p1);
             HomeFudge._mainCamera.attachToShip(p1.destroyer);
-            destroyer = new HomeFudge.Destroyer(ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(500, 0, 0)));
-            HomeFudge._worldNode.appendChild(destroyer);
-            ƒ.Physics.setGravity(ƒ.Vector3.ZERO());
+            /// ------------T-E-S-T--A-R-E-A------------------\\\
+            // destroyer = new Destroyer(ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(500, 0, 0)));
+            // let mtx:ƒ.Matrix4x4 = ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(400, 30, 0));
+            // mtx.rotation =new ƒ.Vector3(0,90,0);
+            // let destroyer2 = new Destroyer(mtx);
+            // _worldNode.appendChild(destroyer2);
+            // _worldNode.appendChild(destroyer);
+            /// ------------T-E-S-T--A-R-E-A------------------\\\
         }
         /// ------------T-E-S-T--A-R-E-A------------------\\\
         //TODO: Before the loop starts. Add an Game Menu draws on frame while updating
@@ -257,12 +268,14 @@ var HomeFudge;
         ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 35); // start the game loop to continuously draw the _viewport, update the audiosystem and drive the physics i/a
     }
     function update(_event) {
-        /// ------------T-E-S-T--A-R-E-A------------------\\\
-        let uiPos = HomeFudge._viewport.pointWorldToClient(destroyer.mtxWorld.translation); //TODO: learn the VUI!
-        /// ------------T-E-S-T--A-R-E-A------------------\\\
         HomeFudge._deltaSeconds = ƒ.Loop.timeFrameGame / 1000;
-        ƒ.AudioManager.default.update();
         ƒ.Physics.simulate(); // make an update loop just for the Physics. fixed at 30fps
+        ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.PLAYER_INPUT));
+        ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.GAME_OBJECTS));
+        /// ------------T-E-S-T--A-R-E-A------------------\\\
+        // let uiPos: ƒ.Vector2 = _viewport.pointWorldToClient(destroyer.mtxWorld.translation); //TODO: learn the VUI!
+        /// ------------T-E-S-T--A-R-E-A------------------\\\
+        ƒ.AudioManager.default.update();
         HomeFudge._viewport.draw();
     }
     /// ------------T-E-S-T--A-R-E-A------------------\\\
@@ -364,9 +377,23 @@ var HomeFudge;
 var HomeFudge;
 (function (HomeFudge) {
     var ƒ = FudgeCore;
-    /* This is a TypeScript class definition for an abstract class called `Bullet` that extends the
-    `ƒ.Node` class. The `export` keyword makes the class available for use in other modules. */
-    class Bullet extends ƒ.Node {
+    class GameObject extends ƒ.Node {
+        constructor(idString) {
+            super(idString);
+            HomeFudge.GameLoop.addGameObject(this);
+            //TODO: TEST out updater list
+            ƒ.Loop.addEventListener(HomeFudge.UPDATE_EVENTS.GAME_OBJECTS, () => {
+                this.update();
+            });
+        }
+    }
+    HomeFudge.GameObject = GameObject;
+})(HomeFudge || (HomeFudge = {}));
+/// <reference path="GameObject.ts" />
+var HomeFudge;
+/// <reference path="GameObject.ts" />
+(function (HomeFudge) {
+    class Bullet extends HomeFudge.GameObject {
         constructor(idString) {
             super("Bullet" + idString);
             HomeFudge._worldNode.addChild(this);
@@ -375,26 +402,25 @@ var HomeFudge;
     }
     HomeFudge.Bullet = Bullet;
 })(HomeFudge || (HomeFudge = {}));
+/// <reference path="GameObject.ts" /> 
 var HomeFudge;
+/// <reference path="GameObject.ts" /> 
 (function (HomeFudge) {
-    var ƒ = FudgeCore;
     let SHIPS;
     (function (SHIPS) {
         SHIPS[SHIPS["DESTROYER"] = 0] = "DESTROYER";
     })(SHIPS || (SHIPS = {}));
-    class Ship extends ƒ.Node {
+    class Ship extends HomeFudge.GameObject {
         static SHIPS = SHIPS;
         constructor(name) {
             super("Ship_" + name);
-            //register to updater list
-            ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, () => {
-                this.update();
-            });
         }
     }
     HomeFudge.Ship = Ship;
 })(HomeFudge || (HomeFudge = {}));
+/// <reference path="../Abstract/GameObject.ts" />
 var HomeFudge;
+/// <reference path="../Abstract/GameObject.ts" />
 (function (HomeFudge) {
     var ƒ = FudgeCore;
     let SIDE;
@@ -402,7 +428,14 @@ var HomeFudge;
         SIDE[SIDE["LEFT"] = 0] = "LEFT";
         SIDE[SIDE["RIGHT"] = 1] = "RIGHT";
     })(SIDE || (SIDE = {}));
-    class BeamTurret extends ƒ.Node {
+    class BeamTurret extends HomeFudge.GameObject {
+        remove() {
+            throw new Error("Method not implemented.");
+        }
+        alive() {
+            //TODO:remove beamturret on death
+            return true;
+        }
         static side = SIDE;
         static graph = null;
         static mesh = null;
@@ -469,12 +502,12 @@ var HomeFudge;
             this.rotNode.addComponent(new ƒ.ComponentMaterial(BeamTurret.material));
             this.rotNode.addComponent(new ƒ.ComponentMesh(BeamTurret.mesh));
         }
-        update = () => {
+        update() {
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_LEFT]))
                 this.rotate(this.maxRotSpeed * HomeFudge._deltaSeconds);
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ARROW_RIGHT]))
                 this.rotate(-this.maxRotSpeed * HomeFudge._deltaSeconds);
-        };
+        }
         rotate(rot) {
             //ROTATION is only between -180° and 180°. Y starts at 0°
             //TODO:add rotation LOCK
@@ -507,7 +540,6 @@ var HomeFudge;
         constructor(side) {
             super("BeamTurret");
             this.init(side);
-            ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, this.update);
         }
     }
     HomeFudge.BeamTurret = BeamTurret;
@@ -534,6 +566,9 @@ var HomeFudge;
         THRUSTER_DIRECTION[THRUSTER_DIRECTION["OFF"] = 8] = "OFF";
     })(THRUSTER_DIRECTION || (THRUSTER_DIRECTION = {}));
     class Destroyer extends HomeFudge.Ship {
+        remove() {
+            throw new Error("Method not implemented.");
+        }
         maxSpeed = null;
         maxAcceleration = null;
         static seedRigidBody = null;
@@ -547,8 +582,12 @@ var HomeFudge;
         //True when the Player interacts with the Thrusters
         inputRot = false;
         inputAcc = false;
+        //player rotation Input
+        desireRotation = new ƒ.Vector3(0, 0, 0);
         //list of weapons
         WEAPONS = WEAPONS;
+        //dampers can be disabled by the player
+        damperON = true;
         static graph = null;
         static mesh = null;
         static material = null;
@@ -572,13 +611,11 @@ var HomeFudge;
             //init Components
             this.setAllComponents(startTransform);
             this.addRigidBody(node, startTransform);
-            ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, this.update);
         }
         addWeapons() {
             this.gatlingTurret = new HomeFudge.GatlingTurret();
             this.beamTurretList[0] = new HomeFudge.BeamTurret(HomeFudge.BeamTurret.side.LEFT);
             this.beamTurretList[1] = new HomeFudge.BeamTurret(HomeFudge.BeamTurret.side.RIGHT);
-            //if one turret is missing
             this.addChild(this.gatlingTurret);
             this.addChild(this.beamTurretList[0]);
             this.addChild(this.beamTurretList[1]);
@@ -609,69 +646,163 @@ var HomeFudge;
             this.rigidBody.mtxPivot.scale(new ƒ.Vector3(2, 2, 2)); //Fixes the ConvexHull being 1/2 of the original convex
             this.rigidBody.setPosition(startTransform.translation);
             this.rigidBody.setRotation(startTransform.rotation);
-            this.rigidBody.effectRotation = new ƒ.Vector3(0, 0.0025, 0);
+            let rotEffect = 0.0025;
+            this.rigidBody.effectRotation = new ƒ.Vector3(rotEffect, rotEffect, rotEffect);
             this.rigidBody.restitution = 0.1;
-            //TODO:Add damping wiht trusters
-            // this.rigidBody.dampRotation = 10;
-            // this.rigidBody.dampTranslation = 0.1;
+            //TODO:Add damping with trusters
+            this.rigidBody.dampRotation = 0;
+            this.rigidBody.dampTranslation = 0;
             this.addComponent(this.rigidBody);
         }
         updateThrusters() {
             //TODO: move to own function
+            //TODO: fire thrusters only wen player or game moves the ship
             if (this.rotThruster[0].getComponent(ƒ.ComponentMesh) == null) {
                 return;
             }
+            if (this.inputRot) {
+                this.fireThrusters(THRUSTER_DIRECTION.OFF);
+                return;
+            }
+            //stop turn thrusters
             if (this.rigidBody.getAngularVelocity().y < 0) {
-                this.fireThrusters(THRUSTER_DIRECTION.YAW_RIGHT);
-                //RIGHT TURN
-                // this.rotThruster[0].activate(true);
-                // this.rotThruster[3].activate(true);
+                this.fireThrusters(THRUSTER_DIRECTION.YAW_LEFT, true);
             }
             else {
-                this.fireThrusters(THRUSTER_DIRECTION.OFF);
-                // this.rotThruster[0].getComponent(ƒ.ComponentMesh).activate(false);
-                // this.rotThruster[3].getComponent(ƒ.ComponentMesh).activate(false);
+                this.fireThrusters(THRUSTER_DIRECTION.YAW_LEFT, false);
             }
             if (this.rigidBody.getAngularVelocity().y > 0) {
-                //LEFT TURN
-                this.rotThruster[1].getComponent(ƒ.ComponentMesh).activate(true);
-                this.rotThruster[2].getComponent(ƒ.ComponentMesh).activate(true);
+                this.fireThrusters(THRUSTER_DIRECTION.YAW_RIGHT, true);
             }
             else {
-                this.rotThruster[1].getComponent(ƒ.ComponentMesh).activate(false);
-                this.rotThruster[2].getComponent(ƒ.ComponentMesh).activate(false);
+                this.fireThrusters(THRUSTER_DIRECTION.YAW_RIGHT, false);
             }
         }
-        update = () => {
-            //DISABLE THRUSTERS
-            //TODO:Find a new Solution if rotation moves to Player
-            // if (this.rotThruster[0].getComponent(ƒ.ComponentMesh).isActive) {
-            //     this.rotThruster.forEach(thruster => {
-            //         thruster.getComponent(ƒ.ComponentMesh).activate(false);
-            //     });
-            // }
-            //TODO: add Y hight check.
-            //TODO: remove drag from Physics. Use thrusters to stop the player. Check if the player gives thruster command or not
-            //stops micro rotation
-            if (Math.abs(this.rigidBody.getAngularVelocity().y) <= 0.01) {
-                this.rigidBody.setAngularVelocity(ƒ.Vector3.ZERO());
+        //TODO: Fill out the Switch case (move the thruster down)
+        fireThrusters(direction, _on) {
+            if (_on == null) {
+                _on = false;
             }
+            switch (direction) {
+                case THRUSTER_DIRECTION.FORWARDS:
+                    break;
+                case THRUSTER_DIRECTION.BACKWARDS:
+                    break;
+                case THRUSTER_DIRECTION.LEFT:
+                    break;
+                case THRUSTER_DIRECTION.RIGHT:
+                    break;
+                case THRUSTER_DIRECTION.YAW_LEFT:
+                    if (_on) {
+                        this.rotThruster[1].activate(true);
+                        this.rotThruster[2].activate(true);
+                    }
+                    else {
+                        this.rotThruster[1].activate(false);
+                        this.rotThruster[2].activate(false);
+                    }
+                    break;
+                case THRUSTER_DIRECTION.YAW_RIGHT:
+                    if (_on) {
+                        this.rotThruster[0].activate(true);
+                        this.rotThruster[3].activate(true);
+                    }
+                    else {
+                        this.rotThruster[0].activate(false);
+                        this.rotThruster[3].activate(false);
+                    }
+                    break;
+                case THRUSTER_DIRECTION.PITCH_UP:
+                    break;
+                case THRUSTER_DIRECTION.PITCH_DOWN:
+                    break;
+                case THRUSTER_DIRECTION.OFF:
+                    //Disables the Thrusters on default
+                    this.rotThruster.forEach(thruster => {
+                        if (thruster.isActivated()) {
+                            thruster.activate(false);
+                        }
+                    });
+                    break;
+            }
+        }
+        dampRotation() {
+            //If player input is enable, and the damper are on
+            let angularVelocity = this.rigidBody.getAngularVelocity();
+            let mtxRigidRotation = new ƒ.Matrix4x4();
+            let pitch = 1;
+            let yaw = 1;
+            if (this.inputRot) {
+                return;
+            }
+            //TODO: fix rotation bug... infitit rotation, it may has something to do with the angular velocity and that the rotation is applayd in world coorodinates
+            mtxRigidRotation.rotation = this.rigidBody.getRotation();
+            //Stops over rotation, aka ping pong rotation I need totranlsate the angular velocity to world coordiantes
+            if (Math.abs(angularVelocity.x) <= 0.1) {
+                this.rigidBody.setAngularVelocity(ƒ.Vector3.TRANSFORMATION(new ƒ.Vector3(0, angularVelocity.y, angularVelocity.z), mtxRigidRotation));
+            }
+            if (Math.abs(angularVelocity.y) <= 0.1) {
+                this.rigidBody.setAngularVelocity(ƒ.Vector3.TRANSFORMATION(new ƒ.Vector3(angularVelocity.x, 0, angularVelocity.z), mtxRigidRotation));
+            }
+            if (Math.abs(angularVelocity.z) <= 0.1) {
+                this.rigidBody.setAngularVelocity(ƒ.Vector3.TRANSFORMATION(new ƒ.Vector3(angularVelocity.x, angularVelocity.y, 0), mtxRigidRotation));
+            }
+            if (angularVelocity.z < 0) {
+                // rotUp
+                this.pitch(pitch);
+            }
+            else if (angularVelocity.z > 0) {
+                // rotDown
+                this.pitch(-pitch);
+            }
+            if (angularVelocity.y < 0) {
+                // rotRight
+                this.yaw(yaw);
+            }
+            else if (angularVelocity.y > 0) {
+                // rotLeft
+                this.yaw(-yaw);
+            }
+        }
+        update() {
+            //starts stops thrusters update loop
+            this.updateThrusters();
+            //Fixes up rotation so that the ship is on the plain and wont roll
+            let rotation = this.rigidBody.getRotation();
+            if (rotation.y <= 0 && rotation.y > 90) {
+                rotation.set(0, rotation.y, rotation.z);
+                this.rigidBody.setRotation(rotation);
+            }
+            if (rotation.y <= -90 && rotation.y > 0) {
+                rotation.set(-180, rotation.y, rotation.z);
+                this.rigidBody.setRotation(rotation);
+            }
+            //TODO: remove drag from Physics. Use thrusters to stop the player. Check if the player gives thruster command or not
+            //TODO:remove DEBUG      
+            //stops micro rotation
             //stops micro movement
             if (Math.abs(HomeFudge.Mathf.vectorLength(this.rigidBody.getVelocity())) <= 0.01) {
                 this.rigidBody.setVelocity(ƒ.Vector3.ZERO());
             }
-            //starts stops thrusters
-            this.updateThrusters();
-        };
+            if (Math.abs(HomeFudge.Mathf.vectorLength(this.rigidBody.getAngularVelocity())) <= 0.01) {
+                this.rigidBody.setAngularVelocity(ƒ.Vector3.ZERO());
+            }
+            //updates rotation
+            let mtxRot = new ƒ.Matrix4x4();
+            mtxRot.rotation = this.rigidBody.getRotation();
+            this.rigidBody.addAngularVelocity(ƒ.Vector3.TRANSFORMATION(this.desireRotation, mtxRot));
+            this.desireRotation = ƒ.Vector3.ZERO();
+            //damps rotation
+            this.dampRotation();
+            //resets inputs flags
+            this.inputAcc = false;
+            this.inputRot = false;
+        }
         alive() {
             console.error("Method not implemented.");
             return true;
         }
         destroyNode() {
-            console.error("Method not implemented.");
-            return null;
-        }
-        toString() {
             console.error("Method not implemented.");
             return null;
         }
@@ -692,7 +823,8 @@ var HomeFudge;
             }
         }
         fireGatling(target) {
-            this.gatlingTurret.fireAt(this.rigidBody.getVelocity(), target);
+            // this.gatlingTurret.fireAt(this.rigidBody.getVelocity(), target);
+            this.gatlingTurret.fire(this.rigidBody.getVelocity());
         }
         fireBeam() {
             this.beamTurretList.forEach(turret => {
@@ -707,21 +839,24 @@ var HomeFudge;
             moveDirection.scale(this.maxAcceleration * HomeFudge._deltaSeconds);
             if (HomeFudge.Mathf.vectorLength(this.rigidBody.getVelocity()) <= this.maxSpeed) {
                 //fixes velocity, rotating it to the right direction
-                let mtxRot = new ƒ.Matrix4x4;
+                let mtxRot = new ƒ.Matrix4x4();
                 mtxRot.rotation = this.mtxWorld.rotation;
                 this.rigidBody.addVelocity(ƒ.Vector3.TRANSFORMATION(moveDirection, mtxRot));
             }
             //TODO:add smooth acceleration
             //add acceleration
         }
-        rotate(rotateY) {
+        yaw(rotateY) {
             /*
             Rotation Direction :
              left -> 1
              RIGHT -> -1
-
             */
-            let shipRotationY = this.rigidBody.getAngularVelocity().y;
+            let mtxRot = new ƒ.Matrix4x4();
+            let shipRotation = this.rigidBody.getAngularVelocity();
+            mtxRot.rotation = this.rigidBody.getRotation();
+            shipRotation = ƒ.Vector3.TRANSFORMATION(shipRotation, mtxRot);
+            console.log(shipRotation.toString());
             //sets the rotation direction flag to false for later use
             let rotLeft = false;
             let rotRight = false;
@@ -729,72 +864,55 @@ var HomeFudge;
             if (rotateY < 0) {
                 rotRight = true;
                 //TODO:remove Debug
-                // console.log("RotRIGHT");
-                // console.log(shipRotationY);
             }
             else if (rotateY > 0) {
                 rotLeft = true;
-                // console.log("RotLEFT");
-                // console.log(shipRotationY);
             }
             // -1 && -100 < max
-            //Stops applaying more force to the rotatin if the maximum rotatin speed is gainend
-            if (rotRight && shipRotationY <= -this.maxTurnSpeed) {
+            //Stops applaying more force to the rotatin if the maximum rotatin speed is gainend by jumping out of the function
+            if (rotRight && shipRotation.y <= -this.maxTurnSpeed) {
                 rotateY = 0;
                 return;
             }
-            if (rotLeft && shipRotationY >= this.maxTurnSpeed) {
+            if (rotLeft && shipRotation.y >= this.maxTurnSpeed) {
                 rotateY = 0;
                 return;
             }
-            //stops rotation if rotation is maxed
-            // if (this.maxTurnSpeed <= Math.abs(this.rigidBody.getAngularVelocity().y)) {
-            //     let yAngularVelocity: number = this.rigidBody.getAngularVelocity().y;
-            //     console.log(yAngularVelocity);
-            //     if (yAngularVelocity >= 0) {
-            //         yAngularVelocity - 1000;
-            //     } else {
-            //         yAngularVelocity + 1000;
-            //     }
-            //     this.rigidBody.setAngularVelocity(new ƒ.Vector3(
-            //         this.rigidBody.getAngularVelocity().x,
-            //         yAngularVelocity,
-            //         this.rigidBody.getAngularVelocity().z
-            //     ));
-            //     return;
-            // }
-            this.rigidBody.addAngularVelocity(new ƒ.Vector3(0, (rotateY * this.maxTurnAcceleration) * HomeFudge._deltaSeconds, 0));
+            this.desireRotation.set(this.desireRotation.x, (rotateY * this.maxTurnAcceleration) * HomeFudge._deltaSeconds, this.desireRotation.z);
         }
-        //TODO: Fill out the Switch case (move the thruster down)
-        fireThrusters(direction) {
-            switch (direction) {
-                case THRUSTER_DIRECTION.FORWARDS:
-                    break;
-                case THRUSTER_DIRECTION.BACKWARDS:
-                    break;
-                case THRUSTER_DIRECTION.LEFT:
-                    break;
-                case THRUSTER_DIRECTION.RIGHT:
-                    break;
-                case THRUSTER_DIRECTION.YAW_LEFT:
-                    break;
-                case THRUSTER_DIRECTION.YAW_RIGHT:
-                    this.rotThruster[0].activate(true);
-                    this.rotThruster[3].activate(true);
-                    break;
-                case THRUSTER_DIRECTION.PITCH_UP:
-                    break;
-                case THRUSTER_DIRECTION.PITCH_DOWN:
-                    break;
-                case THRUSTER_DIRECTION.OFF:
-                    //Disables the Thrusters on default
-                    this.rotThruster.forEach(thruster => {
-                        if (thruster.isActivated()) {
-                            thruster.activate(false);
-                        }
-                    });
-                    break;
+        pitch(rotateZ) {
+            /*
+            Rotation Direction :
+             UP -> 1
+             DOWN -> -1
+            */
+            let mtxRot = new ƒ.Matrix4x4();
+            let shipRotation = this.rigidBody.getAngularVelocity();
+            mtxRot.rotation = this.rigidBody.getRotation();
+            shipRotation = ƒ.Vector3.TRANSFORMATION(shipRotation, mtxRot);
+            console.log(shipRotation.toString());
+            //sets the rotation direction flag to false for later use
+            let pitchDown = false;
+            let pitchUp = false;
+            this.inputRot = true;
+            if (rotateZ < 0) {
+                pitchDown = true;
+                //TODO:remove Debug
             }
+            else if (rotateZ > 0) {
+                pitchUp = true;
+            }
+            // -1 && -100 < max
+            // Stops applaying more force to the rotation if the maximum rotatin speed is gainend by jumping out of the function
+            if (pitchDown && shipRotation.z <= -this.maxTurnSpeed) {
+                rotateZ = 0;
+                return;
+            }
+            if (pitchUp && shipRotation.z >= this.maxTurnSpeed) {
+                rotateZ = 0;
+                return;
+            }
+            this.desireRotation.set(this.desireRotation.x, this.desireRotation.y, (rotateZ * this.maxTurnAcceleration) * HomeFudge._deltaSeconds);
         }
         constructor(startTransform) {
             super("Destroyer");
@@ -818,7 +936,7 @@ var HomeFudge;
         rigidBody = null;
         //TODO: try faction out.
         // faction: FACTION="FACTION.A";
-        update = () => {
+        update() {
             //goes out of the update loop as long the date is received into the config variable
             if (this.maxLifeTime == null || GatlingBullet.maxSpeed == null) {
                 return;
@@ -829,7 +947,7 @@ var HomeFudge;
             if (!this.alive()) {
                 this.destroyNode();
             }
-        };
+        }
         async init(initVelocity, spawnTransform) {
             GatlingBullet.graph = await HomeFudge.Resources.getGraphResources(HomeFudge.Config.gatlingBullet.graphID);
             let node = await HomeFudge.Resources.getComponentNode("GatlingBullet", GatlingBullet.graph);
@@ -883,7 +1001,7 @@ var HomeFudge;
         destroyNode() {
             //remove bullet from viewGraph
             //TODO:Verify if it is a valid approach // I need the Super class Bullet because I extended the Bullet Class to GatlingBullet
-            ƒ.Loop.removeEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, this.update);
+            ƒ.Loop.removeEventListener(HomeFudge.UPDATE_EVENTS.GAME_OBJECTS, this.update);
             try {
                 HomeFudge._worldNode.removeChild(this);
             }
@@ -895,7 +1013,6 @@ var HomeFudge;
         constructor(initVelocity, spawnTransform) {
             super("Gatling");
             this.init(initVelocity, spawnTransform);
-            ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, this.update);
         }
     }
     HomeFudge.GatlingBullet = GatlingBullet;
@@ -1012,7 +1129,6 @@ var HomeFudge;
                 return;
             }
             if (this.roundsTimer >= 1 / this.roundsPerSecond) {
-                // new GatlingBullet(this.shootNode.mtxWorld.clone, parentVelocity);
                 //TODO remove test
                 let shot2 = this.shootNode.mtxWorld.clone;
                 let spread1x = Math.random() * 0.2 - (Math.random()) * 0.2;
@@ -1137,6 +1253,48 @@ var HomeFudge;
     }
     HomeFudge.RotThrusters = RotThrusters;
 })(HomeFudge || (HomeFudge = {}));
+/// <reference path="../Abstract/GameObject.ts" />
+var HomeFudge;
+/// <reference path="../Abstract/GameObject.ts" />
+(function (HomeFudge) {
+    //Refactor Event handling to method handling
+    //TODO: remove event handling and replace it with that:
+    class GameLoop {
+        static objects = [];
+        static addGameObject(_object) {
+            GameLoop.objects.push(_object);
+        }
+        static update() {
+            GameLoop.objects.forEach(e => {
+                if (e == null) {
+                    return;
+                }
+                if (e.alive()) {
+                    e.update();
+                }
+                else {
+                    e = null;
+                    e.remove(); //TODO:Implement all remove functions
+                }
+            });
+        }
+        static removeGarbage() {
+            console.log(GameLoop.objects);
+            GameLoop.objects.sort();
+            console.log(GameLoop.objects);
+            for (let i = 0; i < GameLoop.objects.length; i++) {
+                //Splice nulls from array
+            }
+        }
+    }
+    HomeFudge.GameLoop = GameLoop;
+})(HomeFudge || (HomeFudge = {}));
+var FudgeCore;
+(function (FudgeCore) {
+    class InputLoop {
+    }
+    FudgeCore.InputLoop = InputLoop;
+})(FudgeCore || (FudgeCore = {}));
 var HomeFudge;
 (function (HomeFudge) {
     var ƒ = FudgeCore;
@@ -1320,8 +1478,7 @@ var HomeFudge;
                 this.destroyer.fireWeapon(this.selectedWeapon, this.tempAimTarget);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ALT_LEFT])) {
-                this.rotateShip();
-                //TODO: PointerLock enabled
+                console.error("Switch NOT IMPLEMENTED!!!");
             }
             else {
                 //TODO: PointerLock disabled
@@ -1363,9 +1520,6 @@ var HomeFudge;
                     break;
             }
         }
-        rotateShip() {
-            throw new Error("Method not implemented.");
-        }
         updateWeaponSelection() {
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ONE])) {
                 //Gatling -> //TODO: Create Look on with mouse
@@ -1389,7 +1543,7 @@ var HomeFudge;
             */
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.A])) {
                 //LEFT STARVE
-                this.destroyer.rotate(1); //TODO:REMOVE DEBUG
+                this.destroyer.yaw(1); //TODO:REMOVE DEBUG
                 // this.moveDirection.set(
                 //     this.moveDirection.x,
                 //     this.moveDirection.y,
@@ -1398,7 +1552,7 @@ var HomeFudge;
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.D])) {
                 //RIGHT STARVE
-                this.destroyer.rotate(-1); //TODO:REMOVE DEBUG
+                this.destroyer.yaw(-1); //TODO:REMOVE DEBUG
                 // this.moveDirection.set(
                 //     this.moveDirection.x,
                 //     this.moveDirection.y,
@@ -1406,12 +1560,24 @@ var HomeFudge;
                 // );
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.W])) {
+                //Down
+                this.destroyer.pitch(-1);
                 //FORWARD
-                this.moveDirection.set(1, this.moveDirection.y, this.moveDirection.z);
+                // this.moveDirection.set(
+                //     1,
+                //     this.moveDirection.y,
+                //     this.moveDirection.z
+                // );
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.S])) {
+                //Up
+                this.destroyer.pitch(1);
                 //BACKWARD
-                this.moveDirection.set(-1, this.moveDirection.y, this.moveDirection.z);
+                // this.moveDirection.set(
+                //     -1,
+                //     this.moveDirection.y,
+                //     this.moveDirection.z
+                // );
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.SHIFT_LEFT])) {
                 //BACKWARD
@@ -1449,7 +1615,9 @@ var HomeFudge;
         constructor(name) {
             super(name);
             this.init();
-            ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, this.update);
+            ƒ.Loop.addEventListener(HomeFudge.UPDATE_EVENTS.PLAYER_INPUT, () => {
+                this.update();
+            });
         }
     }
     HomeFudge.Player = Player;
@@ -1458,8 +1626,8 @@ var HomeFudge;
 (function (HomeFudge) {
     var ƒ = FudgeCore;
     class UI_Astroid extends ƒ.Mutable {
-        selection;
         reduceMutator(_mutator) {
+            throw new Error("Method not implemented.");
         }
     }
     HomeFudge.UI_Astroid = UI_Astroid;
