@@ -1,9 +1,10 @@
+/// <reference path="GameObject.ts" /> 
 namespace HomeFudge{
     import ƒ = FudgeCore;
     enum SHIPS{
         DESTROYER
     }
-    export abstract class Ship extends ƒ.Node{
+    export abstract class Ship extends GameObject{
         public static SHIPS = SHIPS;
         protected abstract maxSpeed:number;
         protected abstract maxAcceleration:number;
@@ -11,16 +12,11 @@ namespace HomeFudge{
 
         protected abstract healthPoints:number;
 
-        protected abstract update():void;
+        public abstract update():void;
         public abstract destroyNode():void; 
-        public abstract toString():string;
 
         constructor(name:string){
             super("Ship_" + name);
-            //register to updater list
-            ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, () => {
-                this.update();
-            });
         }
     }
 
