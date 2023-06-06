@@ -126,7 +126,6 @@ namespace HomeFudge {
                 return;
             }
             if (this.roundsTimer >= 1 / this.roundsPerSecond) {
-                // new GatlingBullet(this.shootNode.mtxWorld.clone, parentVelocity);
 
                 //TODO remove test
                 let shot2= this.shootNode.mtxWorld.clone;
