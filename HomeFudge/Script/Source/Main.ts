@@ -66,6 +66,12 @@ namespace HomeFudge {
       // let destroyer2 = new Destroyer(mtx);
       // _worldNode.appendChild(destroyer2);
       // _worldNode.appendChild(destroyer);
+      let node: ƒ.Node= new ƒ.Node("name");
+      let nodeMes = new ƒ.ComponentMesh(new ƒ.MeshSprite);
+      nodeMes.mtxPivot.scale(new ƒ.Vector3(200,200,200));
+      node.addComponent(nodeMes);
+      node.addComponent(new ƒ.ComponentMaterial(new ƒ.Material("lit",ƒ.ShaderLit)));
+      _worldNode.appendChild(node);
       /// ------------T-E-S-T--A-R-E-A------------------\\\
     }
 

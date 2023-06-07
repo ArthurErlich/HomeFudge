@@ -38,11 +38,18 @@ namespace HomeFudge {
         public static vectorNegate(v:ƒ.Vector3):ƒ.Vector3{
             return new ƒ.Vector3(-v.x,-v.y,-v.z);
         }
-        public static DegreeToRadiant(degree:number):number{
+        public static degreeToRadiant(degree:number):number{
             return degree * (Math.PI/180);
         }
-        public static RadiantToDegree(radiant:number):number{
+        public static radiantToDegree(radiant:number):number{
             return radiant * (180/Math.PI);
+        }
+        public static localToWorld(inversMatrix:ƒ.Matrix4x4, vector:ƒ.Vector3):ƒ.Vector3{
+            
+            
+        }
+        public static worldToLocal():ƒ.Vector3{
+            return null;
         }
     }
 

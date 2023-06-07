@@ -43,6 +43,8 @@ namespace HomeFudge {
         //player rotation Input
         private desireRotation: ƒ.Vector3 = new ƒ.Vector3(0, 0, 0);
 
+        private maxPithsAngle: number = null;
+
         //list of weapons
         public WEAPONS = WEAPONS;
 
@@ -70,6 +72,7 @@ namespace HomeFudge {
             this.maxSpeed = Config.destroyer.maxSpeed;
             this.maxTurnSpeed = Config.destroyer.maxTurnSpeed;
             this.maxTurnAcceleration = Config.destroyer.maxTurnAcceleration;
+            this.maxPithsAngle = Config.destroyer.maxPitchAngle;
 
 
             //init Weapons
@@ -208,63 +211,103 @@ namespace HomeFudge {
         }
         private dampRotation(): void {
             //If player input is enable, and the damper are on
-            let angularVelocity: ƒ.Vector3 = this.rigidBody.getAngularVelocity()
-            let mtxRigidRotation: ƒ.Matrix4x4 = new ƒ.Matrix4x4();
+
+            //TODO: SETTING AND RADIN ROTATION SHOULD BE ALLWAYS WITH THE TRANLSATE LOCAL TO WORLD COORDINATES! RIGIDBODY IS IN WOLRD COORDINATES!!!
+            let angularVelocity: ƒ.Vector3 = this.rigidBody.getAngularVelocity();
+            let transformedAngularVelocity:ƒ.Vector3 = angularVelocity;//ƒ.Vector3.TRANSFORMATION(angularVelocity, this.mtxWorldInverse);
             let pitch: number = 1;
             let yaw: number = 1;
             if (this.inputRot) {
                 return;
             }
-            //TODO: fix rotation bug... infitit rotation, it may has something to do with the angular velocity and that the rotation is applayd in world coorodinates
-            mtxRigidRotation.rotation = this.rigidBody.getRotation();
-            //Stops over rotation, aka ping pong rotation I need totranlsate the angular velocity to world coordiantes
-            if (Math.abs(angularVelocity.x) <= 0.1) {
-                this.rigidBody.setAngularVelocity(ƒ.Vector3.TRANSFORMATION(new ƒ.Vector3(0, angularVelocity.y, angularVelocity.z), mtxRigidRotation));
-            }
-            if (Math.abs(angularVelocity.y) <= 0.1) {
-                this.rigidBody.setAngularVelocity(ƒ.Vector3.TRANSFORMATION(new ƒ.Vector3(angularVelocity.x, 0, angularVelocity.z), mtxRigidRotation));
-            }
-            if (Math.abs(angularVelocity.z) <= 0.1) {
-                this.rigidBody.setAngularVelocity(ƒ.Vector3.TRANSFORMATION(new ƒ.Vector3(angularVelocity.x, angularVelocity.y, 0), mtxRigidRotation));
+
+            //fixes rounding errors by getting rid after 
+            transformedAngularVelocity.set(
+                Math.round(transformedAngularVelocity.x * 100) / 100,
+                Math.round(transformedAngularVelocity.y * 100) / 100,
+                Math.round(transformedAngularVelocity.z * 100) / 100
+            );
+
+
+            // let transposedAngularVelocity:ƒ.Vector3 = ƒ.Vector3.TRANSFORMATION(angularVelocity,this.mtxWorldInverse,false);
+
+            //Stops over rotation, aka ping pong rotation
+            // if (Math.abs(transformedAngularVelocity.x) <= 0.01) {
+            //     this.rigidBody.setAngularVelocity(new ƒ.Vector3(0, transformedAngularVelocity.y, transformedAngularVelocity.z));
+            // }
+            // if (Math.abs(transformedAngularVelocity.y) <= 0.01) {
+            //     this.rigidBody.setAngularVelocity(new ƒ.Vector3(transformedAngularVelocity.x, 0, transformedAngularVelocity.z));
+            // }
+            // if (Math.abs(transformedAngularVelocity.z) <= 0.01) {
+            //     this.rigidBody.setAngularVelocity(new ƒ.Vector3(transformedAngularVelocity.x, transformedAngularVelocity.y, 0));
+            // }
+
+            //Fixes Micro rotation
+            if (Math.abs(Mathf.vectorLength(this.rigidBody.getAngularVelocity())) <= 0.01) {
+                this.rigidBody.setAngularVelocity(ƒ.Vector3.ZERO());
             }
 
-            if (angularVelocity.z < 0) {
+            //Shortens the step for rotation to make it smoothly ends.
+            if (transformedAngularVelocity.z <= pitch) {
+                pitch = -transformedAngularVelocity.z;
+            }
+            if (transformedAngularVelocity.z >= pitch) {
+                pitch = transformedAngularVelocity.z;
+            }
+
+            if (transformedAngularVelocity.y <= yaw) {
+                yaw = -transformedAngularVelocity.y;
+            }
+            if (transformedAngularVelocity.y >= yaw) {
+                yaw = transformedAngularVelocity.y;
+            }
+
+            if (transformedAngularVelocity.z < 0) {
                 // rotUp
-                this.pitch(pitch);
+                this.yawPitch(0, pitch, true);
 
-            } else if (angularVelocity.z > 0) {
+            } else if (transformedAngularVelocity.z > 0) {
                 // rotDown
-                this.pitch(-pitch);
+                this.yawPitch(0, -pitch, true);
             }
 
-            if (angularVelocity.y < 0) {
+            if (transformedAngularVelocity.y < 0) {
                 // rotRight
-                this.yaw(yaw);
+                this.yawPitch(yaw, 0, true);
 
-            } else if (angularVelocity.y > 0) {
+            } else if (transformedAngularVelocity.y > 0) {
                 // rotLeft
-                this.yaw(-yaw);
+                this.yawPitch(-yaw, 0, true);
             }
         }
         public update(): void {
-            
-            //starts stops thrusters update loop
-            this.updateThrusters();
-
             //Fixes up rotation so that the ship is on the plain and wont roll
-            let rotation: ƒ.Vector3 = this.rigidBody.getRotation();
-            if (rotation.y <= 0 && rotation.y > 90) {
-                rotation.set(0, rotation.y, rotation.z);
-                this.rigidBody.setRotation(rotation);
-            }
-            if (rotation.y <= -90 && rotation.y > 0) {
-                rotation.set(-180, rotation.y, rotation.z);
-                this.rigidBody.setRotation(rotation);
-            }
+            //TODO: DEBUG
+
+            // let rotation: ƒ.Vector3 = this.rigidBody.getRotation();
+            // if (rotation.y <= 0 && rotation.y > 90) {
+            //     rotation.set(0, rotation.y, rotation.z);
+            //     this.rigidBody.setRotation(rotation);
+            // }
+            // l
+            // 
+            // if (rotation.y <= -90 && rotation.y > 0) {
+            //     rotation.set(-180, rotation.y, rotation.z);
+            //     this.rigidBody.setRotation(rotation);
+            // }
 
             //TODO: remove drag from Physics. Use thrusters to stop the player. Check if the player gives thruster command or not
+            let angularVelocity: ƒ.Vector3 = this.rigidBody.getAngularVelocity();
+            let transformedAngularVelocity: ƒ.Vector3 = ƒ.Vector3.TRANSFORMATION(angularVelocity, this.mtxWorldInverse);
+            transformedAngularVelocity.set(
+                Math.round(transformedAngularVelocity.x * 100) / 100,
+                Math.round(transformedAngularVelocity.y * 100) / 100,
+                Math.round(transformedAngularVelocity.z * 100) / 100
+            );
 
-            //TODO:remove DEBUG      
+            
+            console.log(angularVelocity.toString());
+            // TODO:console.log(transformedAngularVelocity.toString());
 
             //stops micro rotation
 
@@ -272,21 +315,19 @@ namespace HomeFudge {
             if (Math.abs(Mathf.vectorLength(this.rigidBody.getVelocity())) <= 0.01) {
                 this.rigidBody.setVelocity(ƒ.Vector3.ZERO());
             }
-            if (Math.abs(Mathf.vectorLength(this.rigidBody.getAngularVelocity())) <= 0.01) {
-                this.rigidBody.setAngularVelocity(ƒ.Vector3.ZERO());
-            }
 
+            //TODO:SPLIT UP X and Z Rotation
             //updates rotation
             let mtxRot: ƒ.Matrix4x4 = new ƒ.Matrix4x4();
-            mtxRot.rotation = this.rigidBody.getRotation();
-            this.rigidBody.addAngularVelocity(ƒ.Vector3.TRANSFORMATION(this.desireRotation, mtxRot));
+            mtxRot.rotation = new ƒ.Vector3(0, this.mtxWorld.rotation.y, 0)
+            // this.rigidBody.addAngularVelocity(ƒ.Vector3.TRANSFORMATION(this.desireRotation, mtxRot));
+
+            this.rigidBody.setAngularVelocity(ƒ.Vector3.TRANSFORMATION(new ƒ.Vector3(0, angularVelocity.y, angularVelocity.z), mtxRot));
+            this.rigidBody.addAngularVelocity(this.desireRotation);
             this.desireRotation = ƒ.Vector3.ZERO();
 
             //damps rotation
-            this.dampRotation();
-
-
-
+            this.dampRotation(); //ROTATION DAMPING IS KOMPLETYL BUGGY
 
             //resets inputs flags
             this.inputAcc = false;
@@ -344,86 +385,201 @@ namespace HomeFudge {
             //TODO:add smooth acceleration
             //add acceleration
         }
-        public yaw(rotateY: number) {
-            /*
-            Rotation Direction : 
-             left -> 1
-             RIGHT -> -1
-            */
-            let mtxRot: ƒ.Matrix4x4 = new ƒ.Matrix4x4();
-            let shipRotation: ƒ.Vector3 = this.rigidBody.getAngularVelocity();
+        // public yaw(rotateY: number, isDamped?: boolean) {
+        //     /*
+        //     Rotation Direction : 
+        //      left -> 1
+        //      RIGHT -> -1
+        //     */
+        //     if (isDamped == null) {
+        //         isDamped = false;
+        //     }
+        //     if (!isDamped) {
+        //         this.inputRot = true;
+        //     }
+        //     //clamp maximum up and down
+        //     let shipRotation: ƒ.Vector3 = this.rigidBody.getAngularVelocity();
 
-            mtxRot.rotation = this.rigidBody.getRotation();
-            shipRotation = ƒ.Vector3.TRANSFORMATION(shipRotation, mtxRot);
-            console.log(shipRotation.toString());
+        //     //sets the rotation direction flag to false for later use
+        //     let rotLeft: boolean = false;
+        //     let rotRight: boolean = false;
 
-            //sets the rotation direction flag to false for later use
-            let rotLeft: boolean = false;
-            let rotRight: boolean = false;
 
-            this.inputRot = true;
 
-            if (rotateY < 0) {
-                rotRight = true;
-                //TODO:remove Debug
+        //     if (rotateY < 0) {
+        //         rotRight = true;
+        //         //TODO:remove Debug
 
-            } else if (rotateY > 0) {
-                rotLeft = true;
-            }
-            // -1 && -100 < max
-            //Stops applaying more force to the rotatin if the maximum rotatin speed is gainend by jumping out of the function
+        //     } else if (rotateY > 0) {
+        //         rotLeft = true;
+        //     }
+        //     // -1 && -100 < max
+        //     //Stops applaying more force to the rotatin if the maximum rotatin speed is gainend by jumping out of the function
 
-            if (rotRight && shipRotation.y <= -this.maxTurnSpeed) {
-                rotateY = 0;
-                return;
-            }
-            if (rotLeft && shipRotation.y >= this.maxTurnSpeed) {
-                rotateY = 0;
-                return;
-            }
-            this.desireRotation.set(this.desireRotation.x, (rotateY * this.maxTurnAcceleration) * _deltaSeconds, this.desireRotation.z);
-        }
+        //     if (rotRight && shipRotation.y <= -this.maxTurnSpeed) {
+        //         rotateY = 0;
+        //         return;
+        //     }
+        //     if (rotLeft && shipRotation.y >= this.maxTurnSpeed) {
+        //         rotateY = 0;
+        //         return;
+        //     }
+        //     this.desireRotation.set(this.desireRotation.x, (rotateY * this.maxTurnAcceleration) * _deltaSeconds, this.desireRotation.z);
+        // }
 
-        public pitch(rotateZ: number) {
+        // public pitch(rotateZ: number, isDamped?: boolean) {
+        //     /*
+        //     Rotation Direction : 
+        //      UP -> 1
+        //      DOWN -> -1
+        //     */
+        //     //sets the rotation direction flag to false for later use
+        //     let pitchDown: boolean = false;
+        //     let pitchUp: boolean = false;
+
+        //     let clampUp: boolean = false;
+        //     let clampDown: boolean = false;
+
+        //     let angularVelocity: ƒ.Vector3 = this.rigidBody.getAngularVelocity();
+        //     let shipRotation: ƒ.Vector3 = this.rigidBody.getRotation();
+        //     console.log(shipRotation.z);
+
+        //     if (shipRotation.z <= -this.maxPithsAngle) {
+        //         clampDown = true;
+        //     }
+        //     if (shipRotation.z >= this.maxPithsAngle) {
+        //         clampUp = true;
+        //     }
+        //     if (isDamped == null) {
+        //         isDamped = false;
+        //     }
+        //     if (!isDamped) {
+        //         this.inputRot = true;
+        //     }
+        //     //clamp maximum up and down
+        //     this.inputRot = true;
+
+        //     if (rotateZ < 0) {
+        //         pitchDown = true;
+        //         //TODO:remove Debug
+
+        //     } else if (rotateZ > 0) {
+        //         pitchUp = true;
+        //     }
+        //     // -1 && -100 < max
+
+        //     if (pitchDown && clampDown) {
+        //         console.log("down");
+        //         rotateZ = 0;
+        //         this.inputRot = false;
+        //         return;
+        //     }
+        //     if (pitchUp && clampUp) {
+        //         console.log("up");
+        //         rotateZ = 0;
+        //         this.inputRot = false;
+        //         return;
+        //     }
+        //     // Stops applaying more force to the rotation if the maximum rotatin speed is gainend by setting the change to 0
+        //     if (pitchDown && angularVelocity.z <= -this.maxTurnSpeed) {
+        //         rotateZ = 0;
+        //     }
+        //     if (pitchUp && angularVelocity.z >= this.maxTurnSpeed) {
+        //         rotateZ = 0;
+        //     }
+
+        //     this.desireRotation.set(this.desireRotation.x, this.desireRotation.y, (rotateZ * this.maxTurnAcceleration) * _deltaSeconds);
+        // }
+        public yawPitch(rotateY: number, rotateZ: number, isDamped?: boolean): void {
+
+            //TODO: redoo rotation completely. add an extra node for rotation?
             /*
             Rotation Direction : 
              UP -> 1
              DOWN -> -1
+            Rotation Direction : 
+             left -> 1
+             RIGHT -> -1
             */
-            let mtxRot: ƒ.Matrix4x4 = new ƒ.Matrix4x4();
-            let shipRotation: ƒ.Vector3 = this.rigidBody.getAngularVelocity();
-
-            mtxRot.rotation = this.rigidBody.getRotation();
-            shipRotation = ƒ.Vector3.TRANSFORMATION(shipRotation, mtxRot);
-            console.log(shipRotation.toString());
-
-
-
             //sets the rotation direction flag to false for later use
             let pitchDown: boolean = false;
             let pitchUp: boolean = false;
+            let rotLeft: boolean = false;
+            let rotRight: boolean = false;
 
-            this.inputRot = true;
+            let clampUp: boolean = false;
+            let clampDown: boolean = false;
+
+            let angularVelocity: ƒ.Vector3 = this.rigidBody.getAngularVelocity();//ƒ.Vector3.TRANSFORMATION(this.rigidBody.getAngularVelocity(), this.mtxWorldInverse);
+            let shipRotation: ƒ.Vector3 = this.rigidBody.getRotation();
+
+            //fixes rounding errors by getting rid after 
+            angularVelocity.set(
+                Math.round(angularVelocity.x * 100) / 100,
+                Math.round(angularVelocity.y * 100) / 100,
+                Math.round(angularVelocity.z * 100) / 100
+            );
+
+            if (isDamped == null) {
+                isDamped = false;
+            }
+            if (!isDamped) {
+                this.inputRot = true;
+            }
+
+
+            if (shipRotation.z <= -this.maxPithsAngle) {
+                clampDown = true;
+            }
+            if (shipRotation.z >= this.maxPithsAngle) {
+                clampUp = true;
+            }
+
 
             if (rotateZ < 0) {
                 pitchDown = true;
-                //TODO:remove Debug
-
             } else if (rotateZ > 0) {
                 pitchUp = true;
             }
-            // -1 && -100 < max
-            // Stops applaying more force to the rotation if the maximum rotatin speed is gainend by jumping out of the function
 
-            if (pitchDown && shipRotation.z <= -this.maxTurnSpeed) {
-                rotateZ = 0;
-                return;
+            if (rotateY < 0) {
+                rotRight = true;
+            } else if (rotateY > 0) {
+                rotLeft = true;
             }
-            if (pitchUp && shipRotation.z >= this.maxTurnSpeed) {
-                rotateZ = 0;
-                return;
+
+            //Stops applaying more force to the rotatin if the maximum rotatin speed is gainend by jumping out of the function
+            if (rotRight && angularVelocity.y <= -this.maxTurnSpeed) {
+                rotateY = 0;
             }
-            this.desireRotation.set(this.desireRotation.x, this.desireRotation.y, (rotateZ * this.maxTurnAcceleration) * _deltaSeconds);
+            if (rotLeft && angularVelocity.y >= this.maxTurnSpeed) {
+                rotateY = 0;
+            }
+
+            //TODO:FIX CLAMPING
+            // if (pitchDown && clampDown) {
+            //     console.log("down");
+            //     rotateZ = 0;
+            //     this.inputRot = false;
+            //     return;
+            // }
+            // if (pitchUp && clampUp) {
+            //     console.log("up");
+            //     rotateZ = 0;
+            //     this.inputRot = false;
+            //     return;
+            // }
+
+            // Stops applaying more force to the rotation if the maximum rotatin speed is gainend by setting the change to 0
+            if (pitchDown && angularVelocity.z <= -this.maxTurnSpeed) {
+                rotateZ = 0;
+            }
+            if (pitchUp && angularVelocity.z >= this.maxTurnSpeed) {
+                rotateZ = 0;
+            }
+            //Applays the rotation force
+            this.desireRotation.set(this.desireRotation.x, (rotateY * this.maxTurnAcceleration) * _deltaSeconds, (rotateZ * this.maxTurnAcceleration) * _deltaSeconds);
+
         }
 
         constructor(startTransform: ƒ.Matrix4x4) {

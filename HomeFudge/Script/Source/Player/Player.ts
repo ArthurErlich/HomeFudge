@@ -86,7 +86,7 @@ namespace HomeFudge {
 
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.A])) {
                 //LEFT STARVE
-                this.destroyer.yaw(1); //TODO:REMOVE DEBUG
+                this.destroyer.yawPitch(1,0); //TODO:REMOVE DEBUG
                 // this.moveDirection.set(
                 //     this.moveDirection.x,
                 //     this.moveDirection.y,
@@ -95,7 +95,7 @@ namespace HomeFudge {
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.D])) {
                 //RIGHT STARVE
-                this.destroyer.yaw(-1); //TODO:REMOVE DEBUG
+                this.destroyer.yawPitch(-1,0); //TODO:REMOVE DEBUG
                 // this.moveDirection.set(
                 //     this.moveDirection.x,
                 //     this.moveDirection.y,
@@ -104,7 +104,7 @@ namespace HomeFudge {
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.W])) {
                 //Down
-                this.destroyer.pitch(-1);
+                this.destroyer.yawPitch(0,-1);
 
                 //FORWARD
                 // this.moveDirection.set(
@@ -116,7 +116,7 @@ namespace HomeFudge {
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.S])) {
                 //Up
-                this.destroyer.pitch(1);
+                this.destroyer.yawPitch(0,1);
 
 
                 //BACKWARD

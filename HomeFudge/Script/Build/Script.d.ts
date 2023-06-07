@@ -55,6 +55,7 @@ declare namespace HomeFudge {
         maxSpeed: number;
         maxTurnSpeed: number;
         maxTurnAcceleration: number;
+        maxPitchAngle: number;
         mass: number;
         maxHealthPoints: number;
         RotThruster_FL: number[];
@@ -148,8 +149,10 @@ declare namespace HomeFudge {
          */
         static vectorLength(v: ƒ.Vector3): number;
         static vectorNegate(v: ƒ.Vector3): ƒ.Vector3;
-        static DegreeToRadiant(degree: number): number;
-        static RadiantToDegree(radiant: number): number;
+        static degreeToRadiant(degree: number): number;
+        static radiantToDegree(radiant: number): number;
+        static localToWorld(inversMatrix: ƒ.Matrix4x4, vector: ƒ.Vector3): ƒ.Vector3;
+        static worldToLocal(): ƒ.Vector3;
     }
 }
 declare namespace HomeFudge {
@@ -246,6 +249,7 @@ declare namespace HomeFudge {
         private inputRot;
         private inputAcc;
         private desireRotation;
+        private maxPithsAngle;
         WEAPONS: typeof WEAPONS;
         damperON: boolean;
         private static graph;
@@ -267,8 +271,7 @@ declare namespace HomeFudge {
         fireGatling(target: ƒ.Vector3): void;
         fireBeam(): void;
         move(moveDirection: ƒ.Vector3): void;
-        yaw(rotateY: number): void;
-        pitch(rotateZ: number): void;
+        yawPitch(rotateY: number, rotateZ: number, isDamped?: boolean): void;
         constructor(startTransform: ƒ.Matrix4x4);
     }
     export {};

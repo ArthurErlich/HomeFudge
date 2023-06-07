@@ -151,7 +151,7 @@ namespace HomeFudge {
             test = target;
             test.subtract(this.shootNode.mtxLocal.translation);
             test.normalize(1);
-            console.log(Mathf.RadiantToDegree(ƒ.Vector3.DOT(test,this.shootNode.mtxLocal.translation)).toString());
+            console.log(Mathf.radiantToDegree(ƒ.Vector3.DOT(test,this.shootNode.mtxLocal.translation)).toString());
             shipVelocity;
             
         }
