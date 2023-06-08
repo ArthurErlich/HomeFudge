@@ -12,7 +12,7 @@ namespace HomeFudge {
         private async init(side: string, position: ƒ.Vector3) {
             //TODO: remove debug
             //console.log("addling: "+ this.name);
-            
+
             RotThrusters.graph = await Resources.getGraphResources(Config.destroyer.graphID);
             let node: ƒ.Node = await Resources.getComponentNode("ThrustExhaust", RotThrusters.graph);
 
@@ -22,9 +22,9 @@ namespace HomeFudge {
                 RotThrusters.animation = node.getComponent(ƒ.ComponentAnimator).animation;
             }
             this.createComponents(position);
-            this.mtxLocal.scale(new ƒ.Vector3(4,4,4));
+            this.mtxLocal.scale(new ƒ.Vector3(4, 4, 4));
             this.meshComp.activate(false);
-            
+
 
             switch (side) {
                 case "FL":
@@ -53,10 +53,13 @@ namespace HomeFudge {
             animator.quantization = ƒ.ANIMATION_QUANTIZATION.DISCRETE;
             this.addComponent(animator);
         }
-        public activate(activate:boolean){
+        public activate(activate: boolean) {
             this.meshComp.activate(activate);
         }
-        public isActivated():boolean{
+        public isActivated(): boolean {
+            if (this.meshComp == null || this.meshComp == undefined) {
+                return false;
+            }
             return this.meshComp.isActive;
         }
         constructor(side: string, position: ƒ.Vector3) {

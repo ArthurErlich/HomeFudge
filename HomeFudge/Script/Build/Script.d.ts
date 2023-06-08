@@ -55,7 +55,6 @@ declare namespace HomeFudge {
         maxSpeed: number;
         maxTurnSpeed: number;
         maxTurnAcceleration: number;
-        maxPitchAngle: number;
         mass: number;
         maxHealthPoints: number;
         RotThruster_FL: number[];
@@ -151,8 +150,7 @@ declare namespace HomeFudge {
         static vectorNegate(v: ƒ.Vector3): ƒ.Vector3;
         static degreeToRadiant(degree: number): number;
         static radiantToDegree(radiant: number): number;
-        static localToWorld(inversMatrix: ƒ.Matrix4x4, vector: ƒ.Vector3): ƒ.Vector3;
-        static worldToLocal(): ƒ.Vector3;
+        static vector3Round(vector: ƒ.Vector3, decimalPlace: number): ƒ.Vector3;
     }
 }
 declare namespace HomeFudge {
@@ -234,12 +232,24 @@ declare namespace HomeFudge {
         BEAM_TURRET = 1,
         ROCKET_POD = 2
     }
+    enum THRUSTER_DIRECTION {
+        FORWARDS = 0,
+        BACKWARDS = 1,
+        LEFT = 2,
+        RIGHT = 3,
+        YAW_LEFT = 4,
+        YAW_RIGHT = 5,
+        PITCH_UP = 6,
+        PITCH_DOWN = 7,
+        OFF = 8
+    }
     export class Destroyer extends Ship {
         remove(): void;
         protected maxSpeed: number;
         protected maxAcceleration: number;
         private static seedRigidBody;
         private rigidBody;
+        private mtxRigid;
         protected healthPoints: number;
         protected maxTurnSpeed: number;
         private maxTurnAcceleration;
@@ -249,29 +259,30 @@ declare namespace HomeFudge {
         private inputRot;
         private inputAcc;
         private desireRotation;
-        private maxPithsAngle;
         WEAPONS: typeof WEAPONS;
+        THRUSTER_DIRECTION: typeof THRUSTER_DIRECTION;
         damperON: boolean;
         private static graph;
         static mesh: ƒ.Mesh;
         static material: ƒ.Material;
         static convexHull: Float32Array;
         private initAllConfigs;
+        update(): void;
         private addWeapons;
         private addThrusters;
         private setAllComponents;
         private addRigidBody;
-        private updateThrusters;
-        private fireThrusters;
+        resetThrusters(): void;
+        fireThrusters(direction: THRUSTER_DIRECTION, _on?: boolean): void;
         private dampRotation;
-        update(): void;
+        private setRigidMTX;
         alive(): boolean;
         destroyNode(): void;
         fireWeapon(_weapon: WEAPONS, target: ƒ.Vector3): void;
         fireGatling(target: ƒ.Vector3): void;
         fireBeam(): void;
         move(moveDirection: ƒ.Vector3): void;
-        yawPitch(rotateY: number, rotateZ: number, isDamped?: boolean): void;
+        yawPitch(rotateY: number, rotateZ: number): void;
         constructor(startTransform: ƒ.Matrix4x4);
     }
     export {};

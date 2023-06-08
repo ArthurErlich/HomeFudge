@@ -86,7 +86,9 @@ namespace HomeFudge {
 
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.A])) {
                 //LEFT STARVE
-                this.destroyer.yawPitch(1,0); //TODO:REMOVE DEBUG
+                this.destroyer.yawPitch(1,0);
+                this.destroyer.resetThrusters();
+                this.destroyer.fireThrusters(   this.destroyer.THRUSTER_DIRECTION.YAW_LEFT,true);
                 // this.moveDirection.set(
                 //     this.moveDirection.x,
                 //     this.moveDirection.y,
@@ -95,36 +97,61 @@ namespace HomeFudge {
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.D])) {
                 //RIGHT STARVE
-                this.destroyer.yawPitch(-1,0); //TODO:REMOVE DEBUG
+                this.destroyer.yawPitch(-1,0); 
+                this.destroyer.resetThrusters();
+                this.destroyer.fireThrusters(   this.destroyer.THRUSTER_DIRECTION.YAW_RIGHT,true);
+
                 // this.moveDirection.set(
                 //     this.moveDirection.x,
                 //     this.moveDirection.y,
                 //     1
                 // );
             }
-            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.W])) {
-                //Down
-                this.destroyer.yawPitch(0,-1);
+            ///<--OBSOLETE-->
+            // if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.W])) {
+            //     //Down
+            //     this.destroyer.yawPitch(0,-1);
 
+            //     //FORWARD
+            //     // this.moveDirection.set(
+            //     //     1,
+            //     //     this.moveDirection.y,
+            //     //     this.moveDirection.z
+            //     // );
+
+            // }
+            // if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.S])) {
+            //     //Up
+            //     this.destroyer.yawPitch(0,1);
+
+
+            //     //BACKWARD
+            //     // this.moveDirection.set(
+            //     //     -1,
+            //     //     this.moveDirection.y,
+            //     //     this.moveDirection.z
+            //     // );
+            // }
+            ///<--OBSOLETE-->
+
+            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.W])) {
                 //FORWARD
-                // this.moveDirection.set(
-                //     1,
-                //     this.moveDirection.y,
-                //     this.moveDirection.z
-                // );
+                this.moveDirection.set(
+                    1,
+                    this.moveDirection.y,
+                    this.moveDirection.z
+                );
 
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.S])) {
-                //Up
-                this.destroyer.yawPitch(0,1);
-
-
                 //BACKWARD
-                // this.moveDirection.set(
-                //     -1,
-                //     this.moveDirection.y,
-                //     this.moveDirection.z
-                // );
+                this.moveDirection.set(
+                    -1,
+                    this.moveDirection.y,
+                    this.moveDirection.z
+                );
+                console.log("!");
+                
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.SHIFT_LEFT])) {
                 //BACKWARD

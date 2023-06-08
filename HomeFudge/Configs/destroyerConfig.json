@@ -5,7 +5,6 @@
     "maxTurnSpeed": 2,
     "maxTurnAcceleration": 10,
     "maxHealthPoints": 1000,
-    "maxPitchAngle": 40,
     "mass": 2000,
     "RotThruster_FL": [
         44.9562,

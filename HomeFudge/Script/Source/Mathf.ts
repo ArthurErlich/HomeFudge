@@ -44,13 +44,15 @@ namespace HomeFudge {
         public static radiantToDegree(radiant:number):number{
             return radiant * (180/Math.PI);
         }
-        public static localToWorld(inversMatrix:ƒ.Matrix4x4, vector:ƒ.Vector3):ƒ.Vector3{
-            
-            
+        public static vector3Round(vector:ƒ.Vector3, decimalPlace: number):ƒ.Vector3{
+            vector.set(
+                Math.round(vector.x * decimalPlace) / decimalPlace,
+                Math.round(vector.y * decimalPlace) / decimalPlace,
+                Math.round(vector.z * decimalPlace) / decimalPlace
+            );
+            return vector;
         }
-        public static worldToLocal():ƒ.Vector3{
-            return null;
-        }
+
     }
 
 }
