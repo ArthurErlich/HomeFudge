@@ -436,6 +436,14 @@
       }
     }
   },
+  "MeshObj|2023-05-10T10:16:44.610Z|85894": {
+    "ƒ.MeshObj": {
+      "idResource": "MeshObj|2023-05-10T10:16:44.610Z|85894",
+      "name": "Mesh_Destroyer_ConvexHull",
+      "type": "MeshObj",
+      "url": "Mesh\\Destroyer\\HomeFuge_Destroyser_ConvexHull_V_1.0.obj"
+    }
+  },
   "Graph|2023-04-25T14:30:46.195Z|98798": {
     "ƒ.Graph": {
       "name": "GameResources",
@@ -670,7 +678,7 @@
                     "dampRotation": 0.1,
                     "effectGravity": 1,
                     "typeBody": "DYNAMIC",
-                    "typeCollider": "CONVEX",
+                    "typeCollider": "SPHERE",
                     "isTrigger": false,
                     "id": 0,
                     "pivot": {
@@ -1032,14 +1040,6 @@
       "name": "Mesh_LaserBeam",
       "type": "MeshObj",
       "url": "Mesh\\Destroyer\\HomeFuge_Beam.obj"
-    }
-  },
-  "MeshObj|2023-05-10T10:16:44.610Z|85894": {
-    "ƒ.MeshObj": {
-      "idResource": "MeshObj|2023-05-10T10:16:44.610Z|85894",
-      "name": "Mesh_Destroyer_ConvexHull",
-      "type": "MeshObj",
-      "url": "Mesh\\Destroyer\\HomeFuge_Destroyser_ConvexHull_V_1.0.obj"
     }
   }
 }
