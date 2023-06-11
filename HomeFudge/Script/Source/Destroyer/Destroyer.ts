@@ -42,13 +42,13 @@ namespace HomeFudge {
 
         private rotThruster: RotThrusters[] = new Array(4); //<-- note adding Thrusters need to add
 
-
         //True when the Player interacts with the Thrusters
         private inputRot: boolean = false;
         private inputAcc: boolean = false;
 
         //player rotation Input
         private desireRotation: ƒ.Vector3 = new ƒ.Vector3(0, 0, 0);
+        private desireVelocity: ƒ.Vector3 = new ƒ.Vector3(0,0,0);
 
         //list of weapons
         public WEAPONS = WEAPONS;
@@ -84,19 +84,19 @@ namespace HomeFudge {
             //init Weapons
             this.addWeapons();
             this.addThrusters();
-            //init Components
 
             // startTransform.rotateY(90);//DEBUG
-
+            //init Components
             this.setAllComponents(startTransform);
             this.addRigidBody(node, startTransform);
-
             // this.rigidBody.setAngularVelocity(new ƒ.Vector3(3, 0, 0));//DEBUG
+            this.rigidBody.addVelocity(ƒ.Vector3.TRANSFORMATION(new ƒ.Vector3(3, 0, 0), this.mtxWorldInverse));
+
         }
         //#region UpdateLoop
         public update(): void {
 
-            //stops micro movement
+            // stops micro movement
             if (Math.abs(Mathf.vectorLength(this.rigidBody.getVelocity())) <= 0.01) {
                 this.rigidBody.setVelocity(ƒ.Vector3.ZERO());
             }
@@ -104,8 +104,6 @@ namespace HomeFudge {
             this.calcLocalAngularVelocity();
 
             //movement stuff
-            // this.resetThrusters();
-            //-> Player input here
             this.dampRotation();
             this.applyForces();
 
@@ -188,7 +186,9 @@ namespace HomeFudge {
         }
 
         private applyForces(): void {
-            this.rigidBody.addAngularVelocity(Mathf.vector3Round(ƒ.Vector3.TRANSFORMATION(this.desireRotation, this.mtxWorld), 100));
+            // this.rigidBody.addVelocity(Mathf.vector3Round(ƒ.Vector3.TRANSFORMATION(this.desireVelocity, this.mtxWorld), 100));
+            this.rigidBody.addAngularVelocity(Mathf.vector3Round(ƒ.Vector3.TRANSFORMATION(this.desireRotation, this.mtxWorld, false), 100));
+            // this.desireVelocity= ƒ.Vector3.ZERO();
             this.desireRotation = ƒ.Vector3.ZERO();
         }
 
@@ -201,10 +201,15 @@ namespace HomeFudge {
                 this.localAngularVelocity = ƒ.Vector3.ZERO();
                 return;
             }
-            let localAng: ƒ.Vector3 = Mathf.vector3Round(Vector3.TRANSFORMATION(ang, this.mtxWorldInverse), 1)
+
+            let localAng: ƒ.Vector3 = Mathf.vector3Round(ƒ.Vector3.TRANSFORMATION(ang, this.mtxWorldInverse,false), 1)
             localAng.scale(angSpeed);
 
             this.localAngularVelocity = localAng;
+            console.log("local rotation: " + this.localAngularVelocity.toString());
+            console.log("world rotation: " + this.mtxWorld.rotation.toString());
+
+
         }
 
         //TODO: Fill out the Switch case (move the thruster down)
@@ -263,6 +268,7 @@ namespace HomeFudge {
             if (this.inputRot) {
                 return;
             }
+
             // Stops over rotation, aka ping pong rotation
             // if (Math.abs(angularVelocity.x) <= 0.1) {
             //     this.rigidBody.setAngularVelocity(new ƒ.Vector3(0, angularVelocity.y, angularVelocity.z));
@@ -357,7 +363,7 @@ namespace HomeFudge {
                 //fixes velocity, rotating it to the right direction
                 let mtxRot: ƒ.Matrix4x4 = new ƒ.Matrix4x4();
                 mtxRot.rotation = this.mtxWorld.rotation;
-                this.rigidBody.addVelocity(ƒ.Vector3.TRANSFORMATION(moveDirection, mtxRot));
+                this.rigidBody.addVelocity(ƒ.Vector3.TRANSFORMATION(moveDirection, this.mtxWorld, false));
             }
             //TODO:add smooth acceleration
             //add acceleration

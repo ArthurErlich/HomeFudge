@@ -376,6 +376,24 @@ var HomeFudge;
     HomeFudge.Ship = Ship;
 })(HomeFudge || (HomeFudge = {}));
 //TODO Add astroids!! SMALL MEDIUM LARGE
+var HomeFudge;
+(function (HomeFudge) {
+    var ƒ = FudgeCore;
+    class Debug extends ƒ.Node {
+    }
+    HomeFudge.Debug = Debug;
+})(HomeFudge || (HomeFudge = {}));
+/// <reference path="Debug.ts" />
+var HomeFudge;
+/// <reference path="Debug.ts" />
+(function (HomeFudge) {
+    class DebugForces extends HomeFudge.Debug {
+        setVisible(_on) {
+            throw new Error("Method not implemented.");
+        }
+    }
+    HomeFudge.DebugForces = DebugForces;
+})(HomeFudge || (HomeFudge = {}));
 /// <reference path="../Abstract/GameObject.ts" />
 var HomeFudge;
 /// <reference path="../Abstract/GameObject.ts" />
@@ -546,6 +564,7 @@ var HomeFudge;
         inputAcc = false;
         //player rotation Input
         desireRotation = new ƒ.Vector3(0, 0, 0);
+        desireVelocity = new ƒ.Vector3(0, 0, 0);
         //list of weapons
         WEAPONS = WEAPONS;
         DIRECTION = DIRECTION;
@@ -571,22 +590,21 @@ var HomeFudge;
             //init Weapons
             this.addWeapons();
             this.addThrusters();
-            //init Components
             // startTransform.rotateY(90);//DEBUG
+            //init Components
             this.setAllComponents(startTransform);
             this.addRigidBody(node, startTransform);
             // this.rigidBody.setAngularVelocity(new ƒ.Vector3(3, 0, 0));//DEBUG
+            this.rigidBody.addVelocity(ƒ.Vector3.TRANSFORMATION(new ƒ.Vector3(3, 0, 0), this.mtxWorldInverse));
         }
         //#region UpdateLoop
         update() {
-            //stops micro movement
+            // stops micro movement
             if (Math.abs(HomeFudge.Mathf.vectorLength(this.rigidBody.getVelocity())) <= 0.01) {
                 this.rigidBody.setVelocity(ƒ.Vector3.ZERO());
             }
             this.calcLocalAngularVelocity();
             //movement stuff
-            // this.resetThrusters();
-            //-> Player input here
             this.dampRotation();
             this.applyForces();
             if (!this.inputRot) {
@@ -648,7 +666,9 @@ var HomeFudge;
             this.fireThrusters(DIRECTION.OFF);
         }
         applyForces() {
-            this.rigidBody.addAngularVelocity(HomeFudge.Mathf.vector3Round(ƒ.Vector3.TRANSFORMATION(this.desireRotation, this.mtxWorld), 100));
+            // this.rigidBody.addVelocity(Mathf.vector3Round(ƒ.Vector3.TRANSFORMATION(this.desireVelocity, this.mtxWorld), 100));
+            this.rigidBody.addAngularVelocity(HomeFudge.Mathf.vector3Round(ƒ.Vector3.TRANSFORMATION(this.desireRotation, this.mtxWorld, false), 100));
+            // this.desireVelocity= ƒ.Vector3.ZERO();
             this.desireRotation = ƒ.Vector3.ZERO();
         }
         calcLocalAngularVelocity() {
@@ -661,9 +681,11 @@ var HomeFudge;
                 this.localAngularVelocity = ƒ.Vector3.ZERO();
                 return;
             }
-            let localAng = HomeFudge.Mathf.vector3Round(HomeFudge.Vector3.TRANSFORMATION(ang, this.mtxWorldInverse), 1);
+            let localAng = HomeFudge.Mathf.vector3Round(ƒ.Vector3.TRANSFORMATION(ang, this.mtxWorldInverse, false), 1);
             localAng.scale(angSpeed);
             this.localAngularVelocity = localAng;
+            console.log("local rotation: " + this.localAngularVelocity.toString());
+            console.log("world rotation: " + this.mtxWorld.rotation.toString());
         }
         //TODO: Fill out the Switch case (move the thruster down)
         fireThrusters(direction, _on) {
@@ -808,7 +830,7 @@ var HomeFudge;
                 //fixes velocity, rotating it to the right direction
                 let mtxRot = new ƒ.Matrix4x4();
                 mtxRot.rotation = this.mtxWorld.rotation;
-                this.rigidBody.addVelocity(ƒ.Vector3.TRANSFORMATION(moveDirection, mtxRot));
+                this.rigidBody.addVelocity(ƒ.Vector3.TRANSFORMATION(moveDirection, this.mtxWorld, false));
             }
             //TODO:add smooth acceleration
             //add acceleration
@@ -1614,16 +1636,10 @@ var HomeFudge;
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.A])) {
                 //LEFT STARVE
                 this.destroyer.rotateTo(this.destroyer.DIRECTION.YAW_LEFT);
-                //REMOVE\/
-                this.destroyer.resetThrusters();
-                this.destroyer.fireThrusters(this.destroyer.DIRECTION.YAW_LEFT, true);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.D])) {
                 //RIGHT STARVE
                 this.destroyer.rotateTo(this.destroyer.DIRECTION.YAW_RIGHT);
-                //REMOVE\/
-                this.destroyer.resetThrusters();
-                this.destroyer.fireThrusters(this.destroyer.DIRECTION.YAW_RIGHT, true);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.W])) {
                 //Down
@@ -1650,17 +1666,6 @@ var HomeFudge;
                 //BACKWARD
                 //TODO:Move to Destroyer
                 this.moveDirection.set(-1, this.moveDirection.y, this.moveDirection.z);
-                console.log("!");
-            }
-            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.SHIFT_LEFT])) {
-                //BACKWARD
-                //TODO:Move to Destroyer
-                this.moveDirection.set(this.moveDirection.z, this.moveDirection.y, this.moveDirection.z);
-            }
-            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.CTRL_LEFT])) {
-                //BACKWARD
-                //TODO:Move to Destroyer
-                this.moveDirection = new ƒ.Vector3(this.moveDirection.z, this.moveDirection.y, this.moveDirection.z);
             }
         }
         init() {

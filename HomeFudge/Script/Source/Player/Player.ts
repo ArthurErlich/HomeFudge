@@ -87,17 +87,10 @@ namespace HomeFudge {
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.A])) {
                 //LEFT STARVE
                 this.destroyer.rotateTo(this.destroyer.DIRECTION.YAW_LEFT);
-                //REMOVE\/
-                this.destroyer.resetThrusters();
-                this.destroyer.fireThrusters(this.destroyer.DIRECTION.YAW_LEFT,true);
-    
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.D])) {
                 //RIGHT STARVE
                 this.destroyer.rotateTo(this.destroyer.DIRECTION.YAW_RIGHT); 
-                //REMOVE\/
-                this.destroyer.resetThrusters();
-                this.destroyer.fireThrusters(   this.destroyer.DIRECTION.YAW_RIGHT,true);
             }
 
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.W])) {
@@ -134,27 +127,7 @@ namespace HomeFudge {
                     -1,
                     this.moveDirection.y,
                     this.moveDirection.z
-                );
-                console.log("!");
-                
-            }
-            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.SHIFT_LEFT])) {
-                //BACKWARD
-                //TODO:Move to Destroyer
-                this.moveDirection.set(
-                    this.moveDirection.z,
-                    this.moveDirection.y,
-                    this.moveDirection.z
-                );
-            }
-            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.CTRL_LEFT])) {
-                //BACKWARD
-                //TODO:Move to Destroyer
-                this.moveDirection = new ƒ.Vector3(
-                    this.moveDirection.z,
-                    this.moveDirection.y,
-                    this.moveDirection.z
-                );
+                );     
             }
         }
         private init() {
