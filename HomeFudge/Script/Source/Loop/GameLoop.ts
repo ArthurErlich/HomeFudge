@@ -6,6 +6,8 @@ namespace HomeFudge {
     export class GameLoop {
         private static objects: GameObject[] = [];
         public static addGameObject(_object: GameObject) {
+            console.warn("Mehtode should not be used jet!");
+            return;
             GameLoop.objects.push(_object);
         }
         public static update(): void {
