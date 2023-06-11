@@ -125,6 +125,17 @@ declare namespace HomeFudge {
 }
 declare namespace HomeFudge {
     import ƒ = FudgeCore;
+    class PlayerSpawner extends ƒ.ComponentScript {
+        static readonly iSubclass: number;
+        message: string;
+        private cmpTransform;
+        private inputValue;
+        constructor();
+        hndEvent: (_event: Event) => void;
+    }
+}
+declare namespace HomeFudge {
+    import ƒ = FudgeCore;
     class Resources {
         static getGraphResources(graphID: string): Promise<ƒ.Graph>;
         static getComponentNode(nodeName: string, graph: ƒ.Graph): Promise<ƒ.Node>;
@@ -488,6 +499,7 @@ declare namespace HomeFudge {
     class Player extends ƒ.Node {
         private tempAimTarget;
         destroyer: Destroyer;
+        playerID: string;
         private selectedWeapon;
         private moveDirection;
         private update;

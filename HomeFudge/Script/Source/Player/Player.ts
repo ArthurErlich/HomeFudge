@@ -2,9 +2,11 @@ namespace HomeFudge {
     import ƒ = FudgeCore;
     export class Player extends ƒ.Node {
         //temporary value
-        private tempAimTarget = new ƒ.Vector3(100,100,0);
-       
+        private tempAimTarget = new ƒ.Vector3(100, 100, 0);
+
         public destroyer: Destroyer = null;
+        public playerID: string = null;
+
         private selectedWeapon: number = null; //TODO:Check if ok
 
         private moveDirection: ƒ.Vector3 = ƒ.Vector3.ZERO();
@@ -15,8 +17,8 @@ namespace HomeFudge {
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ALT_LEFT])) {
                 console.error("Switch NOT IMPLEMENTED!!!");
-                
-            }else{
+
+            } else {
                 //TODO: PointerLock disabled
                 this.updateShipMovement();
             }
@@ -61,7 +63,7 @@ namespace HomeFudge {
                     break;
             }
         }
-        
+
         private updateWeaponSelection(): void {
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ONE])) {
                 //Gatling -> //TODO: Create Look on with mouse
@@ -90,7 +92,7 @@ namespace HomeFudge {
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.D])) {
                 //RIGHT STARVE
-                this.destroyer.rotateTo(this.destroyer.DIRECTION.YAW_RIGHT); 
+                this.destroyer.rotateTo(this.destroyer.DIRECTION.YAW_RIGHT);
             }
 
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.W])) {
@@ -127,7 +129,7 @@ namespace HomeFudge {
                     -1,
                     this.moveDirection.y,
                     this.moveDirection.z
-                );     
+                );
             }
         }
         private init() {

@@ -371,8 +371,6 @@ namespace HomeFudge {
         public rotateTo(rotate: DIRECTION): void {
             //Resets the Thruster fire Anim bevor adding the others
             this.fireThrusters(DIRECTION.OFF);
-
-            //TODO: redoo rotation completely
             /*
             Rotation Direction : 
              UP -> 1
@@ -418,7 +416,7 @@ namespace HomeFudge {
                 default:
                     return;
             }
-            //sets the rotation direction flag to false for later use
+            //sets the rotation direction flags to false for later use
             let pitchDown: boolean = false;
             let pitchUp: boolean = false;
             let yawLeft: boolean = false;
@@ -431,7 +429,7 @@ namespace HomeFudge {
             this.inputRot = true; //TODO: move away! Think diffrent
 
             //TODO: set input flag for Roll move to Switch case
-            //serts inut flags fore easier use.
+            //sets input flags fore easier use.
             if (rotateZ < 0) {
                 pitchDown = true;
             } else if (rotateZ > 0) {

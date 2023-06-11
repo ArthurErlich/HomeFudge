@@ -313,6 +313,53 @@ var HomeFudge;
 var HomeFudge;
 (function (HomeFudge) {
     var ƒ = FudgeCore;
+    ƒ.Project.registerScriptNamespace(Script); // Register the namespace to FUDGE for serialization
+    class PlayerSpawner extends ƒ.ComponentScript {
+        // Register the script as component for use in the editor via drag&drop
+        static iSubclass = ƒ.Component.registerSubclass(PlayerSpawner);
+        // Properties may be mutated by users in the editor via the automatically created user interface
+        message = "CustomComponentScript added to ";
+        cmpTransform;
+        inputValue; // input for setting the Player ID
+        constructor() {
+            super();
+            // Don't start when running in editor
+            if (ƒ.Project.mode == ƒ.MODE.EDITOR)
+                return;
+            // Listen to this component being added to or removed from a node
+            this.addEventListener("componentAdd" /* ƒ.EVENT.COMPONENT_ADD */, this.hndEvent);
+            this.addEventListener("componentRemove" /* ƒ.EVENT.COMPONENT_REMOVE */, this.hndEvent);
+            this.addEventListener("nodeDeserialized" /* ƒ.EVENT.NODE_DESERIALIZED */, this.hndEvent);
+        }
+        // Activate the functions of this component as response to events
+        hndEvent = (_event) => {
+            if (_event.type === "input") {
+                this.inputValue = _event.target.value;
+            }
+            switch (_event.type) {
+                case "componentAdd" /* ƒ.EVENT.COMPONENT_ADD */:
+                    ƒ.Debug.log(this.message, this.node.name);
+                    ƒ.Debug.log(this.message, this.inputValue);
+                case "componentRemove" /* ƒ.EVENT.COMPONENT_REMOVE */:
+                    this.removeEventListener("componentAdd" /* ƒ.EVENT.COMPONENT_ADD */, this.hndEvent);
+                    this.removeEventListener("componentRemove" /* ƒ.EVENT.COMPONENT_REMOVE */, this.hndEvent);
+                    break;
+                case "nodeDeserialized" /* ƒ.EVENT.NODE_DESERIALIZED */:
+                    // if deserialized the node is now fully reconstructed and access to all its components and children is possible
+                    this.cmpTransform = this.node.getComponent(ƒ.ComponentTransform);
+                    ƒ.Debug.log(this.message, this.node.name);
+                    ƒ.Debug.log(this.message, this.inputValue);
+                    break;
+                case "renderPrepare" /* ƒ.EVENT.RENDER_PREPARE */:
+                    break;
+            }
+        };
+    }
+    HomeFudge.PlayerSpawner = PlayerSpawner;
+})(HomeFudge || (HomeFudge = {}));
+var HomeFudge;
+(function (HomeFudge) {
+    var ƒ = FudgeCore;
     class Resources {
         static async getGraphResources(graphID) {
             let graph = ƒ.Project.resources[graphID];
@@ -838,7 +885,6 @@ var HomeFudge;
         rotateTo(rotate) {
             //Resets the Thruster fire Anim bevor adding the others
             this.fireThrusters(DIRECTION.OFF);
-            //TODO: redoo rotation completely
             /*
             Rotation Direction :
              UP -> 1
@@ -884,7 +930,7 @@ var HomeFudge;
                 default:
                     return;
             }
-            //sets the rotation direction flag to false for later use
+            //sets the rotation direction flags to false for later use
             let pitchDown = false;
             let pitchUp = false;
             let yawLeft = false;
@@ -894,7 +940,7 @@ var HomeFudge;
             let angularVelocity = this.localAngularVelocity;
             this.inputRot = true; //TODO: move away! Think diffrent
             //TODO: set input flag for Roll move to Switch case
-            //serts inut flags fore easier use.
+            //sets input flags fore easier use.
             if (rotateZ < 0) {
                 pitchDown = true;
             }
@@ -1563,6 +1609,7 @@ var HomeFudge;
         //temporary value
         tempAimTarget = new ƒ.Vector3(100, 100, 0);
         destroyer = null;
+        playerID = null;
         selectedWeapon = null; //TODO:Check if ok
         moveDirection = ƒ.Vector3.ZERO();
         update = () => {
