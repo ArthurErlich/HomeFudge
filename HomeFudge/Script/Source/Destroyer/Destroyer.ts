@@ -5,7 +5,7 @@ namespace HomeFudge {
         BEAM_TURRET,
         ROCKET_POD
     }
-    enum THRUSTER_DIRECTION {
+    enum DIRECTION {
         FORWARDS,
         BACKWARDS,
         LEFT,
@@ -14,6 +14,8 @@ namespace HomeFudge {
         YAW_RIGHT,
         PITCH_UP,
         PITCH_DOWN,
+        ROLL_LEFT,
+        ROLL_RIGHT,
         OFF
     }
     export class Destroyer extends Ship {
@@ -26,7 +28,9 @@ namespace HomeFudge {
         private static seedRigidBody: ƒ.ComponentRigidbody = null;
         private rigidBody: ƒ.ComponentRigidbody = null;
 
-        private mtxRigid: ƒ.Matrix4x4 = null;
+        // private mtxRigid: ƒ.Matrix4x4 = null;
+
+        private localAngularVelocity: ƒ.Vector3 = null;
 
 
         protected healthPoints: number = null;
@@ -36,7 +40,7 @@ namespace HomeFudge {
         private gatlingTurret: GatlingTurret = null;
         private beamTurretList: BeamTurret[] = new Array(2);
 
-        private rotThruster: RotThrusters[] = new Array(4);
+        private rotThruster: RotThrusters[] = new Array(4); //<-- note adding Thrusters need to add
 
 
         //True when the Player interacts with the Thrusters
@@ -49,7 +53,7 @@ namespace HomeFudge {
         //list of weapons
         public WEAPONS = WEAPONS;
 
-        public THRUSTER_DIRECTION = THRUSTER_DIRECTION;
+        public DIRECTION = DIRECTION;
 
         //dampers can be disabled by the player
         public damperON = true;
@@ -87,26 +91,26 @@ namespace HomeFudge {
             this.setAllComponents(startTransform);
             this.addRigidBody(node, startTransform);
 
-            // this.rigidBody.setAngularVelocity(new ƒ.Vector3(10, 0, 0));//DEBUG
+            // this.rigidBody.setAngularVelocity(new ƒ.Vector3(3, 0, 0));//DEBUG
         }
         //#region UpdateLoop
         public update(): void {
-            //Set ups the mtxWorld for the Rigid Body and resets Thruster for this Frame
-            this.setRigidMTX();
-            if (!this.inputRot && !this.inputAcc) {
-                this.resetThrusters();
-            }
 
             //stops micro movement
             if (Math.abs(Mathf.vectorLength(this.rigidBody.getVelocity())) <= 0.01) {
                 this.rigidBody.setVelocity(ƒ.Vector3.ZERO());
             }
 
-            this.rigidBody.addAngularVelocity(Mathf.vector3Round(ƒ.Vector3.TRANSFORMATION(this.desireRotation, this.mtxRigid), 100));
-            this.desireRotation = ƒ.Vector3.ZERO();
+            this.calcLocalAngularVelocity();
 
-            //damps rotation
-            this.dampRotation(); //ROTATION DAMPING IS COMPLETELY BUGGY //TODO: MAKE ROTATION DAMPING AT WORLD COORDINATES: find per MatrixInversion the right thrustre to fire.
+            //movement stuff
+            this.resetThrusters();
+            //-> Player input here
+            this.applyForces();
+
+            this.dampRotation();
+            this.applyForces();
+
 
             //resets inputs flags
             this.inputAcc = false;
@@ -179,26 +183,43 @@ namespace HomeFudge {
                     return;
                 }
             });
-            this.fireThrusters(THRUSTER_DIRECTION.OFF);
+            this.fireThrusters(DIRECTION.OFF);
 
 
         }
 
+        private applyForces(): void {
+            this.rigidBody.addAngularVelocity(Mathf.vector3Round(ƒ.Vector3.TRANSFORMATION(this.desireRotation, this.mtxWorld), 100));
+            this.desireRotation = ƒ.Vector3.ZERO();
+        }
+
+        private calcLocalAngularVelocity(): void {
+            let ang = this.rigidBody.getAngularVelocity();
+            let angSpeed: number = Mathf.vectorLength(ang);
+            if (angSpeed < 0) {
+                ang.normalize();
+            }
+            let localAng: ƒ.Vector3 = Mathf.vector3Round(Vector3.TRANSFORMATION(ang, this.mtxWorldInverse), 1)
+            localAng.scale(angSpeed);
+
+            this.localAngularVelocity = localAng;
+        }
+
         //TODO: Fill out the Switch case (move the thruster down)
-        public fireThrusters(direction: THRUSTER_DIRECTION, _on?: boolean) {
+        public fireThrusters(direction: DIRECTION, _on?: boolean) {
             if (_on == null) {
                 _on = false;
             }
             switch (direction) {
-                case THRUSTER_DIRECTION.FORWARDS:
+                case DIRECTION.FORWARDS:
                     break;
-                case THRUSTER_DIRECTION.BACKWARDS:
+                case DIRECTION.BACKWARDS:
                     break;
-                case THRUSTER_DIRECTION.LEFT:
+                case DIRECTION.LEFT:
                     break;
-                case THRUSTER_DIRECTION.RIGHT:
+                case DIRECTION.RIGHT:
                     break;
-                case THRUSTER_DIRECTION.YAW_LEFT:
+                case DIRECTION.YAW_LEFT:
                     if (_on) {
                         this.rotThruster[1].activate(true);
                         this.rotThruster[2].activate(true);
@@ -207,7 +228,7 @@ namespace HomeFudge {
                         this.rotThruster[2].activate(false);
                     }
                     break;
-                case THRUSTER_DIRECTION.YAW_RIGHT:
+                case DIRECTION.YAW_RIGHT:
                     if (_on) {
                         this.rotThruster[0].activate(true);
                         this.rotThruster[3].activate(true);
@@ -216,11 +237,16 @@ namespace HomeFudge {
                         this.rotThruster[3].activate(false);
                     }
                     break;
-                case THRUSTER_DIRECTION.PITCH_UP:
+                case DIRECTION.PITCH_UP:
                     break;
-                case THRUSTER_DIRECTION.PITCH_DOWN:
+                case DIRECTION.PITCH_DOWN:
                     break;
-                case THRUSTER_DIRECTION.OFF:
+                case DIRECTION.ROLL_LEFT:
+                    break;
+                case DIRECTION.ROLL_RIGHT:
+                    break;
+
+                case DIRECTION.OFF:
                     this.rotThruster.forEach(thruster => {
                         if (thruster.isActivated()) {
                             thruster.activate(false);
@@ -276,28 +302,16 @@ namespace HomeFudge {
 
             if (angularVelocity.y < -0.1) {
                 //stop rotRight
-                this.yawPitch(1, 0);
+                this.rotateTo(1, 0);
                 this.resetThrusters();
-                this.fireThrusters(THRUSTER_DIRECTION.YAW_LEFT, true);
+                this.fireThrusters(DIRECTION.YAW_LEFT, true);
 
             } else if (angularVelocity.y > 0.1) {
                 //stop rotLeft
-                this.yawPitch(-1, 0);
+                this.rotateTo(-1, 0);
                 this.resetThrusters();
-                this.fireThrusters(THRUSTER_DIRECTION.YAW_RIGHT, true);
+                this.fireThrusters(DIRECTION.YAW_RIGHT, true);
             }
-        }
-        private setRigidMTX(): void {
-            if (this.rigidBody == null) {
-                return;
-            }
-            let mtxRigidBody: ƒ.Matrix4x4 = new ƒ.Matrix4x4();
-            let rigidRotation: ƒ.Vector3 = this.rigidBody.getRotation();
-
-            mtxRigidBody.rotation = rigidRotation;
-            mtxRigidBody.scaling = ƒ.Vector3.ONE();
-
-            this.mtxRigid = mtxRigidBody;
         }
 
         public alive(): boolean {
@@ -352,114 +366,9 @@ namespace HomeFudge {
             //TODO:add smooth acceleration
             //add acceleration
         }
-        // public yaw(rotateY: number, isDamped?: boolean) {
-        //     /*
-        //     Rotation Direction : 
-        //      left -> 1
-        //      RIGHT -> -1
-        //     */
-        //     if (isDamped == null) {
-        //         isDamped = false;
-        //     }
-        //     if (!isDamped) {
-        //         this.inputRot = true;
-        //     }
-        //     //clamp maximum up and down
-        //     let shipRotation: ƒ.Vector3 = this.rigidBody.getAngularVelocity();
+        public rotateTo(rotate: DIRECTION): void {
 
-        //     //sets the rotation direction flag to false for later use
-        //     let rotLeft: boolean = false;
-        //     let rotRight: boolean = false;
-
-
-
-        //     if (rotateY < 0) {
-        //         rotRight = true;
-        //         //TODO:remove Debug
-
-        //     } else if (rotateY > 0) {
-        //         rotLeft = true;
-        //     }
-        //     // -1 && -100 < max
-        //     //Stops applaying more force to the rotatin if the maximum rotatin speed is gainend by jumping out of the function
-
-        //     if (rotRight && shipRotation.y <= -this.maxTurnSpeed) {
-        //         rotateY = 0;
-        //         return;
-        //     }
-        //     if (rotLeft && shipRotation.y >= this.maxTurnSpeed) {
-        //         rotateY = 0;
-        //         return;
-        //     }
-        //     this.desireRotation.set(this.desireRotation.x, (rotateY * this.maxTurnAcceleration) * _deltaSeconds, this.desireRotation.z);
-        // }
-
-        // public pitch(rotateZ: number, isDamped?: boolean) {
-        //     /*
-        //     Rotation Direction : 
-        //      UP -> 1
-        //      DOWN -> -1
-        //     */
-        //     //sets the rotation direction flag to false for later use
-        //     let pitchDown: boolean = false;
-        //     let pitchUp: boolean = false;
-
-        //     let clampUp: boolean = false;
-        //     let clampDown: boolean = false;
-
-        //     let angularVelocity: ƒ.Vector3 = this.rigidBody.getAngularVelocity();
-        //     let shipRotation: ƒ.Vector3 = this.rigidBody.getRotation();
-        //     console.log(shipRotation.z);
-
-        //     if (shipRotation.z <= -this.maxPithsAngle) {
-        //         clampDown = true;
-        //     }
-        //     if (shipRotation.z >= this.maxPithsAngle) {
-        //         clampUp = true;
-        //     }
-        //     if (isDamped == null) {
-        //         isDamped = false;
-        //     }
-        //     if (!isDamped) {
-        //         this.inputRot = true;
-        //     }
-        //     //clamp maximum up and down
-        //     this.inputRot = true;
-
-        //     if (rotateZ < 0) {
-        //         pitchDown = true;
-        //         //TODO:remove Debug
-
-        //     } else if (rotateZ > 0) {
-        //         pitchUp = true;
-        //     }
-        //     // -1 && -100 < max
-
-        //     if (pitchDown && clampDown) {
-        //         console.log("down");
-        //         rotateZ = 0;
-        //         this.inputRot = false;
-        //         return;
-        //     }
-        //     if (pitchUp && clampUp) {
-        //         console.log("up");
-        //         rotateZ = 0;
-        //         this.inputRot = false;
-        //         return;
-        //     }
-        //     // Stops applaying more force to the rotation if the maximum rotatin speed is gainend by setting the change to 0
-        //     if (pitchDown && angularVelocity.z <= -this.maxTurnSpeed) {
-        //         rotateZ = 0;
-        //     }
-        //     if (pitchUp && angularVelocity.z >= this.maxTurnSpeed) {
-        //         rotateZ = 0;
-        //     }
-
-        //     this.desireRotation.set(this.desireRotation.x, this.desireRotation.y, (rotateZ * this.maxTurnAcceleration) * _deltaSeconds);
-        // }
-        public yawPitch(rotateY: number, rotateZ: number): void {
-
-            //TODO: redoo rotation completely. add an extra node for rotation?
+            //TODO: redoo rotation completely
             /*
             Rotation Direction : 
              UP -> 1
@@ -468,33 +377,56 @@ namespace HomeFudge {
              left -> 1
              RIGHT -> -1
             */
+            let rotateZ = null;
+            let rotateY = null;
+            let rotateX = null;
+
+            switch (rotate) {
+                case DIRECTION.FORWARDS:
+                    break;
+                case DIRECTION.BACKWARDS:
+                    break;
+                case DIRECTION.LEFT:
+                    break;
+                case DIRECTION.RIGHT:
+                    break;
+                case DIRECTION.YAW_LEFT:
+                    rotateY = 1;
+                    break;
+                case DIRECTION.YAW_RIGHT:
+                    rotateY = -1;
+                    break;
+                case DIRECTION.PITCH_UP:
+                    rotateZ = 1;
+                    break;
+                case DIRECTION.PITCH_DOWN:
+                    rotateZ = -1;
+                    break;
+                case DIRECTION.ROLL_LEFT:
+                    rotateX = -1;
+                    break;
+                case DIRECTION.ROLL_RIGHT:
+                    rotateX = 1;
+                    break;
+                case DIRECTION.OFF:
+                    return;
+                default:
+                    return;
+            }
             //sets the rotation direction flag to false for later use
             let pitchDown: boolean = false;
             let pitchUp: boolean = false;
-            let rotLeft: boolean = false;
-            let rotRight: boolean = false;
+            let yawLeft: boolean = false;
+            let yawRight: boolean = false;
+            let rollRight: boolean = false;
+            let rollLeft: boolean = false;
 
-            let angularVelocity: ƒ.Vector3 = ƒ.Vector3.TRANSFORMATION(this.rigidBody.getAngularVelocity(), this.mtxWorldInverse);
+            let angularVelocity: ƒ.Vector3 = this.localAngularVelocity;
 
-            this.inputRot = true;
-            // let shipRotation: ƒ.Vector3 = this.rigidBody.getRotation();
+            this.inputRot = true; //TODO: move away! Think diffrent
 
-            //fixes rounding errors by getting rid after 
-            // angularVelocity.set(
-            //     Math.round(angularVelocity.x * 100) / 100,
-            //     Math.round(angularVelocity.y * 100) / 100,
-            //     Math.round(angularVelocity.z * 100) / 100
-            // )
-
-            // if (shipRotation.z <= -this.maxPithsAngle) {
-            //     clampDown = true;
-            // }
-            // if (shipRotation.z >= this.maxPithsAngle) {
-            //     clampUp = true;
-            // }
-
-
-
+            //TODO: set input flag for Roll move to Switch case
+            //serts inut flags fore easier use.
             if (rotateZ < 0) {
                 pitchDown = true;
             } else if (rotateZ > 0) {
@@ -502,34 +434,19 @@ namespace HomeFudge {
             }
 
             if (rotateY < 0) {
-                rotRight = true;
+                yawRight = true;
             } else if (rotateY > 0) {
-                rotLeft = true;
+                yawLeft = true;
             }
-
-            //Stops applaying more force to the rotatin if the maximum rotatin speed is gainend by jumping out of the function
-            if (rotRight && angularVelocity.y <= -this.maxTurnSpeed) {
-                rotateY = 0;
-            }
-            if (rotLeft && angularVelocity.y >= this.maxTurnSpeed) {
-                rotateY = 0;
-            }
-
-            //TODO:FIX CLAMPING
-            // if (pitchDown && clampDown) {
-            //     console.log("down");
-            //     rotateZ = 0;
-            //     this.inputRot = false;
-            //     return;
-            // }
-            // if (pitchUp && clampUp) {
-            //     console.log("up");
-            //     rotateZ = 0;
-            //     this.inputRot = false;
-            //     return;
-            // }
 
             // Stops applaying more force to the rotation if the maximum rotatin speed is gainend by setting the change to 0
+            if (yawRight && angularVelocity.y <= -this.maxTurnSpeed) {
+                rotateY = 0;
+            }
+            if (yawLeft && angularVelocity.y >= this.maxTurnSpeed) {
+                rotateY = 0;
+            }
+
             if (pitchDown && angularVelocity.z <= -this.maxTurnSpeed) {
                 rotateZ = 0;
             }
@@ -537,7 +454,7 @@ namespace HomeFudge {
                 rotateZ = 0;
             }
             //Applays the rotation force
-            this.desireRotation.set(this.desireRotation.x, (rotateY * this.maxTurnAcceleration) * _deltaSeconds, (rotateZ * this.maxTurnAcceleration) * _deltaSeconds);
+            this.desireRotation.set((rotateX * this.maxTurnAcceleration) * _deltaSeconds, (rotateY * this.maxTurnAcceleration) * _deltaSeconds, (rotateZ * this.maxTurnAcceleration) * _deltaSeconds);
 
         }
 

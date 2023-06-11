@@ -1,6 +1,5 @@
 /// <reference path="GameObject.ts" /> 
 namespace HomeFudge{
-    import ƒ = FudgeCore;
     enum SHIPS{
         DESTROYER
     }

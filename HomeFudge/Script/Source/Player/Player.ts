@@ -86,56 +86,40 @@ namespace HomeFudge {
 
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.A])) {
                 //LEFT STARVE
-                this.destroyer.yawPitch(1,0);
+                this.destroyer.rotateTo(this.destroyer.DIRECTION.YAW_LEFT);
+                //REMOVE\/
                 this.destroyer.resetThrusters();
-                this.destroyer.fireThrusters(   this.destroyer.THRUSTER_DIRECTION.YAW_LEFT,true);
-                // this.moveDirection.set(
-                //     this.moveDirection.x,
-                //     this.moveDirection.y,
-                //     -1
-                // );
+                this.destroyer.fireThrusters(this.destroyer.DIRECTION.YAW_LEFT,true);
+    
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.D])) {
                 //RIGHT STARVE
-                this.destroyer.yawPitch(-1,0); 
+                this.destroyer.rotateTo(this.destroyer.DIRECTION.YAW_RIGHT); 
+                //REMOVE\/
                 this.destroyer.resetThrusters();
-                this.destroyer.fireThrusters(   this.destroyer.THRUSTER_DIRECTION.YAW_RIGHT,true);
-
-                // this.moveDirection.set(
-                //     this.moveDirection.x,
-                //     this.moveDirection.y,
-                //     1
-                // );
+                this.destroyer.fireThrusters(   this.destroyer.DIRECTION.YAW_RIGHT,true);
             }
-            ///<--OBSOLETE-->
-            // if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.W])) {
-            //     //Down
-            //     this.destroyer.yawPitch(0,-1);
-
-            //     //FORWARD
-            //     // this.moveDirection.set(
-            //     //     1,
-            //     //     this.moveDirection.y,
-            //     //     this.moveDirection.z
-            //     // );
-
-            // }
-            // if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.S])) {
-            //     //Up
-            //     this.destroyer.yawPitch(0,1);
-
-
-            //     //BACKWARD
-            //     // this.moveDirection.set(
-            //     //     -1,
-            //     //     this.moveDirection.y,
-            //     //     this.moveDirection.z
-            //     // );
-            // }
-            ///<--OBSOLETE-->
 
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.W])) {
+                //Down
+                this.destroyer.rotateTo(this.destroyer.DIRECTION.PITCH_DOWN);
+            }
+
+            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.S])) {
+                //Up
+                this.destroyer.rotateTo(this.destroyer.DIRECTION.PITCH_UP);
+            }
+            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.Q])) {
+                //Down
+                this.destroyer.rotateTo(this.destroyer.DIRECTION.ROLL_LEFT);
+            }
+            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.E])) {
+                //Up
+                this.destroyer.rotateTo(this.destroyer.DIRECTION.ROLL_RIGHT);
+            }
+            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.C])) {
                 //FORWARD
+                //TODO:Move to Destroyer
                 this.moveDirection.set(
                     1,
                     this.moveDirection.y,
@@ -143,8 +127,9 @@ namespace HomeFudge {
                 );
 
             }
-            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.S])) {
+            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.V])) {
                 //BACKWARD
+                //TODO:Move to Destroyer
                 this.moveDirection.set(
                     -1,
                     this.moveDirection.y,
@@ -155,6 +140,7 @@ namespace HomeFudge {
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.SHIFT_LEFT])) {
                 //BACKWARD
+                //TODO:Move to Destroyer
                 this.moveDirection.set(
                     this.moveDirection.z,
                     this.moveDirection.y,
@@ -163,6 +149,7 @@ namespace HomeFudge {
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.CTRL_LEFT])) {
                 //BACKWARD
+                //TODO:Move to Destroyer
                 this.moveDirection = new ƒ.Vector3(
                     this.moveDirection.z,
                     this.moveDirection.y,
