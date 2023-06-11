@@ -164,6 +164,17 @@ declare namespace HomeFudge {
     export {};
 }
 declare namespace HomeFudge {
+    import ƒ = FudgeCore;
+    abstract class Debug extends ƒ.Node {
+        abstract setVisible(_on: boolean): void;
+    }
+}
+declare namespace HomeFudge {
+    class DebugForces extends Debug {
+        setVisible(_on: boolean): void;
+    }
+}
+declare namespace HomeFudge {
     enum SIDE {
         LEFT = 0,
         RIGHT = 1

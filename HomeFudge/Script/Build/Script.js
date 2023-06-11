@@ -376,6 +376,24 @@ var HomeFudge;
     HomeFudge.Ship = Ship;
 })(HomeFudge || (HomeFudge = {}));
 //TODO Add astroids!! SMALL MEDIUM LARGE
+var HomeFudge;
+(function (HomeFudge) {
+    var ƒ = FudgeCore;
+    class Debug extends ƒ.Node {
+    }
+    HomeFudge.Debug = Debug;
+})(HomeFudge || (HomeFudge = {}));
+/// <reference path="Debug.ts" />
+var HomeFudge;
+/// <reference path="Debug.ts" />
+(function (HomeFudge) {
+    class DebugForces extends HomeFudge.Debug {
+        setVisible(_on) {
+            throw new Error("Method not implemented.");
+        }
+    }
+    HomeFudge.DebugForces = DebugForces;
+})(HomeFudge || (HomeFudge = {}));
 /// <reference path="../Abstract/GameObject.ts" />
 var HomeFudge;
 /// <reference path="../Abstract/GameObject.ts" />
