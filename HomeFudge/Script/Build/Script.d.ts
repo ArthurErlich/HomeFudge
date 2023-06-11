@@ -231,6 +231,7 @@ declare namespace HomeFudge {
         private inputRot;
         private inputAcc;
         private desireRotation;
+        private desireVelocity;
         WEAPONS: typeof WEAPONS;
         DIRECTION: typeof DIRECTION;
         damperON: boolean;
