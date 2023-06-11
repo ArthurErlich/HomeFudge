@@ -164,6 +164,19 @@ declare namespace HomeFudge {
     }
     export abstract class Ship extends GameObject {
         static SHIPS: typeof SHIPS;
+        static DIRECTION: {
+            FORWARDS: string;
+            BACKWARDS: string;
+            LEFT: string;
+            RIGHT: string;
+            YAW_LEFT: string;
+            YAW_RIGHT: string;
+            PITCH_UP: string;
+            PITCH_DOWN: string;
+            ROLL_LEFT: string;
+            ROLL_RIGHT: string;
+            OFF: string;
+        };
         protected abstract maxSpeed: number;
         protected abstract maxAcceleration: number;
         protected abstract maxTurnSpeed: number;
@@ -225,17 +238,6 @@ declare namespace HomeFudge {
         ROCKET_POD = 2
     }
     enum DIRECTION {
-        FORWARDS = 0,
-        BACKWARDS = 1,
-        LEFT = 2,
-        RIGHT = 3,
-        YAW_LEFT = 4,
-        YAW_RIGHT = 5,
-        PITCH_UP = 6,
-        PITCH_DOWN = 7,
-        ROLL_LEFT = 8,
-        ROLL_RIGHT = 9,
-        OFF = 10
     }
     export class Destroyer extends Ship {
         remove(): void;
@@ -270,7 +272,7 @@ declare namespace HomeFudge {
         resetThrusters(): void;
         private applyForces;
         private calcLocalAngularVelocity;
-        fireThrusters(direction: DIRECTION, _on?: boolean): void;
+        fireThrusters(direction: typeof Ship.DIRECTION[keyof typeof Ship.DIRECTION], _on?: boolean): void;
         private dampRotation;
         alive(): boolean;
         destroyNode(): void;
@@ -278,7 +280,7 @@ declare namespace HomeFudge {
         fireGatling(target: ƒ.Vector3): void;
         fireBeam(): void;
         move(moveDirection: ƒ.Vector3): void;
-        rotateTo(rotate: DIRECTION): void;
+        rotateTo(rotate: typeof Ship.DIRECTION[keyof typeof Ship.DIRECTION], _on?: boolean): void;
         constructor(startTransform: ƒ.Matrix4x4);
     }
     export {};

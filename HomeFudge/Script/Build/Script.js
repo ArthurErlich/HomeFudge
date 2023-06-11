@@ -416,6 +416,19 @@ var HomeFudge;
     })(SHIPS || (SHIPS = {}));
     class Ship extends HomeFudge.GameObject {
         static SHIPS = SHIPS;
+        static DIRECTION = {
+            FORWARDS: "FORWARDS",
+            BACKWARDS: "BACKWARDS",
+            LEFT: "LEFT",
+            RIGHT: "RIGHT",
+            YAW_LEFT: "YAW_LEFT",
+            YAW_RIGHT: "YAW_RIGHT",
+            PITCH_UP: "PITCH_UP",
+            PITCH_DOWN: "PITCH_DOWN",
+            ROLL_LEFT: "ROLL_LEFT",
+            ROLL_RIGHT: "ROLL_RIGHT",
+            OFF: "OFF"
+        };
         constructor(name) {
             super("Ship_" + name);
         }
@@ -578,17 +591,6 @@ var HomeFudge;
     })(WEAPONS || (WEAPONS = {}));
     let DIRECTION;
     (function (DIRECTION) {
-        DIRECTION[DIRECTION["FORWARDS"] = 0] = "FORWARDS";
-        DIRECTION[DIRECTION["BACKWARDS"] = 1] = "BACKWARDS";
-        DIRECTION[DIRECTION["LEFT"] = 2] = "LEFT";
-        DIRECTION[DIRECTION["RIGHT"] = 3] = "RIGHT";
-        DIRECTION[DIRECTION["YAW_LEFT"] = 4] = "YAW_LEFT";
-        DIRECTION[DIRECTION["YAW_RIGHT"] = 5] = "YAW_RIGHT";
-        DIRECTION[DIRECTION["PITCH_UP"] = 6] = "PITCH_UP";
-        DIRECTION[DIRECTION["PITCH_DOWN"] = 7] = "PITCH_DOWN";
-        DIRECTION[DIRECTION["ROLL_LEFT"] = 8] = "ROLL_LEFT";
-        DIRECTION[DIRECTION["ROLL_RIGHT"] = 9] = "ROLL_RIGHT";
-        DIRECTION[DIRECTION["OFF"] = 10] = "OFF";
     })(DIRECTION || (DIRECTION = {}));
     class Destroyer extends HomeFudge.Ship {
         remove() {
@@ -614,7 +616,7 @@ var HomeFudge;
         desireVelocity = new ƒ.Vector3(0, 0, 0);
         //list of weapons
         WEAPONS = WEAPONS;
-        DIRECTION = DIRECTION;
+        DIRECTION = HomeFudge.Ship.DIRECTION;
         //dampers can be disabled by the player
         damperON = true;
         static graph = null;
@@ -710,7 +712,7 @@ var HomeFudge;
                     return;
                 }
             });
-            this.fireThrusters(DIRECTION.OFF);
+            this.fireThrusters(HomeFudge.Ship.DIRECTION.OFF);
         }
         applyForces() {
             // this.rigidBody.addVelocity(Mathf.vector3Round(ƒ.Vector3.TRANSFORMATION(this.desireVelocity, this.mtxWorld), 100));
@@ -740,15 +742,15 @@ var HomeFudge;
                 _on = false;
             }
             switch (direction) {
-                case DIRECTION.FORWARDS:
+                case HomeFudge.Ship.DIRECTION.FORWARDS:
                     break;
-                case DIRECTION.BACKWARDS:
+                case HomeFudge.Ship.DIRECTION.BACKWARDS:
                     break;
-                case DIRECTION.LEFT:
+                case HomeFudge.Ship.DIRECTION.LEFT:
                     break;
-                case DIRECTION.RIGHT:
+                case HomeFudge.Ship.DIRECTION.RIGHT:
                     break;
-                case DIRECTION.YAW_LEFT:
+                case HomeFudge.Ship.DIRECTION.YAW_LEFT:
                     if (_on) {
                         this.rotThruster[1].activate(true);
                         this.rotThruster[2].activate(true);
@@ -758,7 +760,7 @@ var HomeFudge;
                         this.rotThruster[2].activate(false);
                     }
                     break;
-                case DIRECTION.YAW_RIGHT:
+                case HomeFudge.Ship.DIRECTION.YAW_RIGHT:
                     if (_on) {
                         this.rotThruster[0].activate(true);
                         this.rotThruster[3].activate(true);
@@ -768,15 +770,15 @@ var HomeFudge;
                         this.rotThruster[3].activate(false);
                     }
                     break;
-                case DIRECTION.PITCH_UP:
+                case HomeFudge.Ship.DIRECTION.PITCH_UP:
                     break;
-                case DIRECTION.PITCH_DOWN:
+                case HomeFudge.Ship.DIRECTION.PITCH_DOWN:
                     break;
-                case DIRECTION.ROLL_LEFT:
+                case HomeFudge.Ship.DIRECTION.ROLL_LEFT:
                     break;
-                case DIRECTION.ROLL_RIGHT:
+                case HomeFudge.Ship.DIRECTION.ROLL_RIGHT:
                     break;
-                case DIRECTION.OFF:
+                case HomeFudge.Ship.DIRECTION.OFF:
                     this.rotThruster.forEach(thruster => {
                         if (thruster.isActivated()) {
                             thruster.activate(false);
@@ -819,19 +821,19 @@ var HomeFudge;
             // }
             if (angularVelocity.z < 0) {
                 //stop rotuUp
-                this.rotateTo(DIRECTION.PITCH_UP);
+                this.rotateTo(HomeFudge.Ship.DIRECTION.PITCH_UP);
             }
             else if (angularVelocity.z > 0) {
                 //stop rotDown
-                this.rotateTo(DIRECTION.PITCH_DOWN);
+                this.rotateTo(HomeFudge.Ship.DIRECTION.PITCH_DOWN);
             }
             if (angularVelocity.y < -0.1) {
                 //stop rotRight
-                this.rotateTo(DIRECTION.YAW_LEFT);
+                this.rotateTo(HomeFudge.Ship.DIRECTION.YAW_LEFT);
             }
             else if (angularVelocity.y > 0.1) {
                 //stop rotLeft
-                this.rotateTo(DIRECTION.YAW_RIGHT);
+                this.rotateTo(HomeFudge.Ship.DIRECTION.YAW_RIGHT);
             }
         }
         alive() {
@@ -882,9 +884,9 @@ var HomeFudge;
             //TODO:add smooth acceleration
             //add acceleration
         }
-        rotateTo(rotate) {
+        rotateTo(rotate, _on) {
             //Resets the Thruster fire Anim bevor adding the others
-            this.fireThrusters(DIRECTION.OFF);
+            this.fireThrusters(HomeFudge.Ship.DIRECTION.OFF);
             /*
             Rotation Direction :
              UP -> 1
@@ -899,33 +901,33 @@ var HomeFudge;
             let rotateX = null;
             this.fireThrusters(rotate, true);
             switch (rotate) {
-                case DIRECTION.FORWARDS:
+                case HomeFudge.Ship.DIRECTION.FORWARDS:
                     break;
-                case DIRECTION.BACKWARDS:
+                case HomeFudge.Ship.DIRECTION.BACKWARDS:
                     break;
-                case DIRECTION.LEFT:
+                case HomeFudge.Ship.DIRECTION.LEFT:
                     break;
-                case DIRECTION.RIGHT:
+                case HomeFudge.Ship.DIRECTION.RIGHT:
                     break;
-                case DIRECTION.YAW_LEFT:
+                case HomeFudge.Ship.DIRECTION.YAW_LEFT:
                     rotateY = 1;
                     break;
-                case DIRECTION.YAW_RIGHT:
+                case HomeFudge.Ship.DIRECTION.YAW_RIGHT:
                     rotateY = -1;
                     break;
-                case DIRECTION.PITCH_UP:
+                case HomeFudge.Ship.DIRECTION.PITCH_UP:
                     rotateZ = 1;
                     break;
-                case DIRECTION.PITCH_DOWN:
+                case HomeFudge.Ship.DIRECTION.PITCH_DOWN:
                     rotateZ = -1;
                     break;
-                case DIRECTION.ROLL_LEFT:
+                case HomeFudge.Ship.DIRECTION.ROLL_LEFT:
                     rotateX = -1;
                     break;
-                case DIRECTION.ROLL_RIGHT:
+                case HomeFudge.Ship.DIRECTION.ROLL_RIGHT:
                     rotateX = 1;
                     break;
-                case DIRECTION.OFF:
+                case HomeFudge.Ship.DIRECTION.OFF:
                     return;
                 default:
                     return;
@@ -1616,13 +1618,12 @@ var HomeFudge;
             if (HomeFudge.Mouse.isPressedOne([HomeFudge.MOUSE_CODE.LEFT])) {
                 this.destroyer.fireWeapon(this.selectedWeapon, this.tempAimTarget);
             }
-            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ALT_LEFT])) {
-                console.error("Switch NOT IMPLEMENTED!!!");
-            }
-            else {
-                //TODO: PointerLock disabled
-                this.updateShipMovement();
-            }
+            // if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE."BUTTON"])) {
+            //     console.error("Switch NOT IMPLEMENTED!!!");
+            // } else {
+            //     //TODO: PointerLock disabled
+            // }
+            this.updateShipMovement();
             this.updateWeaponSelection();
             this.destroyer.move(this.moveDirection);
             this.moveDirection = ƒ.Vector3.ZERO();
@@ -1674,35 +1675,29 @@ var HomeFudge;
             }
         }
         updateShipMovement() {
-            /*
-            Rotation :
-             left ->this.destroyer.rotate(1);
-             RIGHT ->this.destroyer.rotate(-1);
-
-            */
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.A])) {
                 //LEFT STARVE
-                this.destroyer.rotateTo(this.destroyer.DIRECTION.YAW_LEFT);
+                this.destroyer.rotateTo(HomeFudge.Ship.DIRECTION.YAW_LEFT);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.D])) {
                 //RIGHT STARVE
-                this.destroyer.rotateTo(this.destroyer.DIRECTION.YAW_RIGHT);
+                this.destroyer.rotateTo(HomeFudge.Ship.DIRECTION.YAW_RIGHT);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.W])) {
                 //Down
-                this.destroyer.rotateTo(this.destroyer.DIRECTION.PITCH_DOWN);
+                this.destroyer.rotateTo(HomeFudge.Ship.DIRECTION.PITCH_DOWN);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.S])) {
                 //Up
-                this.destroyer.rotateTo(this.destroyer.DIRECTION.PITCH_UP);
+                this.destroyer.rotateTo(HomeFudge.Ship.DIRECTION.PITCH_UP);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.Q])) {
                 //Down
-                this.destroyer.rotateTo(this.destroyer.DIRECTION.ROLL_LEFT);
+                this.destroyer.rotateTo(HomeFudge.Ship.DIRECTION.ROLL_LEFT);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.E])) {
                 //Up
-                this.destroyer.rotateTo(this.destroyer.DIRECTION.ROLL_RIGHT);
+                this.destroyer.rotateTo(HomeFudge.Ship.DIRECTION.ROLL_RIGHT);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.C])) {
                 //FORWARD
