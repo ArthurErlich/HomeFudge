@@ -584,11 +584,13 @@ var HomeFudge;
             }
             this.calcLocalAngularVelocity();
             //movement stuff
-            this.resetThrusters();
+            // this.resetThrusters();
             //-> Player input here
-            this.applyForces();
             this.dampRotation();
             this.applyForces();
+            if (!this.inputRot) {
+                this.resetThrusters();
+            }
             //resets inputs flags
             this.inputAcc = false;
             this.inputRot = false;
@@ -651,8 +653,12 @@ var HomeFudge;
         calcLocalAngularVelocity() {
             let ang = this.rigidBody.getAngularVelocity();
             let angSpeed = HomeFudge.Mathf.vectorLength(ang);
-            if (angSpeed < 0) {
+            if (ang.magnitudeSquared != 0) {
                 ang.normalize();
+            }
+            else {
+                this.localAngularVelocity = ƒ.Vector3.ZERO();
+                return;
             }
             let localAng = HomeFudge.Mathf.vector3Round(HomeFudge.Vector3.TRANSFORMATION(ang, this.mtxWorldInverse), 1);
             localAng.scale(angSpeed);
@@ -710,7 +716,7 @@ var HomeFudge;
             }
         }
         dampRotation() {
-            let angularVelocity = this.rigidBody.getAngularVelocity();
+            let angularVelocity = this.localAngularVelocity;
             if (this.inputRot) {
                 return;
             }
@@ -718,16 +724,16 @@ var HomeFudge;
             // if (Math.abs(angularVelocity.x) <= 0.1) {
             //     this.rigidBody.setAngularVelocity(new ƒ.Vector3(0, angularVelocity.y, angularVelocity.z));
             // }
-            if (Math.abs(angularVelocity.y) <= 0.1) {
-                this.rigidBody.setAngularVelocity(new ƒ.Vector3(angularVelocity.x, 0, angularVelocity.z));
-            }
+            // if (Math.abs(angularVelocity.y) <= 0.1) {
+            //     this.rigidBody.setAngularVelocity(new ƒ.Vector3(angularVelocity.x, 0, angularVelocity.z));
+            // }
             // if (Math.abs(angularVelocity.z) <= 0.1) {
             //     this.rigidBody.setAngularVelocity(new ƒ.Vector3(angularVelocity.x, angularVelocity.y, 0));
             // }
             // //Fixes Micro rotation
-            // if (Math.abs(Mathf.vectorLength(this.rigidBody.getAngularVelocity())) <= 0.01) {
-            //     this.rigidBody.setAngularVelocity(ƒ.Vector3.ZERO());
-            // }
+            if (Math.abs(HomeFudge.Mathf.vectorLength(this.rigidBody.getAngularVelocity())) <= 0.15) {
+                this.rigidBody.setAngularVelocity(ƒ.Vector3.ZERO());
+            }
             //Shortens the step for rotation to make it smoothly ends.
             // if (transformedAngularVelocity.z <= -pitch * this.maxTurnAcceleration) {
             //     pitch =pitch/2;
@@ -741,24 +747,21 @@ var HomeFudge;
             // if (transformedAngularVelocity.y >= yaw * this.maxTurnAcceleration) {
             //     yaw = 0;
             // }
-            // if (transformedAngularVelocity.z < 0) {
-            //     // rotUp
-            //     this.yawPitch(0, pitch, true);
-            // } else if (transformedAngularVelocity.z > 0) {
-            //     // rotDown
-            //     this.yawPitch(0, -pitch, true);
-            // }
+            if (angularVelocity.z < 0) {
+                //stop rotuUp
+                this.rotateTo(DIRECTION.PITCH_UP);
+            }
+            else if (angularVelocity.z > 0) {
+                //stop rotDown
+                this.rotateTo(DIRECTION.PITCH_DOWN);
+            }
             if (angularVelocity.y < -0.1) {
                 //stop rotRight
-                this.rotateTo(1, 0);
-                this.resetThrusters();
-                this.fireThrusters(DIRECTION.YAW_LEFT, true);
+                this.rotateTo(DIRECTION.YAW_LEFT);
             }
             else if (angularVelocity.y > 0.1) {
                 //stop rotLeft
-                this.rotateTo(-1, 0);
-                this.resetThrusters();
-                this.fireThrusters(DIRECTION.YAW_RIGHT, true);
+                this.rotateTo(DIRECTION.YAW_RIGHT);
             }
         }
         alive() {
@@ -810,6 +813,8 @@ var HomeFudge;
             //add acceleration
         }
         rotateTo(rotate) {
+            //Resets the Thruster fire Anim bevor adding the others
+            this.fireThrusters(DIRECTION.OFF);
             //TODO: redoo rotation completely
             /*
             Rotation Direction :
@@ -819,9 +824,11 @@ var HomeFudge;
              left -> 1
              RIGHT -> -1
             */
+            this.inputRot = true;
             let rotateZ = null;
             let rotateY = null;
             let rotateX = null;
+            this.fireThrusters(rotate, true);
             switch (rotate) {
                 case DIRECTION.FORWARDS:
                     break;
@@ -1220,6 +1227,9 @@ var HomeFudge;
             this.addComponent(animator);
         }
         activate(activate) {
+            if (this.meshComp == null || this.meshComp == undefined) {
+                return;
+            }
             this.meshComp.activate(activate);
         }
         isActivated() {
