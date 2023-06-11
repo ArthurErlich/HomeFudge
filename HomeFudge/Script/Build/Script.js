@@ -375,6 +375,7 @@ var HomeFudge;
     }
     HomeFudge.Ship = Ship;
 })(HomeFudge || (HomeFudge = {}));
+//TODO Add astroids!! SMALL MEDIUM LARGE
 /// <reference path="../Abstract/GameObject.ts" />
 var HomeFudge;
 /// <reference path="../Abstract/GameObject.ts" />
