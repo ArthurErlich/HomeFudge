@@ -23,8 +23,7 @@ namespace HomeFudge {
   let p1: Player = null;
 
   ///Destroyer\\\
-  let destroyer: Destroyer = null;
-  //TODO: remove debug Destroyer
+ 
 
 
 
@@ -60,7 +59,7 @@ namespace HomeFudge {
       _viewport.getBranch().addChild(p1);
       _mainCamera.attachToShip(p1.destroyer);
       /// ------------T-E-S-T--A-R-E-A------------------\\\
-      // destroyer = new Destroyer(ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(500, 0, 0)));
+      // let destroyer = new Destroyer(ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(500, 0, 0)));
       // let mtx:ƒ.Matrix4x4 = ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(400, 30, 0));
       // mtx.rotation =new ƒ.Vector3(0,90,0);
       // let destroyer2 = new Destroyer(mtx);

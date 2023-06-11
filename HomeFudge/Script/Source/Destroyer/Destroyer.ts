@@ -195,10 +195,6 @@ namespace HomeFudge {
             localAng.scale(angSpeed);
 
             this.localAngularVelocity = localAng;
-            console.log("local rotation: " + this.localAngularVelocity.toString());
-            console.log("world rotation: " + this.mtxWorld.rotation.toString());
-
-
         }
 
         //TODO: Fill out the Switch case (move the thruster down)

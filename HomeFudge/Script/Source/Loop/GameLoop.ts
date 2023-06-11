@@ -6,6 +6,8 @@ namespace HomeFudge {
     export class GameLoop {
         private static objects: GameObject[] = [];
         public static addGameObject(_object: GameObject) {
+            return;
+            //TODO: Replace Events with this GameLoop 
             GameLoop.objects.push(_object);
         }
         public static update(): void {

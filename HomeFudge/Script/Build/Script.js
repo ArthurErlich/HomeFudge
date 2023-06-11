@@ -222,8 +222,6 @@ var HomeFudge;
     ///Player\\\
     let p1 = null;
     ///Destroyer\\\
-    let destroyer = null;
-    //TODO: remove debug Destroyer
     /// ------------T-E-S-T--A-R-E-A------------------\\\
     let UPDATE_EVENTS;
     (function (UPDATE_EVENTS) {
@@ -253,7 +251,7 @@ var HomeFudge;
             HomeFudge._viewport.getBranch().addChild(p1);
             HomeFudge._mainCamera.attachToShip(p1.destroyer);
             /// ------------T-E-S-T--A-R-E-A------------------\\\
-            // destroyer = new Destroyer(ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(500, 0, 0)));
+            // let destroyer = new Destroyer(ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(500, 0, 0)));
             // let mtx:ƒ.Matrix4x4 = ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(400, 30, 0));
             // mtx.rotation =new ƒ.Vector3(0,90,0);
             // let destroyer2 = new Destroyer(mtx);
@@ -314,18 +312,18 @@ var HomeFudge;
 (function (HomeFudge) {
     var ƒ = FudgeCore;
     ƒ.Project.registerScriptNamespace(Script); // Register the namespace to FUDGE for serialization
-    class PlayerSpawner extends ƒ.ComponentScript {
+    class PlayerSpawnerComponent extends ƒ.ComponentScript {
         // Register the script as component for use in the editor via drag&drop
-        static iSubclass = ƒ.Component.registerSubclass(PlayerSpawner);
+        static iSubclass = ƒ.Component.registerSubclass(PlayerSpawnerComponent);
         // Properties may be mutated by users in the editor via the automatically created user interface
         message = "CustomComponentScript added to ";
-        cmpTransform;
-        inputValue; // input for setting the Player ID
+        #cmpTransform; //Loook how the Transform is ben getting by RIGID BODY COMPONENT IN FUDGE CORE 
+        playerID; // input for setting the Player ID on add change look at the avalbe player span in game and check if ID is the same
         constructor() {
             super();
             // Don't start when running in editor
-            if (ƒ.Project.mode == ƒ.MODE.EDITOR)
-                return;
+            // if (ƒ.Project.mode == ƒ.MODE.EDITOR)
+            //     return;
             // Listen to this component being added to or removed from a node
             this.addEventListener("componentAdd" /* ƒ.EVENT.COMPONENT_ADD */, this.hndEvent);
             this.addEventListener("componentRemove" /* ƒ.EVENT.COMPONENT_REMOVE */, this.hndEvent);
@@ -333,29 +331,22 @@ var HomeFudge;
         }
         // Activate the functions of this component as response to events
         hndEvent = (_event) => {
-            if (_event.type === "input") {
-                this.inputValue = _event.target.value;
-            }
             switch (_event.type) {
                 case "componentAdd" /* ƒ.EVENT.COMPONENT_ADD */:
-                    ƒ.Debug.log(this.message, this.node.name);
-                    ƒ.Debug.log(this.message, this.inputValue);
+                    this.#cmpTransform = this.node.getComponent(ƒ.ComponentTransform);
                 case "componentRemove" /* ƒ.EVENT.COMPONENT_REMOVE */:
                     this.removeEventListener("componentAdd" /* ƒ.EVENT.COMPONENT_ADD */, this.hndEvent);
                     this.removeEventListener("componentRemove" /* ƒ.EVENT.COMPONENT_REMOVE */, this.hndEvent);
                     break;
                 case "nodeDeserialized" /* ƒ.EVENT.NODE_DESERIALIZED */:
                     // if deserialized the node is now fully reconstructed and access to all its components and children is possible
-                    this.cmpTransform = this.node.getComponent(ƒ.ComponentTransform);
-                    ƒ.Debug.log(this.message, this.node.name);
-                    ƒ.Debug.log(this.message, this.inputValue);
                     break;
                 case "renderPrepare" /* ƒ.EVENT.RENDER_PREPARE */:
                     break;
             }
         };
     }
-    HomeFudge.PlayerSpawner = PlayerSpawner;
+    HomeFudge.PlayerSpawnerComponent = PlayerSpawnerComponent;
 })(HomeFudge || (HomeFudge = {}));
 var HomeFudge;
 (function (HomeFudge) {
@@ -435,7 +426,39 @@ var HomeFudge;
     }
     HomeFudge.Ship = Ship;
 })(HomeFudge || (HomeFudge = {}));
-//TODO Add astroids!! SMALL MEDIUM LARGE
+//TODO Add astroid!! SMALL MEDIUM LARGE
+var HomeFudge;
+//TODO Add astroid!! SMALL MEDIUM LARGE
+(function (HomeFudge) {
+    let SIZE;
+    (function (SIZE) {
+        SIZE[SIZE["SMALL"] = 0] = "SMALL";
+        SIZE[SIZE["MEDIUM"] = 1] = "MEDIUM";
+        SIZE[SIZE["LARGE"] = 2] = "LARGE";
+    })(SIZE || (SIZE = {}));
+    class Astroid extends HomeFudge.GameObject {
+        SIZE = SIZE;
+        size = null;
+        update() {
+            throw new Error("Method not implemented.");
+        }
+        alive() {
+            throw new Error("Method not implemented.");
+        }
+        remove() {
+            throw new Error("Method not implemented.");
+        }
+        init(location) {
+            this.size = SIZE.LARGE; //MAKE RNG number. Look at dev doc
+            throw new Error("Method not implemented.");
+        }
+        constructor(location) {
+            super("Astroid " + location.toString());
+            this.init(location);
+        }
+    }
+    HomeFudge.Astroid = Astroid;
+})(HomeFudge || (HomeFudge = {}));
 var HomeFudge;
 (function (HomeFudge) {
     var ƒ = FudgeCore;
@@ -733,8 +756,6 @@ var HomeFudge;
             let localAng = HomeFudge.Mathf.vector3Round(ƒ.Vector3.TRANSFORMATION(ang, this.mtxWorldInverse, false), 1);
             localAng.scale(angSpeed);
             this.localAngularVelocity = localAng;
-            console.log("local rotation: " + this.localAngularVelocity.toString());
-            console.log("world rotation: " + this.mtxWorld.rotation.toString());
         }
         //TODO: Fill out the Switch case (move the thruster down)
         fireThrusters(direction, _on) {
@@ -1325,6 +1346,8 @@ var HomeFudge;
     class GameLoop {
         static objects = [];
         static addGameObject(_object) {
+            return;
+            //TODO: Replace Events with this GameLoop 
             GameLoop.objects.push(_object);
         }
         static update() {

@@ -125,11 +125,11 @@ declare namespace HomeFudge {
 }
 declare namespace HomeFudge {
     import ƒ = FudgeCore;
-    class PlayerSpawner extends ƒ.ComponentScript {
+    class PlayerSpawnerComponent extends ƒ.ComponentScript {
+        #private;
         static readonly iSubclass: number;
         message: string;
-        private cmpTransform;
-        private inputValue;
+        private playerID;
         constructor();
         hndEvent: (_event: Event) => void;
     }
@@ -186,6 +186,18 @@ declare namespace HomeFudge {
         constructor(name: string);
     }
     export {};
+}
+declare namespace HomeFudge {
+    import ƒ = FudgeCore;
+    class Astroid extends GameObject {
+        private SIZE;
+        private size;
+        update(): void;
+        alive(): boolean;
+        remove(): void;
+        init(location: ƒ.Vector3): void;
+        constructor(location: ƒ.Vector3);
+    }
 }
 declare namespace HomeFudge {
     import ƒ = FudgeCore;
