@@ -130,20 +130,64 @@ namespace HomeFudge {
         offset: number[];
         [key: string]: number[];
     }
+    //#region Astroid
     interface AstroidConfig {
         graphID: string;
-        size: string[];
+        size: AstroidSize;
         seedNodes: AstroidSeedNodes;
-        [key: string]: string | string[] | AstroidSeedNodes;
+        [key: string]: string | AstroidSize | AstroidSeedNodes;
     }
     class AstroidSeedNodes {
-        public  small: string[];
-        public  medium: string[];
-        public  large: string[];
+        public small: string[];
+        public medium: string[];
+        public large: string[];
         constructor(_small: string[], _medium: string[], _large: string[]) {
             this.small = _small;
             this.medium = _medium;
             this.large = _large;
         }
     }
+    class AstroidSize {
+        public SMALL: AstroidData;
+        public MEDIUM: AstroidData;
+        public LARGE: AstroidData;
+
+        constructor(_small: AstroidData, _medium: AstroidData, _large: AstroidData) {
+            if (_small == undefined ){  
+                throw new Error("Small Astroid is undefined in the config!");
+            }
+            if (_medium == undefined ){
+                throw new Error("Medium Astroid is undefined in the config!");
+            }
+            if (_large == undefined ){
+                throw new Error("Large Astroid is undefined in the config!");
+            }
+            this.SMALL = _small;
+            this.MEDIUM = _medium;
+            this.LARGE = _large;
+        }
+    }
+    class AstroidData {
+        public hitpoints: number;
+        public mass: number;
+        public spawnRotSpeed: number;
+        constructor(_hitpoints: number, _mass: number, _spawnRotSpeed:number) {
+            if (_mass == undefined || typeof _mass == 'number') {
+                this.mass = 0;
+                throw new Error("Mass is undefined in the config!");
+            }
+            if (_hitpoints == undefined  || typeof _hitpoints == 'number') {
+                this.hitpoints = 0;
+                throw new Error("HitPoints is undefined in the config!");
+            }
+            if (_spawnRotSpeed == undefined  || typeof _spawnRotSpeed == 'number') {
+                this.spawnRotSpeed = 0;
+                throw new Error("Spawn rotation speed is undefined in the config!");
+            }
+            this.hitpoints = _hitpoints;
+            this.mass = _mass;
+            this.spawnRotSpeed = _spawnRotSpeed;
+        }
+    }
+    //#endregion Astroid
 }

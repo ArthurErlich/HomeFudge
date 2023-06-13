@@ -2,13 +2,19 @@
     "graphID": "Graph|2023-04-25T14:30:46.195Z|98798",
     "size": {
         "SMALL": {
-            "hitpoints": 100
+            "hitpoints": 100,
+            "mass":100,
+            "spawnRotSpeed" : 4
         },
         "MEDIUM": {
-            "hitpoints": 250
+            "hitpoints": 250,
+            "mass":250,
+            "spawnRotSpeed" : 2
         },
         "LARGE": {
-            "hitpoints": 500
+            "hitpoints": 500,
+            "mass":500,
+            "spawnRotSpeed" : 1
         }
     },
     "seedNodes": {

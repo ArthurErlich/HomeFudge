@@ -1,16 +1,19 @@
 declare namespace HomeFudge {
     export class Config {
+        private static errorText;
         static gatlingBullet: GatlingBulletConfig;
         static gatlingTurret: GatlingTurretConfig;
         static beamTurret: BeamTurretConfig;
         static laserBeam: LaserBeam;
         static destroyer: DestroyerConfig;
         static camera: CameraConfig;
+        static astroid: AstroidConfig;
         /**
          * The function initializes configurations by fetching JSON files and assigning their contents
          * to corresponding variables.
          */
         static initConfigs(): Promise<void>;
+        private static printError;
     }
     interface GatlingTurretConfig {
         graphID: string;
@@ -68,6 +71,30 @@ declare namespace HomeFudge {
     interface CameraConfig {
         offset: number[];
         [key: string]: number[];
+    }
+    interface AstroidConfig {
+        graphID: string;
+        size: AstroidSize;
+        seedNodes: AstroidSeedNodes;
+        [key: string]: string | AstroidSize | AstroidSeedNodes;
+    }
+    class AstroidSeedNodes {
+        small: string[];
+        medium: string[];
+        large: string[];
+        constructor(_small: string[], _medium: string[], _large: string[]);
+    }
+    class AstroidSize {
+        SMALL: AstroidData;
+        MEDIUM: AstroidData;
+        LARGE: AstroidData;
+        constructor(_small: AstroidData, _medium: AstroidData, _large: AstroidData);
+    }
+    class AstroidData {
+        hitpoints: number;
+        mass: number;
+        spawnRotSpeed: number;
+        constructor(_hitpoints: number, _mass: number, _spawnRotSpeed: number);
     }
     export {};
 }
@@ -139,6 +166,7 @@ declare namespace HomeFudge {
     class Resources {
         static getGraphResources(graphID: string): Promise<ƒ.Graph>;
         static getComponentNode(nodeName: string, graph: ƒ.Graph): Promise<ƒ.Node>;
+        static getMultiplyComponentNodes(nodeNames: string[], graph: ƒ.Graph): Promise<ƒ.Node[]>;
     }
 }
 declare namespace HomeFudge {
@@ -147,6 +175,7 @@ declare namespace HomeFudge {
         abstract update(): void;
         abstract alive(): boolean;
         abstract remove(): void;
+        getAliveGameobjects(): GameObject[];
         constructor(idString: string);
     }
 }
@@ -189,13 +218,38 @@ declare namespace HomeFudge {
 }
 declare namespace HomeFudge {
     import ƒ = FudgeCore;
-    class Astroid extends GameObject {
+    enum SIZE {
+        SMALL = "SMALL",
+        MEDIUM = "MEDIUM",
+        LARGE = "LARGE"
+    }
+    export class Astroid extends GameObject {
         private SIZE;
-        private size;
+        update(): void;
+        static getLarge(): SIZE;
+        static spawn(location: ƒ.Vector3, size?: SIZE): void;
+        alive(): boolean;
+        remove(): void;
+        protected static loadMeshList(nodes: ƒ.Node[]): ƒ.Mesh[];
+        protected static loadMaterialList(nodes: ƒ.Node[]): ƒ.Material[];
+        constructor(name: string);
+    }
+    export {};
+}
+declare namespace HomeFudge {
+    import ƒ = FudgeCore;
+    class AstroidLarge extends Astroid {
+        private static graph;
+        private hitPoints;
+        private static meshList;
+        private static materialList;
+        private rigidBody;
         update(): void;
         alive(): boolean;
         remove(): void;
-        init(location: ƒ.Vector3): void;
+        private init;
+        private setAllComponents;
+        private addRigidbody;
         constructor(location: ƒ.Vector3);
     }
 }
@@ -375,6 +429,7 @@ declare namespace HomeFudge {
         static addGameObject(_object: GameObject): void;
         static update(): void;
         static removeGarbage(): void;
+        static getAliveGameobjects(): GameObject[];
     }
 }
 declare namespace FudgeCore {

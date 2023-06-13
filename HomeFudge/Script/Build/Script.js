@@ -2,12 +2,14 @@
 var HomeFudge;
 (function (HomeFudge) {
     class Config {
+        static errorText = "There was an Error on loading the Configs for";
         static gatlingBullet = null;
         static gatlingTurret = null;
         static beamTurret = null;
         static laserBeam = null;
         static destroyer = null;
         static camera = null;
+        static astroid = null;
         /**
          * The function initializes configurations by fetching JSON files and assigning their contents
          * to corresponding variables.
@@ -19,15 +21,107 @@ var HomeFudge;
             let laserBeamResponse = await fetch("Configs/laserBeamConfig.json");
             let destroyerResponse = await fetch("Configs/destroyerConfig.json");
             let cameraResponse = await fetch("Configs/cameraConfig.json");
-            Config.gatlingBullet = await gatBulletResponse.json();
-            Config.gatlingTurret = await gatTurretResponse.json();
-            Config.beamTurret = await beamTurretResponse.json();
-            Config.laserBeam = await laserBeamResponse.json();
-            Config.destroyer = await destroyerResponse.json();
-            Config.camera = await cameraResponse.json();
+            let astroidResponse = await fetch("Configs/astroidConfig.json");
+            try {
+                Config.gatlingBullet = await gatBulletResponse.json();
+            }
+            catch (error) {
+                Config.printError(error, HomeFudge.GatlingBullet.name);
+            }
+            try {
+                Config.gatlingTurret = await gatTurretResponse.json();
+            }
+            catch (error) {
+                Config.printError(error, HomeFudge.GatlingTurret.name);
+            }
+            try {
+                Config.beamTurret = await beamTurretResponse.json();
+            }
+            catch (error) {
+                Config.printError(error, HomeFudge.BeamTurret.name);
+            }
+            try {
+                Config.laserBeam = await laserBeamResponse.json();
+            }
+            catch (error) {
+                Config.printError(error, "Beam");
+            }
+            try {
+                Config.destroyer = await destroyerResponse.json();
+            }
+            catch (error) {
+                Config.printError(error, HomeFudge.Destroyer.name);
+            }
+            try {
+                Config.camera = await cameraResponse.json();
+            }
+            catch (error) {
+                Config.printError(error, HomeFudge.Camera.name);
+            }
+            try {
+                Config.astroid = await astroidResponse.json();
+            }
+            catch (error) {
+                Config.printError(error, HomeFudge.Astroid.name);
+            }
+        }
+        static printError(error, object) {
+            console.error(Config.errorText + " " + object + ": " + error + "\n\n %cAssure that the config.json is correctly written.", "font-weight: bold;");
         }
     }
     HomeFudge.Config = Config;
+    class AstroidSeedNodes {
+        small;
+        medium;
+        large;
+        constructor(_small, _medium, _large) {
+            this.small = _small;
+            this.medium = _medium;
+            this.large = _large;
+        }
+    }
+    class AstroidSize {
+        SMALL;
+        MEDIUM;
+        LARGE;
+        constructor(_small, _medium, _large) {
+            if (_small == undefined) {
+                throw new Error("Small Astroid is undefined in the config!");
+            }
+            if (_medium == undefined) {
+                throw new Error("Medium Astroid is undefined in the config!");
+            }
+            if (_large == undefined) {
+                throw new Error("Large Astroid is undefined in the config!");
+            }
+            this.SMALL = _small;
+            this.MEDIUM = _medium;
+            this.LARGE = _large;
+        }
+    }
+    class AstroidData {
+        hitpoints;
+        mass;
+        spawnRotSpeed;
+        constructor(_hitpoints, _mass, _spawnRotSpeed) {
+            if (_mass == undefined || typeof _mass == 'number') {
+                this.mass = 0;
+                throw new Error("Mass is undefined in the config!");
+            }
+            if (_hitpoints == undefined || typeof _hitpoints == 'number') {
+                this.hitpoints = 0;
+                throw new Error("HitPoints is undefined in the config!");
+            }
+            if (_spawnRotSpeed == undefined || typeof _spawnRotSpeed == 'number') {
+                this.spawnRotSpeed = 0;
+                throw new Error("Spawn rotation speed is undefined in the config!");
+            }
+            this.hitpoints = _hitpoints;
+            this.mass = _mass;
+            this.spawnRotSpeed = _spawnRotSpeed;
+        }
+    }
+    //#endregion Astroid
 })(HomeFudge || (HomeFudge = {}));
 var HomeFudge;
 (function (HomeFudge) {
@@ -233,7 +327,7 @@ var HomeFudge;
         HomeFudge.LoadingScreen.remove();
         HomeFudge._viewport = _event.detail;
         HomeFudge._worldNode = HomeFudge._viewport.getBranch();
-        // _viewport.physicsDebugMode =ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
+        HomeFudge._viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
         console.log(HomeFudge._viewport);
         //Loads Config then initializes the world in the right order
         await loadConfig().then(initWorld).then(() => {
@@ -251,22 +345,29 @@ var HomeFudge;
             HomeFudge._viewport.getBranch().addChild(p1);
             HomeFudge._mainCamera.attachToShip(p1.destroyer);
             /// ------------T-E-S-T--A-R-E-A------------------\\\
-            // let destroyer = new Destroyer(ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(500, 0, 0)));
-            // let mtx:ƒ.Matrix4x4 = ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(400, 30, 0));
-            // mtx.rotation =new ƒ.Vector3(0,90,0);
-            // let destroyer2 = new Destroyer(mtx);
-            // _worldNode.appendChild(destroyer2);
-            // _worldNode.appendChild(destroyer);
-            let node = new ƒ.Node("name");
-            let nodeMes = new ƒ.ComponentMesh(new ƒ.MeshSprite);
-            nodeMes.mtxPivot.scale(new ƒ.Vector3(200, 200, 200));
-            node.addComponent(nodeMes);
-            node.addComponent(new ƒ.ComponentMaterial(new ƒ.Material("lit", ƒ.ShaderLit)));
-            HomeFudge._worldNode.appendChild(node);
+            let destroyer = new HomeFudge.Destroyer(ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(500, 0, 0)));
+            let mtx = ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(400, 30, 0));
+            mtx.rotation = new ƒ.Vector3(0, 90, 0);
+            let destroyer2 = new HomeFudge.Destroyer(mtx);
+            HomeFudge._worldNode.appendChild(destroyer2);
+            HomeFudge._worldNode.appendChild(destroyer);
+            // let node: ƒ.Node= new ƒ.Node("name");
+            // let nodeMes = new ƒ.ComponentMesh(new ƒ.MeshSprite);
+            // nodeMes.mtxPivot.scale(new ƒ.Vector3(200,200,200));
+            // node.addComponent(nodeMes);
+            // node.addComponent(new ƒ.ComponentMaterial(new ƒ.Material("lit",ƒ.ShaderLit)));
+            // _worldNode.appendChild(node);
             /// ------------T-E-S-T--A-R-E-A------------------\\\
         }
         /// ------------T-E-S-T--A-R-E-A------------------\\\
         //TODO: Before the loop starts. Add an Game Menu draws on frame while updating
+        let x = 200;
+        let y = 0;
+        let z = -100;
+        for (let index = 0; index < 50; index++) {
+            HomeFudge.Astroid.spawn(new ƒ.Vector3(x * index * Math.random() - x / 2, y * index * Math.random() + 100 - y / 2, z * index * Math.random()), HomeFudge.Astroid.getLarge());
+        }
+        let astroid = 
         /// ------------T-E-S-T--A-R-E-A------------------\\\
         ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, update);
         ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 35); // start the game loop to continuously draw the _viewport, update the audiosystem and drive the physics i/a
@@ -366,6 +467,18 @@ var HomeFudge;
             }
             return node;
         }
+        static async getMultiplyComponentNodes(nodeNames, graph) {
+            let nodeList = new Array(nodeNames.length);
+            let index = 0;
+            nodeNames.forEach(name => {
+                nodeList[index] = graph.getChildrenByName(name)[0];
+                index++;
+            });
+            if (nodeList == null || nodeList[0] == undefined) {
+                console.warn("+\"" + nodeNames.toString() + "\" not found inside: " + graph.name + "->Graph");
+            }
+            return nodeList;
+        }
     }
     HomeFudge.Resources = Resources;
 })(HomeFudge || (HomeFudge = {}));
@@ -373,8 +486,11 @@ var HomeFudge;
 (function (HomeFudge) {
     var ƒ = FudgeCore;
     class GameObject extends ƒ.Node {
+        getAliveGameobjects() {
+            return HomeFudge.GameLoop.getAliveGameobjects();
+        }
         constructor(idString) {
-            super(idString);
+            super(idString + "_" + (Math.random() * 100));
             HomeFudge.GameLoop.addGameObject(this);
             //TODO: TEST out updater list
             ƒ.Loop.addEventListener(HomeFudge.UPDATE_EVENTS.GAME_OBJECTS, () => {
@@ -430,17 +546,42 @@ var HomeFudge;
 var HomeFudge;
 //TODO Add astroid!! SMALL MEDIUM LARGE
 (function (HomeFudge) {
+    var ƒ = FudgeCore;
     let SIZE;
     (function (SIZE) {
-        SIZE[SIZE["SMALL"] = 0] = "SMALL";
-        SIZE[SIZE["MEDIUM"] = 1] = "MEDIUM";
-        SIZE[SIZE["LARGE"] = 2] = "LARGE";
+        SIZE["SMALL"] = "SMALL";
+        SIZE["MEDIUM"] = "MEDIUM";
+        SIZE["LARGE"] = "LARGE";
     })(SIZE || (SIZE = {}));
     class Astroid extends HomeFudge.GameObject {
         SIZE = SIZE;
-        size = null;
+        //this is an large Astorid example
+        //Mesh and Material index is equal to node index
         update() {
-            throw new Error("Method not implemented.");
+        }
+        // public static getRandomSize():SIZE{
+        //     return SIZE.LARGE //RNG°
+        // }
+        static getLarge() {
+            return SIZE.LARGE; //RNG°
+        }
+        static spawn(location, size) {
+            if (size == null || size == undefined) {
+                size = Astroid.getLarge(); // change to random when ready
+            }
+            switch (size) {
+                case SIZE.LARGE:
+                    HomeFudge._worldNode.addChild(new HomeFudge.AstroidLarge(location));
+                    break;
+                case SIZE.MEDIUM:
+                    console.warn("Medium astroids dont have a class");
+                    break;
+                case SIZE.SMALL:
+                    console.warn("Small astroids dont have a class");
+                    break;
+                default:
+                    break;
+            }
         }
         alive() {
             throw new Error("Method not implemented.");
@@ -448,16 +589,93 @@ var HomeFudge;
         remove() {
             throw new Error("Method not implemented.");
         }
-        init(location) {
-            this.size = SIZE.LARGE; //MAKE RNG number. Look at dev doc
-            throw new Error("Method not implemented.");
+        static loadMeshList(nodes) {
+            if (nodes[0].name == undefined) {
+                console.error(nodes + " is empty or undefined");
+                return null;
+            }
+            let meshList = new Array(nodes.length);
+            for (let index = 0; index < nodes.length; index++) {
+                meshList[index] = nodes[index].getComponent(ƒ.ComponentMesh).mesh;
+            }
+            return meshList;
         }
-        constructor(location) {
-            super("Astroid " + location.toString());
-            this.init(location);
+        static loadMaterialList(nodes) {
+            if (nodes[0].name == undefined) {
+                console.error(nodes + " is empty or undefined");
+                return null;
+            }
+            let materialList = new Array(nodes.length);
+            for (let index = 0; index < nodes.length; index++) {
+                materialList[index] = nodes[index].getComponent(ƒ.ComponentMaterial).material;
+            }
+            return materialList;
+        }
+        constructor(name) {
+            super(name);
         }
     }
     HomeFudge.Astroid = Astroid;
+})(HomeFudge || (HomeFudge = {}));
+var HomeFudge;
+(function (HomeFudge) {
+    var ƒ = FudgeCore;
+    class AstroidLarge extends HomeFudge.Astroid {
+        static graph = null;
+        hitPoints = null;
+        static meshList = null;
+        static materialList = null;
+        rigidBody = null;
+        update() {
+        }
+        alive() {
+            throw new Error("Method not implemented.");
+        }
+        remove() {
+            throw new Error("Method not implemented.");
+        }
+        async init(location) {
+            /// needs to be moved to own class
+            let nodeList;
+            AstroidLarge.graph = await HomeFudge.Resources.getGraphResources(HomeFudge.Config.destroyer.graphID);
+            nodeList = await HomeFudge.Resources.getMultiplyComponentNodes(HomeFudge.Config.astroid.seedNodes.large, AstroidLarge.graph); //<-note: Config.astroid.seedNodes.large, is an array 
+            AstroidLarge.meshList = HomeFudge.Astroid.loadMeshList(nodeList);
+            AstroidLarge.materialList = HomeFudge.Astroid.loadMaterialList(nodeList);
+            this.setAllComponents(location);
+            this.addRigidbody(location);
+        }
+        setAllComponents(location) {
+            if (AstroidLarge.materialList == null || AstroidLarge.meshList == null) {
+                console.warn(this.name + " Mesh and/or Material is missing");
+                return;
+            }
+            //random mat/mesh selection:
+            let selection = 0;
+            this.addComponent(new ƒ.ComponentMaterial(AstroidLarge.materialList[selection]));
+            this.addComponent(new ƒ.ComponentMesh(AstroidLarge.meshList[selection]));
+            this.addComponent(new ƒ.ComponentTransform(ƒ.Matrix4x4.TRANSLATION(location)));
+        }
+        addRigidbody(location) {
+            let rotEffect = 0.0025;
+            let spawnRotEffect = HomeFudge.Config.astroid.size.LARGE.spawnRotSpeed;
+            this.rigidBody = new ƒ.ComponentRigidbody(HomeFudge.Config.astroid.size.LARGE.mass, ƒ.BODY_TYPE.DYNAMIC, ƒ.COLLIDER_TYPE.CUBE, ƒ.COLLISION_GROUP.DEFAULT, ƒ.Matrix4x4.TRANSLATION(location));
+            this.rigidBody.mtxPivot.scale(ƒ.Vector3.SUM(AstroidLarge.meshList[0].boundingBox.min, AstroidLarge.meshList[0].boundingBox.min));
+            this.rigidBody.setPosition(location);
+            this.rigidBody.restitution = 0.1;
+            this.rigidBody.effectRotation = new ƒ.Vector3(rotEffect, rotEffect, rotEffect);
+            this.rigidBody.dampRotation = 0;
+            this.rigidBody.dampTranslation = 0;
+            this.addComponent(this.rigidBody);
+            this.rigidBody.setAngularVelocity(new ƒ.Vector3(Math.random() * spawnRotEffect - (spawnRotEffect / 2), Math.random() * spawnRotEffect - (spawnRotEffect / 2), Math.random() * spawnRotEffect - (spawnRotEffect / 2)));
+            spawnRotEffect = 100;
+            this.rigidBody.setVelocity(new ƒ.Vector3(Math.random() * spawnRotEffect - (spawnRotEffect / 2), Math.random() * spawnRotEffect - (spawnRotEffect / 2), Math.random() * spawnRotEffect - (spawnRotEffect / 2)));
+        }
+        constructor(location) {
+            super("Astroid_Large_" + location.toString() + "_" + Date.now().valueOf());
+            this.init(location);
+        }
+    }
+    HomeFudge.AstroidLarge = AstroidLarge;
 })(HomeFudge || (HomeFudge = {}));
 var HomeFudge;
 (function (HomeFudge) {
@@ -716,7 +934,9 @@ var HomeFudge;
             if (Destroyer.seedRigidBody == null) {
                 Destroyer.seedRigidBody = node.getComponent(ƒ.ComponentRigidbody);
             }
-            this.rigidBody = new ƒ.ComponentRigidbody(HomeFudge.Config.destroyer.mass, Destroyer.seedRigidBody.typeBody, Destroyer.seedRigidBody.typeCollider, ƒ.COLLISION_GROUP.DEFAULT, startTransform, Destroyer.convexHull);
+            this.rigidBody = new ƒ.ComponentRigidbody(HomeFudge.Config.destroyer.mass, Destroyer.seedRigidBody.typeBody, 
+            // Destroyer.seedRigidBody.typeCollider,<<< since the CONVEX colider is not suportet in Editor, manual setting needs be done;
+            ƒ.COLLIDER_TYPE.CONVEX, ƒ.COLLISION_GROUP.DEFAULT, startTransform, Destroyer.convexHull);
             this.rigidBody.mtxPivot.scale(new ƒ.Vector3(2, 2, 2)); //Fixes the ConvexHull being 1/2 of the original convex
             this.rigidBody.setPosition(startTransform.translation);
             this.rigidBody.setRotation(startTransform.rotation);
@@ -1346,8 +1566,8 @@ var HomeFudge;
     class GameLoop {
         static objects = [];
         static addGameObject(_object) {
-            return;
             //TODO: Replace Events with this GameLoop 
+            return;
             GameLoop.objects.push(_object);
         }
         static update() {
@@ -1371,6 +1591,9 @@ var HomeFudge;
             for (let i = 0; i < GameLoop.objects.length; i++) {
                 //Splice nulls from array
             }
+        }
+        static getAliveGameobjects() {
+            return this.objects;
         }
     }
     HomeFudge.GameLoop = GameLoop;
@@ -1481,7 +1704,7 @@ var HomeFudge;
         };
         init() {
             this.camComp = new ƒ.ComponentCamera();
-            this.camComp.projectCentral(1.77, 75, ƒ.FIELD_OF_VIEW.DIAGONAL, 0.1, 30000);
+            this.camComp.projectCentral(1.77, 75, ƒ.FIELD_OF_VIEW.DIAGONAL, 0.1, 50000);
             this.camNode = new ƒ.Node("camPivotNode");
             this.camNode.addComponent(new ƒ.ComponentTransform());
             this.camNode.addComponent(this.camComp);
