@@ -26,3 +26,15 @@ canvas.fullscreen {
   opacity: 2;
   transition: opacity 1s;
 }
+div#vui {
+  visibility: hidden;
+  position: absolute;
+  background-color: rgba(255, 0, 0, 0.123);
+  top: 0;
+  left: 0;
+  width: 10vw;
+  height: 10vw;
+  color: white;
+  border-radius: 100%;
+  pointer-events: none; 
+}

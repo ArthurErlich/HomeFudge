@@ -316,6 +316,7 @@ var HomeFudge;
     ///Player\\\
     let p1 = null;
     ///Destroyer\\\
+    let destroyer = null;
     /// ------------T-E-S-T--A-R-E-A------------------\\\
     let UPDATE_EVENTS;
     (function (UPDATE_EVENTS) {
@@ -345,7 +346,7 @@ var HomeFudge;
             HomeFudge._viewport.getBranch().addChild(p1);
             HomeFudge._mainCamera.attachToShip(p1.destroyer);
             /// ------------T-E-S-T--A-R-E-A------------------\\\
-            let destroyer = new HomeFudge.Destroyer(ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(500, 0, 0)));
+            destroyer = new HomeFudge.Destroyer(ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(500, 0, 0)));
             let mtx = ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(400, 30, 0));
             mtx.rotation = new ƒ.Vector3(0, 90, 0);
             let destroyer2 = new HomeFudge.Destroyer(mtx);
@@ -367,6 +368,8 @@ var HomeFudge;
         for (let index = 0; index < 50; index++) {
             HomeFudge.Astroid.spawn(new ƒ.Vector3(x * index * Math.random() - x / 2, y * index * Math.random() + 100 - y / 2, -z * index * Math.random()), HomeFudge.Astroid.getLarge());
         }
+        let astroid_UI = new HomeFudge.UI_AstroidTEST();
+        HomeFudge.UI_AstroidTEST.setPosition(new ƒ.Vector2(100, 100));
         /// ------------T-E-S-T--A-R-E-A------------------\\\
         ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, update);
         ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 35); // start the game loop to continuously draw the _viewport, update the audiosystem and drive the physics i/a
@@ -379,6 +382,8 @@ var HomeFudge;
         // GameLoop.update(); <-- different approach instant of dispatching an event for the loop.
         /// ------------T-E-S-T--A-R-E-A------------------\\\
         // let uiPos: ƒ.Vector2 = _viewport.pointWorldToClient(destroyer.mtxWorld.translation); //TODO: learn the VUI!
+        let uiPos = HomeFudge._viewport.pointWorldToClient(destroyer.mtxWorld.translation);
+        HomeFudge.UI_AstroidTEST.setPosition(uiPos);
         /// ------------T-E-S-T--A-R-E-A------------------\\\
         ƒ.AudioManager.default.update();
         HomeFudge._viewport.draw();
@@ -1872,6 +1877,8 @@ var HomeFudge;
             if (HomeFudge.Mouse.isPressedOne([HomeFudge.MOUSE_CODE.LEFT])) {
                 this.destroyer.fireWeapon(this.selectedWeapon, this.tempAimTarget);
             }
+            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.F])) {
+            }
             // if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE."BUTTON"])) {
             //     console.error("Switch NOT IMPLEMENTED!!!");
             // } else {
@@ -2001,11 +2008,26 @@ var HomeFudge;
 var HomeFudge;
 (function (HomeFudge) {
     var ƒ = FudgeCore;
-    class UI_Astroid extends ƒ.Mutable {
+    var ƒUi = FudgeUserInterface;
+    class UI_AstroidTEST extends ƒ.Mutable {
+        static uiElement;
+        static setPosition(pos) {
+            let width = (UI_AstroidTEST.uiElement.clientWidth) / 2;
+            UI_AstroidTEST.uiElement.style.top = (pos.y - width) + "px";
+            UI_AstroidTEST.uiElement.style.left = (pos.x - width) + "px";
+        }
+        constructor() {
+            super();
+            UI_AstroidTEST.uiElement = document.querySelector("div#vui");
+            UI_AstroidTEST.uiElement.style.visibility = "visible";
+            UI_AstroidTEST.uiElement.style.width = "10vw";
+            UI_AstroidTEST.uiElement.style.height = "10vw";
+            new ƒUi.Controller(this, UI_AstroidTEST.uiElement);
+            this.addEventListener("mutate" /* ƒ.EVENT.MUTATE */, () => console.log(this));
+        }
         reduceMutator(_mutator) {
-            throw new Error("Method not implemented.");
         }
     }
-    HomeFudge.UI_Astroid = UI_Astroid;
+    HomeFudge.UI_AstroidTEST = UI_AstroidTEST;
 })(HomeFudge || (HomeFudge = {}));
 //# sourceMappingURL=Script.js.map

@@ -584,7 +584,10 @@ declare namespace HomeFudge {
 }
 declare namespace HomeFudge {
     import ƒ = FudgeCore;
-    class UI_Astroid extends ƒ.Mutable {
+    class UI_AstroidTEST extends ƒ.Mutable {
+        private static uiElement;
+        static setPosition(pos: ƒ.Vector2): void;
+        constructor();
         protected reduceMutator(_mutator: ƒ.Mutator): void;
     }
 }

@@ -23,7 +23,7 @@ namespace HomeFudge {
   let p1: Player = null;
 
   ///Destroyer\\\
-
+let destroyer:Destroyer = null;
 
 
 
@@ -59,7 +59,7 @@ namespace HomeFudge {
       _viewport.getBranch().addChild(p1);
       _mainCamera.attachToShip(p1.destroyer);
       /// ------------T-E-S-T--A-R-E-A------------------\\\
-      let destroyer = new Destroyer(ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(500, 0, 0)));
+      destroyer = new Destroyer(ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(500, 0, 0)));
       let mtx: ƒ.Matrix4x4 = ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(400, 30, 0));
       mtx.rotation = new ƒ.Vector3(0, 90, 0);
       let destroyer2 = new Destroyer(mtx);
@@ -81,9 +81,9 @@ namespace HomeFudge {
     let z = -100;
     for (let index = 0; index < 50; index++) {
       Astroid.spawn(new ƒ.Vector3(x*index*Math.random()-x/2, y*index*Math.random()+100-y/2, -z*index*Math.random()), Astroid.getLarge());
-      
     }
-
+    let astroid_UI:UI_AstroidTEST = new UI_AstroidTEST();
+    UI_AstroidTEST.setPosition(new ƒ.Vector2(100,100));
     /// ------------T-E-S-T--A-R-E-A------------------\\\
 
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);
@@ -101,6 +101,8 @@ namespace HomeFudge {
 
     /// ------------T-E-S-T--A-R-E-A------------------\\\
     // let uiPos: ƒ.Vector2 = _viewport.pointWorldToClient(destroyer.mtxWorld.translation); //TODO: learn the VUI!
+    let uiPos: ƒ.Vector2 = _viewport.pointWorldToClient(destroyer.mtxWorld.translation);
+    UI_AstroidTEST.setPosition(uiPos);
     /// ------------T-E-S-T--A-R-E-A------------------\\\
 
     ƒ.AudioManager.default.update();
