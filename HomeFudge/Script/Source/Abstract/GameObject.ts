@@ -9,7 +9,7 @@ namespace HomeFudge{
             return GameLoop.getAliveGameobjects();
         }
         constructor(idString:string){
-            super(idString);
+            super(idString +"_"+ (Math.random()*100));
 
             GameLoop.addGameObject(this);
             //TODO: TEST out updater list
