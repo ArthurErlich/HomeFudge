@@ -26,7 +26,7 @@ namespace HomeFudge{
         
         private init(){
             this.camComp = new ƒ.ComponentCamera();
-            this.camComp.projectCentral(1.77, 75, ƒ.FIELD_OF_VIEW.DIAGONAL, 0.1, 30000);
+            this.camComp.projectCentral(1.77, 75, ƒ.FIELD_OF_VIEW.DIAGONAL, 0.1, 50000);
 
             this.camNode = new ƒ.Node("camPivotNode");
 
