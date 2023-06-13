@@ -6,8 +6,8 @@ namespace HomeFudge {
     export class GameLoop {
         private static objects: GameObject[] = [];
         public static addGameObject(_object: GameObject) {
-            return;
             //TODO: Replace Events with this GameLoop 
+            return;
             GameLoop.objects.push(_object);
         }
         public static update(): void {
@@ -31,6 +31,9 @@ namespace HomeFudge {
             for (let i: number = 0; i < GameLoop.objects.length; i++) {
                 //Splice nulls from array
             }
+        }
+        public static getAliveGameobjects():GameObject[]{
+            return this.objects;
         }
     }
 }

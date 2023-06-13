@@ -4,6 +4,10 @@ namespace HomeFudge{
         public abstract update():void;
         public abstract alive():boolean;
         public abstract remove():void;
+
+        public getAliveGameobjects():GameObject[]{
+            return GameLoop.getAliveGameobjects();
+        }
         constructor(idString:string){
             super(idString);
 
