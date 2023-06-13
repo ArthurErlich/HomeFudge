@@ -1,5 +1,7 @@
 namespace HomeFudge {
     export class Config {
+        private static errorText: string = "There was an Error on loading the Configs for"
+
         public static gatlingBullet: GatlingBulletConfig = null;
         public static gatlingTurret: GatlingTurretConfig = null;
         public static beamTurret: BeamTurretConfig = null;
@@ -25,45 +27,43 @@ namespace HomeFudge {
             try {
                 Config.gatlingBullet = await gatBulletResponse.json();
             } catch (error) {
-                console.error("There was an Error on loading the Configs for " + GatlingBullet.name + ": " + error);
+                Config.printError(error, GatlingBullet.name);
             }
             try {
                 Config.gatlingTurret = await gatTurretResponse.json();
             } catch (error) {
-                console.error("There was an Error on loading the Configs for " + GatlingTurret.name + ": " + error);
+                Config.printError(error, GatlingTurret.name);
             }
             try {
                 Config.beamTurret = await beamTurretResponse.json();
             } catch (error) {
-                console.error("There was an Error on loading the Configs for " + BeamTurret.name + ": " + error);
-
+                Config.printError(error, BeamTurret.name);
             }
             try {
                 Config.laserBeam = await laserBeamResponse.json();
             } catch (error) {
-                console.error("There was an Error on loading the Configs for " + "laserBeam" + ": " + error);
-
+                Config.printError(error, "Beam");
             }
             try {
                 Config.destroyer = await destroyerResponse.json();
             } catch (error) {
-                console.error("There was an Error on loading the Configs for " + Destroyer.name + ": " + error);
-
+                Config.printError(error, Destroyer.name);
             }
             try {
                 Config.camera = await cameraResponse.json();
             } catch (error) {
-                console.error("There was an Error on loading the Configs for " + Camera.name + ": " + error);
-
+                Config.printError(error, Camera.name);
             }
             try {
                 Config.astroid = await astroidResponse.json();
             } catch (error) {
-                console.error("There was an Error on loading the Configs for " + Astroid.name + ": " + error);
-
+                Config.printError(error, Astroid.name);
             }
 
 
+        }
+        private static printError(error: Error, object: string) {
+            console.error(Config.errorText + " " + object + ": " + error + "\n\n %cAssure that the config.json is correctly written.", "font-weight: bold;");
         }
 
     }
@@ -133,7 +133,17 @@ namespace HomeFudge {
     interface AstroidConfig {
         graphID: string;
         size: string[];
-        seedNodes: string[];
-        [key: string]: string | string[];
+        seedNodes: AstroidSeedNodes;
+        [key: string]: string | string[] | AstroidSeedNodes;
+    }
+    class AstroidSeedNodes {
+        public  small: string[];
+        public  medium: string[];
+        public  large: string[];
+        constructor(_small: string[], _medium: string[], _large: string[]) {
+            this.small = _small;
+            this.medium = _medium;
+            this.large = _large;
+        }
     }
 }
