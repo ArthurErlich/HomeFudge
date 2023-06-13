@@ -40,7 +40,7 @@ namespace HomeFudge {
     _worldNode = _viewport.getBranch();
 
 
-    _viewport.physicsDebugMode =ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
+    // _viewport.physicsDebugMode =ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
 
     console.log(_viewport);
     //Loads Config then initializes the world in the right order
@@ -80,11 +80,9 @@ namespace HomeFudge {
     let y = 0;
     let z = -100;
     for (let index = 0; index < 50; index++) {
-      Astroid.spawn(new ƒ.Vector3(x*index*Math.random()-x/2, y*index*Math.random()+100-y/2, z*index*Math.random()), Astroid.getLarge());
+      Astroid.spawn(new ƒ.Vector3(x*index*Math.random()-x/2, y*index*Math.random()+100-y/2, -z*index*Math.random()), Astroid.getLarge());
       
     }
-
-    let astroid = 
 
     /// ------------T-E-S-T--A-R-E-A------------------\\\
 

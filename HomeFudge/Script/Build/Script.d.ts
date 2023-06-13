@@ -225,6 +225,7 @@ declare namespace HomeFudge {
     }
     export class Astroid extends GameObject {
         private SIZE;
+        d: any;
         update(): void;
         static getLarge(): SIZE;
         static spawn(location: ƒ.Vector3, size?: SIZE): void;
@@ -232,6 +233,7 @@ declare namespace HomeFudge {
         remove(): void;
         protected static loadMeshList(nodes: ƒ.Node[]): ƒ.Mesh[];
         protected static loadMaterialList(nodes: ƒ.Node[]): ƒ.Material[];
+        protected static setupRigidbody(location: ƒ.Vector3, boundingBox: ƒ.Vector3, spawnRotEffect: number): ƒ.ComponentRigidbody;
         constructor(name: string);
     }
     export {};
@@ -249,7 +251,6 @@ declare namespace HomeFudge {
         remove(): void;
         private init;
         private setAllComponents;
-        private addRigidbody;
         constructor(location: ƒ.Vector3);
     }
 }

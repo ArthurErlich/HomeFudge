@@ -327,7 +327,7 @@ var HomeFudge;
         HomeFudge.LoadingScreen.remove();
         HomeFudge._viewport = _event.detail;
         HomeFudge._worldNode = HomeFudge._viewport.getBranch();
-        HomeFudge._viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
+        // _viewport.physicsDebugMode =ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
         console.log(HomeFudge._viewport);
         //Loads Config then initializes the world in the right order
         await loadConfig().then(initWorld).then(() => {
@@ -365,9 +365,8 @@ var HomeFudge;
         let y = 0;
         let z = -100;
         for (let index = 0; index < 50; index++) {
-            HomeFudge.Astroid.spawn(new ƒ.Vector3(x * index * Math.random() - x / 2, y * index * Math.random() + 100 - y / 2, z * index * Math.random()), HomeFudge.Astroid.getLarge());
+            HomeFudge.Astroid.spawn(new ƒ.Vector3(x * index * Math.random() - x / 2, y * index * Math.random() + 100 - y / 2, -z * index * Math.random()), HomeFudge.Astroid.getLarge());
         }
-        let astroid = 
         /// ------------T-E-S-T--A-R-E-A------------------\\\
         ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, update);
         ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 35); // start the game loop to continuously draw the _viewport, update the audiosystem and drive the physics i/a
@@ -555,6 +554,7 @@ var HomeFudge;
     })(SIZE || (SIZE = {}));
     class Astroid extends HomeFudge.GameObject {
         SIZE = SIZE;
+        d;
         //this is an large Astorid example
         //Mesh and Material index is equal to node index
         update() {
@@ -611,6 +611,25 @@ var HomeFudge;
             }
             return materialList;
         }
+        static setupRigidbody(location, boundingBox, spawnRotEffect) {
+            let rotEffect = 0.0025;
+            let rigidBody;
+            rigidBody = new ƒ.ComponentRigidbody(HomeFudge.Config.astroid.size.LARGE.mass, ƒ.BODY_TYPE.DYNAMIC, ƒ.COLLIDER_TYPE.CUBE, ƒ.COLLISION_GROUP.DEFAULT, ƒ.Matrix4x4.TRANSLATION(location));
+            rigidBody.mtxPivot.scale(ƒ.Vector3.SUM(boundingBox, boundingBox));
+            rigidBody.setPosition(location);
+            rigidBody.restitution = 1;
+            rigidBody.effectRotation = new ƒ.Vector3(rotEffect, rotEffect, rotEffect);
+            rigidBody.dampRotation = 0;
+            rigidBody.dampTranslation = 0;
+            rigidBody.setAngularVelocity(new ƒ.Vector3(Math.random() * spawnRotEffect - (spawnRotEffect / 2), Math.random() * spawnRotEffect - (spawnRotEffect / 2), Math.random() * spawnRotEffect - (spawnRotEffect / 2)));
+            // spawnRotEffect = 100;
+            // this.rigidBody.setVelocity(new ƒ.Vector3(
+            //     Math.random() * spawnRotEffect - (spawnRotEffect / 2),
+            //     Math.random() * spawnRotEffect - (spawnRotEffect / 2),
+            //     Math.random() * spawnRotEffect - (spawnRotEffect / 2)
+            // ));
+            return rigidBody;
+        }
         constructor(name) {
             super(name);
         }
@@ -641,34 +660,22 @@ var HomeFudge;
             nodeList = await HomeFudge.Resources.getMultiplyComponentNodes(HomeFudge.Config.astroid.seedNodes.large, AstroidLarge.graph); //<-note: Config.astroid.seedNodes.large, is an array 
             AstroidLarge.meshList = HomeFudge.Astroid.loadMeshList(nodeList);
             AstroidLarge.materialList = HomeFudge.Astroid.loadMaterialList(nodeList);
-            this.setAllComponents(location);
-            this.addRigidbody(location);
+            //sets the configs for this Astroid
+            this.hitPoints = HomeFudge.Config.astroid.size.LARGE.hitpoints;
+            this.setAllComponents(location, nodeList.length);
         }
-        setAllComponents(location) {
+        setAllComponents(location, selectionLength) {
             if (AstroidLarge.materialList == null || AstroidLarge.meshList == null) {
                 console.warn(this.name + " Mesh and/or Material is missing");
                 return;
             }
             //random mat/mesh selection:
-            let selection = 0;
+            let selection = Math.floor(Math.random() * selectionLength);
             this.addComponent(new ƒ.ComponentMaterial(AstroidLarge.materialList[selection]));
             this.addComponent(new ƒ.ComponentMesh(AstroidLarge.meshList[selection]));
             this.addComponent(new ƒ.ComponentTransform(ƒ.Matrix4x4.TRANSLATION(location)));
-        }
-        addRigidbody(location) {
-            let rotEffect = 0.0025;
-            let spawnRotEffect = HomeFudge.Config.astroid.size.LARGE.spawnRotSpeed;
-            this.rigidBody = new ƒ.ComponentRigidbody(HomeFudge.Config.astroid.size.LARGE.mass, ƒ.BODY_TYPE.DYNAMIC, ƒ.COLLIDER_TYPE.CUBE, ƒ.COLLISION_GROUP.DEFAULT, ƒ.Matrix4x4.TRANSLATION(location));
-            this.rigidBody.mtxPivot.scale(ƒ.Vector3.SUM(AstroidLarge.meshList[0].boundingBox.min, AstroidLarge.meshList[0].boundingBox.min));
-            this.rigidBody.setPosition(location);
-            this.rigidBody.restitution = 0.1;
-            this.rigidBody.effectRotation = new ƒ.Vector3(rotEffect, rotEffect, rotEffect);
-            this.rigidBody.dampRotation = 0;
-            this.rigidBody.dampTranslation = 0;
+            this.rigidBody = AstroidLarge.setupRigidbody(location, AstroidLarge.meshList[selection].boundingBox.min, HomeFudge.Config.astroid.size.LARGE.spawnRotSpeed);
             this.addComponent(this.rigidBody);
-            this.rigidBody.setAngularVelocity(new ƒ.Vector3(Math.random() * spawnRotEffect - (spawnRotEffect / 2), Math.random() * spawnRotEffect - (spawnRotEffect / 2), Math.random() * spawnRotEffect - (spawnRotEffect / 2)));
-            spawnRotEffect = 100;
-            this.rigidBody.setVelocity(new ƒ.Vector3(Math.random() * spawnRotEffect - (spawnRotEffect / 2), Math.random() * spawnRotEffect - (spawnRotEffect / 2), Math.random() * spawnRotEffect - (spawnRotEffect / 2)));
         }
         constructor(location) {
             super("Astroid_Large_" + location.toString() + "_" + Date.now().valueOf());
