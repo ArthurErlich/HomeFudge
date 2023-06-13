@@ -23,8 +23,7 @@ namespace HomeFudge {
   let p1: Player = null;
 
   ///Destroyer\\\
-  let destroyer: Destroyer = null;
-  //TODO: remove debug Destroyer
+
 
 
 
@@ -41,7 +40,7 @@ namespace HomeFudge {
     _worldNode = _viewport.getBranch();
 
 
-    // _viewport.physicsDebugMode =ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
+    _viewport.physicsDebugMode =ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
 
     console.log(_viewport);
     //Loads Config then initializes the world in the right order
@@ -60,23 +59,33 @@ namespace HomeFudge {
       _viewport.getBranch().addChild(p1);
       _mainCamera.attachToShip(p1.destroyer);
       /// ------------T-E-S-T--A-R-E-A------------------\\\
-      // destroyer = new Destroyer(ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(500, 0, 0)));
-      // let mtx:ƒ.Matrix4x4 = ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(400, 30, 0));
-      // mtx.rotation =new ƒ.Vector3(0,90,0);
-      // let destroyer2 = new Destroyer(mtx);
-      // _worldNode.appendChild(destroyer2);
-      // _worldNode.appendChild(destroyer);
-      let node: ƒ.Node= new ƒ.Node("name");
-      let nodeMes = new ƒ.ComponentMesh(new ƒ.MeshSprite);
-      nodeMes.mtxPivot.scale(new ƒ.Vector3(200,200,200));
-      node.addComponent(nodeMes);
-      node.addComponent(new ƒ.ComponentMaterial(new ƒ.Material("lit",ƒ.ShaderLit)));
-      _worldNode.appendChild(node);
+      let destroyer = new Destroyer(ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(500, 0, 0)));
+      let mtx: ƒ.Matrix4x4 = ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(400, 30, 0));
+      mtx.rotation = new ƒ.Vector3(0, 90, 0);
+      let destroyer2 = new Destroyer(mtx);
+      _worldNode.appendChild(destroyer2);
+      _worldNode.appendChild(destroyer);
+      // let node: ƒ.Node= new ƒ.Node("name");
+      // let nodeMes = new ƒ.ComponentMesh(new ƒ.MeshSprite);
+      // nodeMes.mtxPivot.scale(new ƒ.Vector3(200,200,200));
+      // node.addComponent(nodeMes);
+      // node.addComponent(new ƒ.ComponentMaterial(new ƒ.Material("lit",ƒ.ShaderLit)));
+      // _worldNode.appendChild(node);
       /// ------------T-E-S-T--A-R-E-A------------------\\\
     }
 
     /// ------------T-E-S-T--A-R-E-A------------------\\\
     //TODO: Before the loop starts. Add an Game Menu draws on frame while updating
+    let x = 200;
+    let y = 0;
+    let z = -100;
+    for (let index = 0; index < 50; index++) {
+      Astroid.spawn(new ƒ.Vector3(x*index*Math.random()-x/2, y*index*Math.random()+100-y/2, z*index*Math.random()), Astroid.getLarge());
+      
+    }
+
+    let astroid = 
+
     /// ------------T-E-S-T--A-R-E-A------------------\\\
 
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);

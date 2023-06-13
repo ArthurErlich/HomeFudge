@@ -2,12 +2,14 @@
 var HomeFudge;
 (function (HomeFudge) {
     class Config {
+        static errorText = "There was an Error on loading the Configs for";
         static gatlingBullet = null;
         static gatlingTurret = null;
         static beamTurret = null;
         static laserBeam = null;
         static destroyer = null;
         static camera = null;
+        static astroid = null;
         /**
          * The function initializes configurations by fetching JSON files and assigning their contents
          * to corresponding variables.
@@ -19,15 +21,107 @@ var HomeFudge;
             let laserBeamResponse = await fetch("Configs/laserBeamConfig.json");
             let destroyerResponse = await fetch("Configs/destroyerConfig.json");
             let cameraResponse = await fetch("Configs/cameraConfig.json");
-            Config.gatlingBullet = await gatBulletResponse.json();
-            Config.gatlingTurret = await gatTurretResponse.json();
-            Config.beamTurret = await beamTurretResponse.json();
-            Config.laserBeam = await laserBeamResponse.json();
-            Config.destroyer = await destroyerResponse.json();
-            Config.camera = await cameraResponse.json();
+            let astroidResponse = await fetch("Configs/astroidConfig.json");
+            try {
+                Config.gatlingBullet = await gatBulletResponse.json();
+            }
+            catch (error) {
+                Config.printError(error, HomeFudge.GatlingBullet.name);
+            }
+            try {
+                Config.gatlingTurret = await gatTurretResponse.json();
+            }
+            catch (error) {
+                Config.printError(error, HomeFudge.GatlingTurret.name);
+            }
+            try {
+                Config.beamTurret = await beamTurretResponse.json();
+            }
+            catch (error) {
+                Config.printError(error, HomeFudge.BeamTurret.name);
+            }
+            try {
+                Config.laserBeam = await laserBeamResponse.json();
+            }
+            catch (error) {
+                Config.printError(error, "Beam");
+            }
+            try {
+                Config.destroyer = await destroyerResponse.json();
+            }
+            catch (error) {
+                Config.printError(error, HomeFudge.Destroyer.name);
+            }
+            try {
+                Config.camera = await cameraResponse.json();
+            }
+            catch (error) {
+                Config.printError(error, HomeFudge.Camera.name);
+            }
+            try {
+                Config.astroid = await astroidResponse.json();
+            }
+            catch (error) {
+                Config.printError(error, HomeFudge.Astroid.name);
+            }
+        }
+        static printError(error, object) {
+            console.error(Config.errorText + " " + object + ": " + error + "\n\n %cAssure that the config.json is correctly written.", "font-weight: bold;");
         }
     }
     HomeFudge.Config = Config;
+    class AstroidSeedNodes {
+        small;
+        medium;
+        large;
+        constructor(_small, _medium, _large) {
+            this.small = _small;
+            this.medium = _medium;
+            this.large = _large;
+        }
+    }
+    class AstroidSize {
+        SMALL;
+        MEDIUM;
+        LARGE;
+        constructor(_small, _medium, _large) {
+            if (_small == undefined) {
+                throw new Error("Small Astroid is undefined in the config!");
+            }
+            if (_medium == undefined) {
+                throw new Error("Medium Astroid is undefined in the config!");
+            }
+            if (_large == undefined) {
+                throw new Error("Large Astroid is undefined in the config!");
+            }
+            this.SMALL = _small;
+            this.MEDIUM = _medium;
+            this.LARGE = _large;
+        }
+    }
+    class AstroidData {
+        hitpoints;
+        mass;
+        spawnRotSpeed;
+        constructor(_hitpoints, _mass, _spawnRotSpeed) {
+            if (_mass == undefined || typeof _mass == 'number') {
+                this.mass = 0;
+                throw new Error("Mass is undefined in the config!");
+            }
+            if (_hitpoints == undefined || typeof _hitpoints == 'number') {
+                this.hitpoints = 0;
+                throw new Error("HitPoints is undefined in the config!");
+            }
+            if (_spawnRotSpeed == undefined || typeof _spawnRotSpeed == 'number') {
+                this.spawnRotSpeed = 0;
+                throw new Error("Spawn rotation speed is undefined in the config!");
+            }
+            this.hitpoints = _hitpoints;
+            this.mass = _mass;
+            this.spawnRotSpeed = _spawnRotSpeed;
+        }
+    }
+    //#endregion Astroid
 })(HomeFudge || (HomeFudge = {}));
 var HomeFudge;
 (function (HomeFudge) {
@@ -222,8 +316,6 @@ var HomeFudge;
     ///Player\\\
     let p1 = null;
     ///Destroyer\\\
-    let destroyer = null;
-    //TODO: remove debug Destroyer
     /// ------------T-E-S-T--A-R-E-A------------------\\\
     let UPDATE_EVENTS;
     (function (UPDATE_EVENTS) {
@@ -235,7 +327,7 @@ var HomeFudge;
         HomeFudge.LoadingScreen.remove();
         HomeFudge._viewport = _event.detail;
         HomeFudge._worldNode = HomeFudge._viewport.getBranch();
-        // _viewport.physicsDebugMode =ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
+        HomeFudge._viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
         console.log(HomeFudge._viewport);
         //Loads Config then initializes the world in the right order
         await loadConfig().then(initWorld).then(() => {
@@ -253,22 +345,29 @@ var HomeFudge;
             HomeFudge._viewport.getBranch().addChild(p1);
             HomeFudge._mainCamera.attachToShip(p1.destroyer);
             /// ------------T-E-S-T--A-R-E-A------------------\\\
-            // destroyer = new Destroyer(ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(500, 0, 0)));
-            // let mtx:ƒ.Matrix4x4 = ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(400, 30, 0));
-            // mtx.rotation =new ƒ.Vector3(0,90,0);
-            // let destroyer2 = new Destroyer(mtx);
-            // _worldNode.appendChild(destroyer2);
-            // _worldNode.appendChild(destroyer);
-            let node = new ƒ.Node("name");
-            let nodeMes = new ƒ.ComponentMesh(new ƒ.MeshSprite);
-            nodeMes.mtxPivot.scale(new ƒ.Vector3(200, 200, 200));
-            node.addComponent(nodeMes);
-            node.addComponent(new ƒ.ComponentMaterial(new ƒ.Material("lit", ƒ.ShaderLit)));
-            HomeFudge._worldNode.appendChild(node);
+            let destroyer = new HomeFudge.Destroyer(ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(500, 0, 0)));
+            let mtx = ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(400, 30, 0));
+            mtx.rotation = new ƒ.Vector3(0, 90, 0);
+            let destroyer2 = new HomeFudge.Destroyer(mtx);
+            HomeFudge._worldNode.appendChild(destroyer2);
+            HomeFudge._worldNode.appendChild(destroyer);
+            // let node: ƒ.Node= new ƒ.Node("name");
+            // let nodeMes = new ƒ.ComponentMesh(new ƒ.MeshSprite);
+            // nodeMes.mtxPivot.scale(new ƒ.Vector3(200,200,200));
+            // node.addComponent(nodeMes);
+            // node.addComponent(new ƒ.ComponentMaterial(new ƒ.Material("lit",ƒ.ShaderLit)));
+            // _worldNode.appendChild(node);
             /// ------------T-E-S-T--A-R-E-A------------------\\\
         }
         /// ------------T-E-S-T--A-R-E-A------------------\\\
         //TODO: Before the loop starts. Add an Game Menu draws on frame while updating
+        let x = 200;
+        let y = 0;
+        let z = -100;
+        for (let index = 0; index < 50; index++) {
+            HomeFudge.Astroid.spawn(new ƒ.Vector3(x * index * Math.random() - x / 2, y * index * Math.random() + 100 - y / 2, z * index * Math.random()), HomeFudge.Astroid.getLarge());
+        }
+        let astroid = 
         /// ------------T-E-S-T--A-R-E-A------------------\\\
         ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, update);
         ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 35); // start the game loop to continuously draw the _viewport, update the audiosystem and drive the physics i/a
@@ -313,6 +412,46 @@ var HomeFudge;
 var HomeFudge;
 (function (HomeFudge) {
     var ƒ = FudgeCore;
+    ƒ.Project.registerScriptNamespace(Script); // Register the namespace to FUDGE for serialization
+    class PlayerSpawnerComponent extends ƒ.ComponentScript {
+        // Register the script as component for use in the editor via drag&drop
+        static iSubclass = ƒ.Component.registerSubclass(PlayerSpawnerComponent);
+        // Properties may be mutated by users in the editor via the automatically created user interface
+        message = "CustomComponentScript added to ";
+        #cmpTransform; //Loook how the Transform is ben getting by RIGID BODY COMPONENT IN FUDGE CORE 
+        playerID; // input for setting the Player ID on add change look at the avalbe player span in game and check if ID is the same
+        constructor() {
+            super();
+            // Don't start when running in editor
+            // if (ƒ.Project.mode == ƒ.MODE.EDITOR)
+            //     return;
+            // Listen to this component being added to or removed from a node
+            this.addEventListener("componentAdd" /* ƒ.EVENT.COMPONENT_ADD */, this.hndEvent);
+            this.addEventListener("componentRemove" /* ƒ.EVENT.COMPONENT_REMOVE */, this.hndEvent);
+            this.addEventListener("nodeDeserialized" /* ƒ.EVENT.NODE_DESERIALIZED */, this.hndEvent);
+        }
+        // Activate the functions of this component as response to events
+        hndEvent = (_event) => {
+            switch (_event.type) {
+                case "componentAdd" /* ƒ.EVENT.COMPONENT_ADD */:
+                    this.#cmpTransform = this.node.getComponent(ƒ.ComponentTransform);
+                case "componentRemove" /* ƒ.EVENT.COMPONENT_REMOVE */:
+                    this.removeEventListener("componentAdd" /* ƒ.EVENT.COMPONENT_ADD */, this.hndEvent);
+                    this.removeEventListener("componentRemove" /* ƒ.EVENT.COMPONENT_REMOVE */, this.hndEvent);
+                    break;
+                case "nodeDeserialized" /* ƒ.EVENT.NODE_DESERIALIZED */:
+                    // if deserialized the node is now fully reconstructed and access to all its components and children is possible
+                    break;
+                case "renderPrepare" /* ƒ.EVENT.RENDER_PREPARE */:
+                    break;
+            }
+        };
+    }
+    HomeFudge.PlayerSpawnerComponent = PlayerSpawnerComponent;
+})(HomeFudge || (HomeFudge = {}));
+var HomeFudge;
+(function (HomeFudge) {
+    var ƒ = FudgeCore;
     class Resources {
         static async getGraphResources(graphID) {
             let graph = ƒ.Project.resources[graphID];
@@ -328,6 +467,18 @@ var HomeFudge;
             }
             return node;
         }
+        static async getMultiplyComponentNodes(nodeNames, graph) {
+            let nodeList = new Array(nodeNames.length);
+            let index = 0;
+            nodeNames.forEach(name => {
+                nodeList[index] = graph.getChildrenByName(name)[0];
+                index++;
+            });
+            if (nodeList == null || nodeList[0] == undefined) {
+                console.warn("+\"" + nodeNames.toString() + "\" not found inside: " + graph.name + "->Graph");
+            }
+            return nodeList;
+        }
     }
     HomeFudge.Resources = Resources;
 })(HomeFudge || (HomeFudge = {}));
@@ -335,8 +486,11 @@ var HomeFudge;
 (function (HomeFudge) {
     var ƒ = FudgeCore;
     class GameObject extends ƒ.Node {
+        getAliveGameobjects() {
+            return HomeFudge.GameLoop.getAliveGameobjects();
+        }
         constructor(idString) {
-            super(idString);
+            super(idString + "_" + (Math.random() * 100));
             HomeFudge.GameLoop.addGameObject(this);
             //TODO: TEST out updater list
             ƒ.Loop.addEventListener(HomeFudge.UPDATE_EVENTS.GAME_OBJECTS, () => {
@@ -369,13 +523,160 @@ var HomeFudge;
     })(SHIPS || (SHIPS = {}));
     class Ship extends HomeFudge.GameObject {
         static SHIPS = SHIPS;
+        static DIRECTION = {
+            FORWARDS: "FORWARDS",
+            BACKWARDS: "BACKWARDS",
+            LEFT: "LEFT",
+            RIGHT: "RIGHT",
+            YAW_LEFT: "YAW_LEFT",
+            YAW_RIGHT: "YAW_RIGHT",
+            PITCH_UP: "PITCH_UP",
+            PITCH_DOWN: "PITCH_DOWN",
+            ROLL_LEFT: "ROLL_LEFT",
+            ROLL_RIGHT: "ROLL_RIGHT",
+            OFF: "OFF"
+        };
         constructor(name) {
             super("Ship_" + name);
         }
     }
     HomeFudge.Ship = Ship;
 })(HomeFudge || (HomeFudge = {}));
-//TODO Add astroids!! SMALL MEDIUM LARGE
+//TODO Add astroid!! SMALL MEDIUM LARGE
+var HomeFudge;
+//TODO Add astroid!! SMALL MEDIUM LARGE
+(function (HomeFudge) {
+    var ƒ = FudgeCore;
+    let SIZE;
+    (function (SIZE) {
+        SIZE["SMALL"] = "SMALL";
+        SIZE["MEDIUM"] = "MEDIUM";
+        SIZE["LARGE"] = "LARGE";
+    })(SIZE || (SIZE = {}));
+    class Astroid extends HomeFudge.GameObject {
+        SIZE = SIZE;
+        //this is an large Astorid example
+        //Mesh and Material index is equal to node index
+        update() {
+        }
+        // public static getRandomSize():SIZE{
+        //     return SIZE.LARGE //RNG°
+        // }
+        static getLarge() {
+            return SIZE.LARGE; //RNG°
+        }
+        static spawn(location, size) {
+            if (size == null || size == undefined) {
+                size = Astroid.getLarge(); // change to random when ready
+            }
+            switch (size) {
+                case SIZE.LARGE:
+                    HomeFudge._worldNode.addChild(new HomeFudge.AstroidLarge(location));
+                    break;
+                case SIZE.MEDIUM:
+                    console.warn("Medium astroids dont have a class");
+                    break;
+                case SIZE.SMALL:
+                    console.warn("Small astroids dont have a class");
+                    break;
+                default:
+                    break;
+            }
+        }
+        alive() {
+            throw new Error("Method not implemented.");
+        }
+        remove() {
+            throw new Error("Method not implemented.");
+        }
+        static loadMeshList(nodes) {
+            if (nodes[0].name == undefined) {
+                console.error(nodes + " is empty or undefined");
+                return null;
+            }
+            let meshList = new Array(nodes.length);
+            for (let index = 0; index < nodes.length; index++) {
+                meshList[index] = nodes[index].getComponent(ƒ.ComponentMesh).mesh;
+            }
+            return meshList;
+        }
+        static loadMaterialList(nodes) {
+            if (nodes[0].name == undefined) {
+                console.error(nodes + " is empty or undefined");
+                return null;
+            }
+            let materialList = new Array(nodes.length);
+            for (let index = 0; index < nodes.length; index++) {
+                materialList[index] = nodes[index].getComponent(ƒ.ComponentMaterial).material;
+            }
+            return materialList;
+        }
+        constructor(name) {
+            super(name);
+        }
+    }
+    HomeFudge.Astroid = Astroid;
+})(HomeFudge || (HomeFudge = {}));
+var HomeFudge;
+(function (HomeFudge) {
+    var ƒ = FudgeCore;
+    class AstroidLarge extends HomeFudge.Astroid {
+        static graph = null;
+        hitPoints = null;
+        static meshList = null;
+        static materialList = null;
+        rigidBody = null;
+        update() {
+        }
+        alive() {
+            throw new Error("Method not implemented.");
+        }
+        remove() {
+            throw new Error("Method not implemented.");
+        }
+        async init(location) {
+            /// needs to be moved to own class
+            let nodeList;
+            AstroidLarge.graph = await HomeFudge.Resources.getGraphResources(HomeFudge.Config.destroyer.graphID);
+            nodeList = await HomeFudge.Resources.getMultiplyComponentNodes(HomeFudge.Config.astroid.seedNodes.large, AstroidLarge.graph); //<-note: Config.astroid.seedNodes.large, is an array 
+            AstroidLarge.meshList = HomeFudge.Astroid.loadMeshList(nodeList);
+            AstroidLarge.materialList = HomeFudge.Astroid.loadMaterialList(nodeList);
+            this.setAllComponents(location);
+            this.addRigidbody(location);
+        }
+        setAllComponents(location) {
+            if (AstroidLarge.materialList == null || AstroidLarge.meshList == null) {
+                console.warn(this.name + " Mesh and/or Material is missing");
+                return;
+            }
+            //random mat/mesh selection:
+            let selection = 0;
+            this.addComponent(new ƒ.ComponentMaterial(AstroidLarge.materialList[selection]));
+            this.addComponent(new ƒ.ComponentMesh(AstroidLarge.meshList[selection]));
+            this.addComponent(new ƒ.ComponentTransform(ƒ.Matrix4x4.TRANSLATION(location)));
+        }
+        addRigidbody(location) {
+            let rotEffect = 0.0025;
+            let spawnRotEffect = HomeFudge.Config.astroid.size.LARGE.spawnRotSpeed;
+            this.rigidBody = new ƒ.ComponentRigidbody(HomeFudge.Config.astroid.size.LARGE.mass, ƒ.BODY_TYPE.DYNAMIC, ƒ.COLLIDER_TYPE.CUBE, ƒ.COLLISION_GROUP.DEFAULT, ƒ.Matrix4x4.TRANSLATION(location));
+            this.rigidBody.mtxPivot.scale(ƒ.Vector3.SUM(AstroidLarge.meshList[0].boundingBox.min, AstroidLarge.meshList[0].boundingBox.min));
+            this.rigidBody.setPosition(location);
+            this.rigidBody.restitution = 0.1;
+            this.rigidBody.effectRotation = new ƒ.Vector3(rotEffect, rotEffect, rotEffect);
+            this.rigidBody.dampRotation = 0;
+            this.rigidBody.dampTranslation = 0;
+            this.addComponent(this.rigidBody);
+            this.rigidBody.setAngularVelocity(new ƒ.Vector3(Math.random() * spawnRotEffect - (spawnRotEffect / 2), Math.random() * spawnRotEffect - (spawnRotEffect / 2), Math.random() * spawnRotEffect - (spawnRotEffect / 2)));
+            spawnRotEffect = 100;
+            this.rigidBody.setVelocity(new ƒ.Vector3(Math.random() * spawnRotEffect - (spawnRotEffect / 2), Math.random() * spawnRotEffect - (spawnRotEffect / 2), Math.random() * spawnRotEffect - (spawnRotEffect / 2)));
+        }
+        constructor(location) {
+            super("Astroid_Large_" + location.toString() + "_" + Date.now().valueOf());
+            this.init(location);
+        }
+    }
+    HomeFudge.AstroidLarge = AstroidLarge;
+})(HomeFudge || (HomeFudge = {}));
 var HomeFudge;
 (function (HomeFudge) {
     var ƒ = FudgeCore;
@@ -531,17 +832,6 @@ var HomeFudge;
     })(WEAPONS || (WEAPONS = {}));
     let DIRECTION;
     (function (DIRECTION) {
-        DIRECTION[DIRECTION["FORWARDS"] = 0] = "FORWARDS";
-        DIRECTION[DIRECTION["BACKWARDS"] = 1] = "BACKWARDS";
-        DIRECTION[DIRECTION["LEFT"] = 2] = "LEFT";
-        DIRECTION[DIRECTION["RIGHT"] = 3] = "RIGHT";
-        DIRECTION[DIRECTION["YAW_LEFT"] = 4] = "YAW_LEFT";
-        DIRECTION[DIRECTION["YAW_RIGHT"] = 5] = "YAW_RIGHT";
-        DIRECTION[DIRECTION["PITCH_UP"] = 6] = "PITCH_UP";
-        DIRECTION[DIRECTION["PITCH_DOWN"] = 7] = "PITCH_DOWN";
-        DIRECTION[DIRECTION["ROLL_LEFT"] = 8] = "ROLL_LEFT";
-        DIRECTION[DIRECTION["ROLL_RIGHT"] = 9] = "ROLL_RIGHT";
-        DIRECTION[DIRECTION["OFF"] = 10] = "OFF";
     })(DIRECTION || (DIRECTION = {}));
     class Destroyer extends HomeFudge.Ship {
         remove() {
@@ -567,7 +857,7 @@ var HomeFudge;
         desireVelocity = new ƒ.Vector3(0, 0, 0);
         //list of weapons
         WEAPONS = WEAPONS;
-        DIRECTION = DIRECTION;
+        DIRECTION = HomeFudge.Ship.DIRECTION;
         //dampers can be disabled by the player
         damperON = true;
         static graph = null;
@@ -644,7 +934,9 @@ var HomeFudge;
             if (Destroyer.seedRigidBody == null) {
                 Destroyer.seedRigidBody = node.getComponent(ƒ.ComponentRigidbody);
             }
-            this.rigidBody = new ƒ.ComponentRigidbody(HomeFudge.Config.destroyer.mass, Destroyer.seedRigidBody.typeBody, Destroyer.seedRigidBody.typeCollider, ƒ.COLLISION_GROUP.DEFAULT, startTransform, Destroyer.convexHull);
+            this.rigidBody = new ƒ.ComponentRigidbody(HomeFudge.Config.destroyer.mass, Destroyer.seedRigidBody.typeBody, 
+            // Destroyer.seedRigidBody.typeCollider,<<< since the CONVEX colider is not suportet in Editor, manual setting needs be done;
+            ƒ.COLLIDER_TYPE.CONVEX, ƒ.COLLISION_GROUP.DEFAULT, startTransform, Destroyer.convexHull);
             this.rigidBody.mtxPivot.scale(new ƒ.Vector3(2, 2, 2)); //Fixes the ConvexHull being 1/2 of the original convex
             this.rigidBody.setPosition(startTransform.translation);
             this.rigidBody.setRotation(startTransform.rotation);
@@ -663,7 +955,7 @@ var HomeFudge;
                     return;
                 }
             });
-            this.fireThrusters(DIRECTION.OFF);
+            this.fireThrusters(HomeFudge.Ship.DIRECTION.OFF);
         }
         applyForces() {
             // this.rigidBody.addVelocity(Mathf.vector3Round(ƒ.Vector3.TRANSFORMATION(this.desireVelocity, this.mtxWorld), 100));
@@ -684,8 +976,6 @@ var HomeFudge;
             let localAng = HomeFudge.Mathf.vector3Round(ƒ.Vector3.TRANSFORMATION(ang, this.mtxWorldInverse, false), 1);
             localAng.scale(angSpeed);
             this.localAngularVelocity = localAng;
-            console.log("local rotation: " + this.localAngularVelocity.toString());
-            console.log("world rotation: " + this.mtxWorld.rotation.toString());
         }
         //TODO: Fill out the Switch case (move the thruster down)
         fireThrusters(direction, _on) {
@@ -693,15 +983,15 @@ var HomeFudge;
                 _on = false;
             }
             switch (direction) {
-                case DIRECTION.FORWARDS:
+                case HomeFudge.Ship.DIRECTION.FORWARDS:
                     break;
-                case DIRECTION.BACKWARDS:
+                case HomeFudge.Ship.DIRECTION.BACKWARDS:
                     break;
-                case DIRECTION.LEFT:
+                case HomeFudge.Ship.DIRECTION.LEFT:
                     break;
-                case DIRECTION.RIGHT:
+                case HomeFudge.Ship.DIRECTION.RIGHT:
                     break;
-                case DIRECTION.YAW_LEFT:
+                case HomeFudge.Ship.DIRECTION.YAW_LEFT:
                     if (_on) {
                         this.rotThruster[1].activate(true);
                         this.rotThruster[2].activate(true);
@@ -711,7 +1001,7 @@ var HomeFudge;
                         this.rotThruster[2].activate(false);
                     }
                     break;
-                case DIRECTION.YAW_RIGHT:
+                case HomeFudge.Ship.DIRECTION.YAW_RIGHT:
                     if (_on) {
                         this.rotThruster[0].activate(true);
                         this.rotThruster[3].activate(true);
@@ -721,15 +1011,15 @@ var HomeFudge;
                         this.rotThruster[3].activate(false);
                     }
                     break;
-                case DIRECTION.PITCH_UP:
+                case HomeFudge.Ship.DIRECTION.PITCH_UP:
                     break;
-                case DIRECTION.PITCH_DOWN:
+                case HomeFudge.Ship.DIRECTION.PITCH_DOWN:
                     break;
-                case DIRECTION.ROLL_LEFT:
+                case HomeFudge.Ship.DIRECTION.ROLL_LEFT:
                     break;
-                case DIRECTION.ROLL_RIGHT:
+                case HomeFudge.Ship.DIRECTION.ROLL_RIGHT:
                     break;
-                case DIRECTION.OFF:
+                case HomeFudge.Ship.DIRECTION.OFF:
                     this.rotThruster.forEach(thruster => {
                         if (thruster.isActivated()) {
                             thruster.activate(false);
@@ -772,19 +1062,19 @@ var HomeFudge;
             // }
             if (angularVelocity.z < 0) {
                 //stop rotuUp
-                this.rotateTo(DIRECTION.PITCH_UP);
+                this.rotateTo(HomeFudge.Ship.DIRECTION.PITCH_UP);
             }
             else if (angularVelocity.z > 0) {
                 //stop rotDown
-                this.rotateTo(DIRECTION.PITCH_DOWN);
+                this.rotateTo(HomeFudge.Ship.DIRECTION.PITCH_DOWN);
             }
             if (angularVelocity.y < -0.1) {
                 //stop rotRight
-                this.rotateTo(DIRECTION.YAW_LEFT);
+                this.rotateTo(HomeFudge.Ship.DIRECTION.YAW_LEFT);
             }
             else if (angularVelocity.y > 0.1) {
                 //stop rotLeft
-                this.rotateTo(DIRECTION.YAW_RIGHT);
+                this.rotateTo(HomeFudge.Ship.DIRECTION.YAW_RIGHT);
             }
         }
         alive() {
@@ -835,10 +1125,9 @@ var HomeFudge;
             //TODO:add smooth acceleration
             //add acceleration
         }
-        rotateTo(rotate) {
+        rotateTo(rotate, _on) {
             //Resets the Thruster fire Anim bevor adding the others
-            this.fireThrusters(DIRECTION.OFF);
-            //TODO: redoo rotation completely
+            this.fireThrusters(HomeFudge.Ship.DIRECTION.OFF);
             /*
             Rotation Direction :
              UP -> 1
@@ -853,38 +1142,38 @@ var HomeFudge;
             let rotateX = null;
             this.fireThrusters(rotate, true);
             switch (rotate) {
-                case DIRECTION.FORWARDS:
+                case HomeFudge.Ship.DIRECTION.FORWARDS:
                     break;
-                case DIRECTION.BACKWARDS:
+                case HomeFudge.Ship.DIRECTION.BACKWARDS:
                     break;
-                case DIRECTION.LEFT:
+                case HomeFudge.Ship.DIRECTION.LEFT:
                     break;
-                case DIRECTION.RIGHT:
+                case HomeFudge.Ship.DIRECTION.RIGHT:
                     break;
-                case DIRECTION.YAW_LEFT:
+                case HomeFudge.Ship.DIRECTION.YAW_LEFT:
                     rotateY = 1;
                     break;
-                case DIRECTION.YAW_RIGHT:
+                case HomeFudge.Ship.DIRECTION.YAW_RIGHT:
                     rotateY = -1;
                     break;
-                case DIRECTION.PITCH_UP:
+                case HomeFudge.Ship.DIRECTION.PITCH_UP:
                     rotateZ = 1;
                     break;
-                case DIRECTION.PITCH_DOWN:
+                case HomeFudge.Ship.DIRECTION.PITCH_DOWN:
                     rotateZ = -1;
                     break;
-                case DIRECTION.ROLL_LEFT:
+                case HomeFudge.Ship.DIRECTION.ROLL_LEFT:
                     rotateX = -1;
                     break;
-                case DIRECTION.ROLL_RIGHT:
+                case HomeFudge.Ship.DIRECTION.ROLL_RIGHT:
                     rotateX = 1;
                     break;
-                case DIRECTION.OFF:
+                case HomeFudge.Ship.DIRECTION.OFF:
                     return;
                 default:
                     return;
             }
-            //sets the rotation direction flag to false for later use
+            //sets the rotation direction flags to false for later use
             let pitchDown = false;
             let pitchUp = false;
             let yawLeft = false;
@@ -894,7 +1183,7 @@ var HomeFudge;
             let angularVelocity = this.localAngularVelocity;
             this.inputRot = true; //TODO: move away! Think diffrent
             //TODO: set input flag for Roll move to Switch case
-            //serts inut flags fore easier use.
+            //sets input flags fore easier use.
             if (rotateZ < 0) {
                 pitchDown = true;
             }
@@ -1277,6 +1566,8 @@ var HomeFudge;
     class GameLoop {
         static objects = [];
         static addGameObject(_object) {
+            //TODO: Replace Events with this GameLoop 
+            return;
             GameLoop.objects.push(_object);
         }
         static update() {
@@ -1300,6 +1591,9 @@ var HomeFudge;
             for (let i = 0; i < GameLoop.objects.length; i++) {
                 //Splice nulls from array
             }
+        }
+        static getAliveGameobjects() {
+            return this.objects;
         }
     }
     HomeFudge.GameLoop = GameLoop;
@@ -1410,7 +1704,7 @@ var HomeFudge;
         };
         init() {
             this.camComp = new ƒ.ComponentCamera();
-            this.camComp.projectCentral(1.77, 75, ƒ.FIELD_OF_VIEW.DIAGONAL, 0.1, 30000);
+            this.camComp.projectCentral(1.77, 75, ƒ.FIELD_OF_VIEW.DIAGONAL, 0.1, 50000);
             this.camNode = new ƒ.Node("camPivotNode");
             this.camNode.addComponent(new ƒ.ComponentTransform());
             this.camNode.addComponent(this.camComp);
@@ -1563,19 +1857,19 @@ var HomeFudge;
         //temporary value
         tempAimTarget = new ƒ.Vector3(100, 100, 0);
         destroyer = null;
+        playerID = null;
         selectedWeapon = null; //TODO:Check if ok
         moveDirection = ƒ.Vector3.ZERO();
         update = () => {
             if (HomeFudge.Mouse.isPressedOne([HomeFudge.MOUSE_CODE.LEFT])) {
                 this.destroyer.fireWeapon(this.selectedWeapon, this.tempAimTarget);
             }
-            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ALT_LEFT])) {
-                console.error("Switch NOT IMPLEMENTED!!!");
-            }
-            else {
-                //TODO: PointerLock disabled
-                this.updateShipMovement();
-            }
+            // if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE."BUTTON"])) {
+            //     console.error("Switch NOT IMPLEMENTED!!!");
+            // } else {
+            //     //TODO: PointerLock disabled
+            // }
+            this.updateShipMovement();
             this.updateWeaponSelection();
             this.destroyer.move(this.moveDirection);
             this.moveDirection = ƒ.Vector3.ZERO();
@@ -1627,35 +1921,29 @@ var HomeFudge;
             }
         }
         updateShipMovement() {
-            /*
-            Rotation :
-             left ->this.destroyer.rotate(1);
-             RIGHT ->this.destroyer.rotate(-1);
-
-            */
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.A])) {
                 //LEFT STARVE
-                this.destroyer.rotateTo(this.destroyer.DIRECTION.YAW_LEFT);
+                this.destroyer.rotateTo(HomeFudge.Ship.DIRECTION.YAW_LEFT);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.D])) {
                 //RIGHT STARVE
-                this.destroyer.rotateTo(this.destroyer.DIRECTION.YAW_RIGHT);
+                this.destroyer.rotateTo(HomeFudge.Ship.DIRECTION.YAW_RIGHT);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.W])) {
                 //Down
-                this.destroyer.rotateTo(this.destroyer.DIRECTION.PITCH_DOWN);
+                this.destroyer.rotateTo(HomeFudge.Ship.DIRECTION.PITCH_DOWN);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.S])) {
                 //Up
-                this.destroyer.rotateTo(this.destroyer.DIRECTION.PITCH_UP);
+                this.destroyer.rotateTo(HomeFudge.Ship.DIRECTION.PITCH_UP);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.Q])) {
                 //Down
-                this.destroyer.rotateTo(this.destroyer.DIRECTION.ROLL_LEFT);
+                this.destroyer.rotateTo(HomeFudge.Ship.DIRECTION.ROLL_LEFT);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.E])) {
                 //Up
-                this.destroyer.rotateTo(this.destroyer.DIRECTION.ROLL_RIGHT);
+                this.destroyer.rotateTo(HomeFudge.Ship.DIRECTION.ROLL_RIGHT);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.C])) {
                 //FORWARD

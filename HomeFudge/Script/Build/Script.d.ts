@@ -1,16 +1,19 @@
 declare namespace HomeFudge {
     export class Config {
+        private static errorText;
         static gatlingBullet: GatlingBulletConfig;
         static gatlingTurret: GatlingTurretConfig;
         static beamTurret: BeamTurretConfig;
         static laserBeam: LaserBeam;
         static destroyer: DestroyerConfig;
         static camera: CameraConfig;
+        static astroid: AstroidConfig;
         /**
          * The function initializes configurations by fetching JSON files and assigning their contents
          * to corresponding variables.
          */
         static initConfigs(): Promise<void>;
+        private static printError;
     }
     interface GatlingTurretConfig {
         graphID: string;
@@ -69,6 +72,30 @@ declare namespace HomeFudge {
         offset: number[];
         [key: string]: number[];
     }
+    interface AstroidConfig {
+        graphID: string;
+        size: AstroidSize;
+        seedNodes: AstroidSeedNodes;
+        [key: string]: string | AstroidSize | AstroidSeedNodes;
+    }
+    class AstroidSeedNodes {
+        small: string[];
+        medium: string[];
+        large: string[];
+        constructor(_small: string[], _medium: string[], _large: string[]);
+    }
+    class AstroidSize {
+        SMALL: AstroidData;
+        MEDIUM: AstroidData;
+        LARGE: AstroidData;
+        constructor(_small: AstroidData, _medium: AstroidData, _large: AstroidData);
+    }
+    class AstroidData {
+        hitpoints: number;
+        mass: number;
+        spawnRotSpeed: number;
+        constructor(_hitpoints: number, _mass: number, _spawnRotSpeed: number);
+    }
     export {};
 }
 declare namespace HomeFudge {
@@ -125,9 +152,21 @@ declare namespace HomeFudge {
 }
 declare namespace HomeFudge {
     import ƒ = FudgeCore;
+    class PlayerSpawnerComponent extends ƒ.ComponentScript {
+        #private;
+        static readonly iSubclass: number;
+        message: string;
+        private playerID;
+        constructor();
+        hndEvent: (_event: Event) => void;
+    }
+}
+declare namespace HomeFudge {
+    import ƒ = FudgeCore;
     class Resources {
         static getGraphResources(graphID: string): Promise<ƒ.Graph>;
         static getComponentNode(nodeName: string, graph: ƒ.Graph): Promise<ƒ.Node>;
+        static getMultiplyComponentNodes(nodeNames: string[], graph: ƒ.Graph): Promise<ƒ.Node[]>;
     }
 }
 declare namespace HomeFudge {
@@ -136,6 +175,7 @@ declare namespace HomeFudge {
         abstract update(): void;
         abstract alive(): boolean;
         abstract remove(): void;
+        getAliveGameobjects(): GameObject[];
         constructor(idString: string);
     }
 }
@@ -153,6 +193,19 @@ declare namespace HomeFudge {
     }
     export abstract class Ship extends GameObject {
         static SHIPS: typeof SHIPS;
+        static DIRECTION: {
+            FORWARDS: string;
+            BACKWARDS: string;
+            LEFT: string;
+            RIGHT: string;
+            YAW_LEFT: string;
+            YAW_RIGHT: string;
+            PITCH_UP: string;
+            PITCH_DOWN: string;
+            ROLL_LEFT: string;
+            ROLL_RIGHT: string;
+            OFF: string;
+        };
         protected abstract maxSpeed: number;
         protected abstract maxAcceleration: number;
         protected abstract maxTurnSpeed: number;
@@ -162,6 +215,43 @@ declare namespace HomeFudge {
         constructor(name: string);
     }
     export {};
+}
+declare namespace HomeFudge {
+    import ƒ = FudgeCore;
+    enum SIZE {
+        SMALL = "SMALL",
+        MEDIUM = "MEDIUM",
+        LARGE = "LARGE"
+    }
+    export class Astroid extends GameObject {
+        private SIZE;
+        update(): void;
+        static getLarge(): SIZE;
+        static spawn(location: ƒ.Vector3, size?: SIZE): void;
+        alive(): boolean;
+        remove(): void;
+        protected static loadMeshList(nodes: ƒ.Node[]): ƒ.Mesh[];
+        protected static loadMaterialList(nodes: ƒ.Node[]): ƒ.Material[];
+        constructor(name: string);
+    }
+    export {};
+}
+declare namespace HomeFudge {
+    import ƒ = FudgeCore;
+    class AstroidLarge extends Astroid {
+        private static graph;
+        private hitPoints;
+        private static meshList;
+        private static materialList;
+        private rigidBody;
+        update(): void;
+        alive(): boolean;
+        remove(): void;
+        private init;
+        private setAllComponents;
+        private addRigidbody;
+        constructor(location: ƒ.Vector3);
+    }
 }
 declare namespace HomeFudge {
     import ƒ = FudgeCore;
@@ -214,17 +304,6 @@ declare namespace HomeFudge {
         ROCKET_POD = 2
     }
     enum DIRECTION {
-        FORWARDS = 0,
-        BACKWARDS = 1,
-        LEFT = 2,
-        RIGHT = 3,
-        YAW_LEFT = 4,
-        YAW_RIGHT = 5,
-        PITCH_UP = 6,
-        PITCH_DOWN = 7,
-        ROLL_LEFT = 8,
-        ROLL_RIGHT = 9,
-        OFF = 10
     }
     export class Destroyer extends Ship {
         remove(): void;
@@ -259,7 +338,7 @@ declare namespace HomeFudge {
         resetThrusters(): void;
         private applyForces;
         private calcLocalAngularVelocity;
-        fireThrusters(direction: DIRECTION, _on?: boolean): void;
+        fireThrusters(direction: typeof Ship.DIRECTION[keyof typeof Ship.DIRECTION], _on?: boolean): void;
         private dampRotation;
         alive(): boolean;
         destroyNode(): void;
@@ -267,7 +346,7 @@ declare namespace HomeFudge {
         fireGatling(target: ƒ.Vector3): void;
         fireBeam(): void;
         move(moveDirection: ƒ.Vector3): void;
-        rotateTo(rotate: DIRECTION): void;
+        rotateTo(rotate: typeof Ship.DIRECTION[keyof typeof Ship.DIRECTION], _on?: boolean): void;
         constructor(startTransform: ƒ.Matrix4x4);
     }
     export {};
@@ -350,6 +429,7 @@ declare namespace HomeFudge {
         static addGameObject(_object: GameObject): void;
         static update(): void;
         static removeGarbage(): void;
+        static getAliveGameobjects(): GameObject[];
     }
 }
 declare namespace FudgeCore {
@@ -488,6 +568,7 @@ declare namespace HomeFudge {
     class Player extends ƒ.Node {
         private tempAimTarget;
         destroyer: Destroyer;
+        playerID: string;
         private selectedWeapon;
         private moveDirection;
         private update;

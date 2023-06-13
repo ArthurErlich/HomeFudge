@@ -2,9 +2,11 @@ namespace HomeFudge {
     import ƒ = FudgeCore;
     export class Player extends ƒ.Node {
         //temporary value
-        private tempAimTarget = new ƒ.Vector3(100,100,0);
-       
+        private tempAimTarget = new ƒ.Vector3(100, 100, 0);
+
         public destroyer: Destroyer = null;
+        public playerID: string = null;
+
         private selectedWeapon: number = null; //TODO:Check if ok
 
         private moveDirection: ƒ.Vector3 = ƒ.Vector3.ZERO();
@@ -13,13 +15,13 @@ namespace HomeFudge {
             if (Mouse.isPressedOne([MOUSE_CODE.LEFT])) {
                 this.destroyer.fireWeapon(this.selectedWeapon, this.tempAimTarget);
             }
-            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ALT_LEFT])) {
-                console.error("Switch NOT IMPLEMENTED!!!");
-                
-            }else{
-                //TODO: PointerLock disabled
-                this.updateShipMovement();
-            }
+            // if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE."BUTTON"])) {
+            //     console.error("Switch NOT IMPLEMENTED!!!");
+
+            // } else {
+            //     //TODO: PointerLock disabled
+            // }
+            this.updateShipMovement();
             this.updateWeaponSelection();
 
             this.destroyer.move(this.moveDirection);
@@ -61,7 +63,7 @@ namespace HomeFudge {
                     break;
             }
         }
-        
+
         private updateWeaponSelection(): void {
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ONE])) {
                 //Gatling -> //TODO: Create Look on with mouse
@@ -77,38 +79,29 @@ namespace HomeFudge {
             }
         }
         private updateShipMovement() {
-            /*
-            Rotation : 
-             left ->this.destroyer.rotate(1);
-             RIGHT ->this.destroyer.rotate(-1);
-
-            */
-
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.A])) {
                 //LEFT STARVE
-                this.destroyer.rotateTo(this.destroyer.DIRECTION.YAW_LEFT);
+                this.destroyer.rotateTo(Ship.DIRECTION.YAW_LEFT);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.D])) {
                 //RIGHT STARVE
-                this.destroyer.rotateTo(this.destroyer.DIRECTION.YAW_RIGHT); 
+                this.destroyer.rotateTo(Ship.DIRECTION.YAW_RIGHT);
             }
-
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.W])) {
                 //Down
-                this.destroyer.rotateTo(this.destroyer.DIRECTION.PITCH_DOWN);
+                this.destroyer.rotateTo(Ship.DIRECTION.PITCH_DOWN);
             }
-
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.S])) {
                 //Up
-                this.destroyer.rotateTo(this.destroyer.DIRECTION.PITCH_UP);
+                this.destroyer.rotateTo(Ship.DIRECTION.PITCH_UP);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.Q])) {
                 //Down
-                this.destroyer.rotateTo(this.destroyer.DIRECTION.ROLL_LEFT);
+                this.destroyer.rotateTo(Ship.DIRECTION.ROLL_LEFT);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.E])) {
                 //Up
-                this.destroyer.rotateTo(this.destroyer.DIRECTION.ROLL_RIGHT);
+                this.destroyer.rotateTo(Ship.DIRECTION.ROLL_RIGHT);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.C])) {
                 //FORWARD
@@ -127,7 +120,7 @@ namespace HomeFudge {
                     -1,
                     this.moveDirection.y,
                     this.moveDirection.z
-                );     
+                );
             }
         }
         private init() {

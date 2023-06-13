@@ -5,18 +5,8 @@ namespace HomeFudge {
         BEAM_TURRET,
         ROCKET_POD
     }
-    enum DIRECTION {
-        FORWARDS,
-        BACKWARDS,
-        LEFT,
-        RIGHT,
-        YAW_LEFT,
-        YAW_RIGHT,
-        PITCH_UP,
-        PITCH_DOWN,
-        ROLL_LEFT,
-        ROLL_RIGHT,
-        OFF
+    enum DIRECTION{
+
     }
     export class Destroyer extends Ship {
         public remove(): void {
@@ -31,7 +21,6 @@ namespace HomeFudge {
         // private mtxRigid: ƒ.Matrix4x4 = null;
 
         private localAngularVelocity: ƒ.Vector3 = null;
-
 
         protected healthPoints: number = null;
         protected maxTurnSpeed: number = null;
@@ -48,12 +37,12 @@ namespace HomeFudge {
 
         //player rotation Input
         private desireRotation: ƒ.Vector3 = new ƒ.Vector3(0, 0, 0);
-        private desireVelocity: ƒ.Vector3 = new ƒ.Vector3(0,0,0);
+        private desireVelocity: ƒ.Vector3 = new ƒ.Vector3(0, 0, 0);
 
         //list of weapons
         public WEAPONS = WEAPONS;
 
-        public DIRECTION = DIRECTION;
+        public DIRECTION: typeof DIRECTION = Ship.DIRECTION;
 
         //dampers can be disabled by the player
         public damperON = true;
@@ -157,7 +146,8 @@ namespace HomeFudge {
             this.rigidBody = new ƒ.ComponentRigidbody(
                 Config.destroyer.mass,
                 Destroyer.seedRigidBody.typeBody,
-                Destroyer.seedRigidBody.typeCollider,
+                // Destroyer.seedRigidBody.typeCollider,<<< since the CONVEX colider is not suportet in Editor, manual setting needs be done;
+                ƒ.COLLIDER_TYPE.CONVEX,
                 ƒ.COLLISION_GROUP.DEFAULT,
                 startTransform,
                 Destroyer.convexHull
@@ -182,7 +172,7 @@ namespace HomeFudge {
                     return;
                 }
             });
-            this.fireThrusters(DIRECTION.OFF);
+            this.fireThrusters(Ship.DIRECTION.OFF);
         }
 
         private applyForces(): void {
@@ -202,31 +192,27 @@ namespace HomeFudge {
                 return;
             }
 
-            let localAng: ƒ.Vector3 = Mathf.vector3Round(ƒ.Vector3.TRANSFORMATION(ang, this.mtxWorldInverse,false), 1)
+            let localAng: ƒ.Vector3 = Mathf.vector3Round(ƒ.Vector3.TRANSFORMATION(ang, this.mtxWorldInverse, false), 1)
             localAng.scale(angSpeed);
 
             this.localAngularVelocity = localAng;
-            console.log("local rotation: " + this.localAngularVelocity.toString());
-            console.log("world rotation: " + this.mtxWorld.rotation.toString());
-
-
         }
 
         //TODO: Fill out the Switch case (move the thruster down)
-        public fireThrusters(direction: DIRECTION, _on?: boolean) {
+        public fireThrusters(direction: typeof Ship.DIRECTION[keyof typeof Ship.DIRECTION], _on?: boolean) {
             if (_on == null) {
                 _on = false;
             }
             switch (direction) {
-                case DIRECTION.FORWARDS:
+                case Ship.DIRECTION.FORWARDS:
                     break;
-                case DIRECTION.BACKWARDS:
+                case Ship.DIRECTION.BACKWARDS:
                     break;
-                case DIRECTION.LEFT:
+                case Ship.DIRECTION.LEFT:
                     break;
-                case DIRECTION.RIGHT:
+                case Ship.DIRECTION.RIGHT:
                     break;
-                case DIRECTION.YAW_LEFT:
+                case Ship.DIRECTION.YAW_LEFT:
                     if (_on) {
                         this.rotThruster[1].activate(true);
                         this.rotThruster[2].activate(true);
@@ -235,7 +221,7 @@ namespace HomeFudge {
                         this.rotThruster[2].activate(false);
                     }
                     break;
-                case DIRECTION.YAW_RIGHT:
+                case Ship.DIRECTION.YAW_RIGHT:
                     if (_on) {
                         this.rotThruster[0].activate(true);
                         this.rotThruster[3].activate(true);
@@ -244,16 +230,16 @@ namespace HomeFudge {
                         this.rotThruster[3].activate(false);
                     }
                     break;
-                case DIRECTION.PITCH_UP:
+                case Ship.DIRECTION.PITCH_UP:
                     break;
-                case DIRECTION.PITCH_DOWN:
+                case Ship.DIRECTION.PITCH_DOWN:
                     break;
-                case DIRECTION.ROLL_LEFT:
+                case Ship.DIRECTION.ROLL_LEFT:
                     break;
-                case DIRECTION.ROLL_RIGHT:
+                case Ship.DIRECTION.ROLL_RIGHT:
                     break;
 
-                case DIRECTION.OFF:
+                case Ship.DIRECTION.OFF:
                     this.rotThruster.forEach(thruster => {
                         if (thruster.isActivated()) {
                             thruster.activate(false);
@@ -301,18 +287,18 @@ namespace HomeFudge {
 
             if (angularVelocity.z < 0) {
                 //stop rotuUp
-                this.rotateTo(DIRECTION.PITCH_UP);
+                this.rotateTo(Ship.DIRECTION.PITCH_UP);
             } else if (angularVelocity.z > 0) {
                 //stop rotDown
-                this.rotateTo(DIRECTION.PITCH_DOWN);
+                this.rotateTo(Ship.DIRECTION.PITCH_DOWN);
             }
 
             if (angularVelocity.y < -0.1) {
                 //stop rotRight
-                this.rotateTo(DIRECTION.YAW_LEFT);
+                this.rotateTo(Ship.DIRECTION.YAW_LEFT);
             } else if (angularVelocity.y > 0.1) {
                 //stop rotLeft
-                this.rotateTo(DIRECTION.YAW_RIGHT);
+                this.rotateTo(Ship.DIRECTION.YAW_RIGHT);
             }
         }
 
@@ -368,11 +354,9 @@ namespace HomeFudge {
             //TODO:add smooth acceleration
             //add acceleration
         }
-        public rotateTo(rotate: DIRECTION): void {
+        public rotateTo(rotate: typeof Ship.DIRECTION[keyof typeof Ship.DIRECTION], _on?: boolean): void {
             //Resets the Thruster fire Anim bevor adding the others
-            this.fireThrusters(DIRECTION.OFF);
-
-            //TODO: redoo rotation completely
+            this.fireThrusters(Ship.DIRECTION.OFF);
             /*
             Rotation Direction : 
              UP -> 1
@@ -387,38 +371,38 @@ namespace HomeFudge {
             let rotateX = null;
             this.fireThrusters(rotate, true);
             switch (rotate) {
-                case DIRECTION.FORWARDS:
+                case Ship.DIRECTION.FORWARDS:
                     break;
-                case DIRECTION.BACKWARDS:
+                case Ship.DIRECTION.BACKWARDS:
                     break;
-                case DIRECTION.LEFT:
+                case Ship.DIRECTION.LEFT:
                     break;
-                case DIRECTION.RIGHT:
+                case Ship.DIRECTION.RIGHT:
                     break;
-                case DIRECTION.YAW_LEFT:
+                case Ship.DIRECTION.YAW_LEFT:
                     rotateY = 1;
                     break;
-                case DIRECTION.YAW_RIGHT:
+                case Ship.DIRECTION.YAW_RIGHT:
                     rotateY = -1;
                     break;
-                case DIRECTION.PITCH_UP:
+                case Ship.DIRECTION.PITCH_UP:
                     rotateZ = 1;
                     break;
-                case DIRECTION.PITCH_DOWN:
+                case Ship.DIRECTION.PITCH_DOWN:
                     rotateZ = -1;
                     break;
-                case DIRECTION.ROLL_LEFT:
+                case Ship.DIRECTION.ROLL_LEFT:
                     rotateX = -1;
                     break;
-                case DIRECTION.ROLL_RIGHT:
+                case Ship.DIRECTION.ROLL_RIGHT:
                     rotateX = 1;
                     break;
-                case DIRECTION.OFF:
+                case Ship.DIRECTION.OFF:
                     return;
                 default:
                     return;
             }
-            //sets the rotation direction flag to false for later use
+            //sets the rotation direction flags to false for later use
             let pitchDown: boolean = false;
             let pitchUp: boolean = false;
             let yawLeft: boolean = false;
@@ -431,7 +415,7 @@ namespace HomeFudge {
             this.inputRot = true; //TODO: move away! Think diffrent
 
             //TODO: set input flag for Roll move to Switch case
-            //serts inut flags fore easier use.
+            //sets input flags fore easier use.
             if (rotateZ < 0) {
                 pitchDown = true;
             } else if (rotateZ > 0) {
