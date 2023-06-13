@@ -1,16 +1,19 @@
 declare namespace HomeFudge {
     export class Config {
+        private static errorText;
         static gatlingBullet: GatlingBulletConfig;
         static gatlingTurret: GatlingTurretConfig;
         static beamTurret: BeamTurretConfig;
         static laserBeam: LaserBeam;
         static destroyer: DestroyerConfig;
         static camera: CameraConfig;
+        static astroid: AstroidConfig;
         /**
          * The function initializes configurations by fetching JSON files and assigning their contents
          * to corresponding variables.
          */
         static initConfigs(): Promise<void>;
+        private static printError;
     }
     interface GatlingTurretConfig {
         graphID: string;
@@ -69,6 +72,30 @@ declare namespace HomeFudge {
         offset: number[];
         [key: string]: number[];
     }
+    interface AstroidConfig {
+        graphID: string;
+        size: AstroidSize;
+        seedNodes: AstroidSeedNodes;
+        [key: string]: string | AstroidSize | AstroidSeedNodes;
+    }
+    class AstroidSeedNodes {
+        small: string[];
+        medium: string[];
+        large: string[];
+        constructor(_small: string[], _medium: string[], _large: string[]);
+    }
+    class AstroidSize {
+        SMALL: AstroidData;
+        MEDIUM: AstroidData;
+        LARGE: AstroidData;
+        constructor(_small: AstroidData, _medium: AstroidData, _large: AstroidData);
+    }
+    class AstroidData {
+        hitpoints: number;
+        mass: number;
+        spawnRotSpeed: number;
+        constructor(_hitpoints: number, _mass: number, _spawnRotSpeed: number);
+    }
     export {};
 }
 declare namespace HomeFudge {
@@ -125,32 +152,13 @@ declare namespace HomeFudge {
 }
 declare namespace HomeFudge {
     import ƒ = FudgeCore;
-    class Mathf {
-        /**
-         * The function performs linear interpolation between two numbers based on a given ratio.
-         *
-         * @param a a is a number representing the starting value of the range to interpolate between.
-         * @param b The parameter "b" is a number representing the end value of the range to
-         * interpolate between.
-         * @param t t is a number between 0 and 1 that represents the interpolation factor. It
-         * determines how much of the second value (b) should be blended with the first value (a) to
-         * produce the final result. A value of 0 means that only the first value should be used, while
-         * a
-         * @return the linear interpolation value between `a` and `b` based on the value of `t`.
-         */
-        static lerp(a: number, b: number, t: number): number;
-        /**
-         * The function calculates the length of a 3D vector using the Pythagorean theorem.
-         *
-         * @param v A 3-dimensional vector represented as an object with properties x, y, and z.
-         * @return The function `vectorLength` returns the length of a 3D vector represented by the
-         * input parameter `v`.
-         */
-        static vectorLength(v: ƒ.Vector3): number;
-        static vectorNegate(v: ƒ.Vector3): ƒ.Vector3;
-        static degreeToRadiant(degree: number): number;
-        static radiantToDegree(radiant: number): number;
-        static vector3Round(vector: ƒ.Vector3, decimalPlace: number): ƒ.Vector3;
+    class PlayerSpawnerComponent extends ƒ.ComponentScript {
+        #private;
+        static readonly iSubclass: number;
+        message: string;
+        private playerID;
+        constructor();
+        hndEvent: (_event: Event) => void;
     }
 }
 declare namespace HomeFudge {
@@ -158,6 +166,7 @@ declare namespace HomeFudge {
     class Resources {
         static getGraphResources(graphID: string): Promise<ƒ.Graph>;
         static getComponentNode(nodeName: string, graph: ƒ.Graph): Promise<ƒ.Node>;
+        static getMultiplyComponentNodes(nodeNames: string[], graph: ƒ.Graph): Promise<ƒ.Node[]>;
     }
 }
 declare namespace HomeFudge {
@@ -166,6 +175,7 @@ declare namespace HomeFudge {
         abstract update(): void;
         abstract alive(): boolean;
         abstract remove(): void;
+        getAliveGameobjects(): GameObject[];
         constructor(idString: string);
     }
 }
@@ -183,6 +193,19 @@ declare namespace HomeFudge {
     }
     export abstract class Ship extends GameObject {
         static SHIPS: typeof SHIPS;
+        static DIRECTION: {
+            FORWARDS: string;
+            BACKWARDS: string;
+            LEFT: string;
+            RIGHT: string;
+            YAW_LEFT: string;
+            YAW_RIGHT: string;
+            PITCH_UP: string;
+            PITCH_DOWN: string;
+            ROLL_LEFT: string;
+            ROLL_RIGHT: string;
+            OFF: string;
+        };
         protected abstract maxSpeed: number;
         protected abstract maxAcceleration: number;
         protected abstract maxTurnSpeed: number;
@@ -192,6 +215,54 @@ declare namespace HomeFudge {
         constructor(name: string);
     }
     export {};
+}
+declare namespace HomeFudge {
+    import ƒ = FudgeCore;
+    enum SIZE {
+        SMALL = "SMALL",
+        MEDIUM = "MEDIUM",
+        LARGE = "LARGE"
+    }
+    export class Astroid extends GameObject {
+        private SIZE;
+        update(): void;
+        static getLarge(): SIZE;
+        static spawn(location: ƒ.Vector3, size?: SIZE): void;
+        alive(): boolean;
+        remove(): void;
+        protected static loadMeshList(nodes: ƒ.Node[]): ƒ.Mesh[];
+        protected static loadMaterialList(nodes: ƒ.Node[]): ƒ.Material[];
+        constructor(name: string);
+    }
+    export {};
+}
+declare namespace HomeFudge {
+    import ƒ = FudgeCore;
+    class AstroidLarge extends Astroid {
+        private static graph;
+        private hitPoints;
+        private static meshList;
+        private static materialList;
+        private rigidBody;
+        update(): void;
+        alive(): boolean;
+        remove(): void;
+        private init;
+        private setAllComponents;
+        private addRigidbody;
+        constructor(location: ƒ.Vector3);
+    }
+}
+declare namespace HomeFudge {
+    import ƒ = FudgeCore;
+    abstract class Debug extends ƒ.Node {
+        abstract setVisible(_on: boolean): void;
+    }
+}
+declare namespace HomeFudge {
+    class DebugForces extends Debug {
+        setVisible(_on: boolean): void;
+    }
 }
 declare namespace HomeFudge {
     enum SIDE {
@@ -232,16 +303,7 @@ declare namespace HomeFudge {
         BEAM_TURRET = 1,
         ROCKET_POD = 2
     }
-    enum THRUSTER_DIRECTION {
-        FORWARDS = 0,
-        BACKWARDS = 1,
-        LEFT = 2,
-        RIGHT = 3,
-        YAW_LEFT = 4,
-        YAW_RIGHT = 5,
-        PITCH_UP = 6,
-        PITCH_DOWN = 7,
-        OFF = 8
+    enum DIRECTION {
     }
     export class Destroyer extends Ship {
         remove(): void;
@@ -249,7 +311,7 @@ declare namespace HomeFudge {
         protected maxAcceleration: number;
         private static seedRigidBody;
         private rigidBody;
-        private mtxRigid;
+        private localAngularVelocity;
         protected healthPoints: number;
         protected maxTurnSpeed: number;
         private maxTurnAcceleration;
@@ -259,8 +321,9 @@ declare namespace HomeFudge {
         private inputRot;
         private inputAcc;
         private desireRotation;
+        private desireVelocity;
         WEAPONS: typeof WEAPONS;
-        THRUSTER_DIRECTION: typeof THRUSTER_DIRECTION;
+        DIRECTION: typeof DIRECTION;
         damperON: boolean;
         private static graph;
         static mesh: ƒ.Mesh;
@@ -273,16 +336,17 @@ declare namespace HomeFudge {
         private setAllComponents;
         private addRigidBody;
         resetThrusters(): void;
-        fireThrusters(direction: THRUSTER_DIRECTION, _on?: boolean): void;
+        private applyForces;
+        private calcLocalAngularVelocity;
+        fireThrusters(direction: typeof Ship.DIRECTION[keyof typeof Ship.DIRECTION], _on?: boolean): void;
         private dampRotation;
-        private setRigidMTX;
         alive(): boolean;
         destroyNode(): void;
         fireWeapon(_weapon: WEAPONS, target: ƒ.Vector3): void;
         fireGatling(target: ƒ.Vector3): void;
         fireBeam(): void;
         move(moveDirection: ƒ.Vector3): void;
-        yawPitch(rotateY: number, rotateZ: number): void;
+        rotateTo(rotate: typeof Ship.DIRECTION[keyof typeof Ship.DIRECTION], _on?: boolean): void;
         constructor(startTransform: ƒ.Matrix4x4);
     }
     export {};
@@ -365,10 +429,47 @@ declare namespace HomeFudge {
         static addGameObject(_object: GameObject): void;
         static update(): void;
         static removeGarbage(): void;
+        static getAliveGameobjects(): GameObject[];
     }
 }
 declare namespace FudgeCore {
     class InputLoop {
+    }
+}
+declare namespace HomeFudge {
+    import ƒ = FudgeCore;
+    class Mathf {
+        /**
+         * The function performs linear interpolation between two numbers based on a given ratio.
+         *
+         * @param a a is a number representing the starting value of the range to interpolate between.
+         * @param b The parameter "b" is a number representing the end value of the range to
+         * interpolate between.
+         * @param t t is a number between 0 and 1 that represents the interpolation factor. It
+         * determines how much of the second value (b) should be blended with the first value (a) to
+         * produce the final result. A value of 0 means that only the first value should be used, while
+         * a
+         * @return the linear interpolation value between `a` and `b` based on the value of `t`.
+         */
+        static lerp(a: number, b: number, t: number): number;
+        /**
+         * The function calculates the length of a 3D vector using the Pythagorean theorem.
+         *
+         * @param v A 3-dimensional vector represented as an object with properties x, y, and z.
+         * @return The function `vectorLength` returns the length of a 3D vector represented by the
+         * input parameter `v`.
+         */
+        static vectorLength(v: ƒ.Vector3): number;
+        static vectorNegate(v: ƒ.Vector3): ƒ.Vector3;
+        static degreeToRadiant(degree: number): number;
+        static radiantToDegree(radiant: number): number;
+        static vector3Round(vector: ƒ.Vector3, decimalPlace: number): ƒ.Vector3;
+    }
+}
+declare namespace HomeFudge {
+    import ƒ = FudgeCore;
+    class Vector3 extends ƒ.Vector3 {
+        static TRANSFORMATION(_vector: ƒ.Vector3, _mtxTransform: ƒ.Matrix4x4, _includeTranslation?: boolean): Vector3;
     }
 }
 declare namespace HomeFudge {
@@ -467,6 +568,7 @@ declare namespace HomeFudge {
     class Player extends ƒ.Node {
         private tempAimTarget;
         destroyer: Destroyer;
+        playerID: string;
         private selectedWeapon;
         private moveDirection;
         private update;

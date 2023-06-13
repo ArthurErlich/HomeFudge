@@ -2,9 +2,11 @@ namespace HomeFudge {
     import ƒ = FudgeCore;
     export class Player extends ƒ.Node {
         //temporary value
-        private tempAimTarget = new ƒ.Vector3(100,100,0);
-       
+        private tempAimTarget = new ƒ.Vector3(100, 100, 0);
+
         public destroyer: Destroyer = null;
+        public playerID: string = null;
+
         private selectedWeapon: number = null; //TODO:Check if ok
 
         private moveDirection: ƒ.Vector3 = ƒ.Vector3.ZERO();
@@ -13,13 +15,13 @@ namespace HomeFudge {
             if (Mouse.isPressedOne([MOUSE_CODE.LEFT])) {
                 this.destroyer.fireWeapon(this.selectedWeapon, this.tempAimTarget);
             }
-            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ALT_LEFT])) {
-                console.error("Switch NOT IMPLEMENTED!!!");
-                
-            }else{
-                //TODO: PointerLock disabled
-                this.updateShipMovement();
-            }
+            // if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE."BUTTON"])) {
+            //     console.error("Switch NOT IMPLEMENTED!!!");
+
+            // } else {
+            //     //TODO: PointerLock disabled
+            // }
+            this.updateShipMovement();
             this.updateWeaponSelection();
 
             this.destroyer.move(this.moveDirection);
@@ -61,7 +63,7 @@ namespace HomeFudge {
                     break;
             }
         }
-        
+
         private updateWeaponSelection(): void {
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.ONE])) {
                 //Gatling -> //TODO: Create Look on with mouse
@@ -77,65 +79,33 @@ namespace HomeFudge {
             }
         }
         private updateShipMovement() {
-            /*
-            Rotation : 
-             left ->this.destroyer.rotate(1);
-             RIGHT ->this.destroyer.rotate(-1);
-
-            */
-
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.A])) {
                 //LEFT STARVE
-                this.destroyer.yawPitch(1,0);
-                this.destroyer.resetThrusters();
-                this.destroyer.fireThrusters(   this.destroyer.THRUSTER_DIRECTION.YAW_LEFT,true);
-                // this.moveDirection.set(
-                //     this.moveDirection.x,
-                //     this.moveDirection.y,
-                //     -1
-                // );
+                this.destroyer.rotateTo(Ship.DIRECTION.YAW_LEFT);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.D])) {
                 //RIGHT STARVE
-                this.destroyer.yawPitch(-1,0); 
-                this.destroyer.resetThrusters();
-                this.destroyer.fireThrusters(   this.destroyer.THRUSTER_DIRECTION.YAW_RIGHT,true);
-
-                // this.moveDirection.set(
-                //     this.moveDirection.x,
-                //     this.moveDirection.y,
-                //     1
-                // );
+                this.destroyer.rotateTo(Ship.DIRECTION.YAW_RIGHT);
             }
-            ///<--OBSOLETE-->
-            // if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.W])) {
-            //     //Down
-            //     this.destroyer.yawPitch(0,-1);
-
-            //     //FORWARD
-            //     // this.moveDirection.set(
-            //     //     1,
-            //     //     this.moveDirection.y,
-            //     //     this.moveDirection.z
-            //     // );
-
-            // }
-            // if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.S])) {
-            //     //Up
-            //     this.destroyer.yawPitch(0,1);
-
-
-            //     //BACKWARD
-            //     // this.moveDirection.set(
-            //     //     -1,
-            //     //     this.moveDirection.y,
-            //     //     this.moveDirection.z
-            //     // );
-            // }
-            ///<--OBSOLETE-->
-
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.W])) {
+                //Down
+                this.destroyer.rotateTo(Ship.DIRECTION.PITCH_DOWN);
+            }
+            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.S])) {
+                //Up
+                this.destroyer.rotateTo(Ship.DIRECTION.PITCH_UP);
+            }
+            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.Q])) {
+                //Down
+                this.destroyer.rotateTo(Ship.DIRECTION.ROLL_LEFT);
+            }
+            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.E])) {
+                //Up
+                this.destroyer.rotateTo(Ship.DIRECTION.ROLL_RIGHT);
+            }
+            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.C])) {
                 //FORWARD
+                //TODO:Move to Destroyer
                 this.moveDirection.set(
                     1,
                     this.moveDirection.y,
@@ -143,28 +113,11 @@ namespace HomeFudge {
                 );
 
             }
-            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.S])) {
+            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.V])) {
                 //BACKWARD
+                //TODO:Move to Destroyer
                 this.moveDirection.set(
                     -1,
-                    this.moveDirection.y,
-                    this.moveDirection.z
-                );
-                console.log("!");
-                
-            }
-            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.SHIFT_LEFT])) {
-                //BACKWARD
-                this.moveDirection.set(
-                    this.moveDirection.z,
-                    this.moveDirection.y,
-                    this.moveDirection.z
-                );
-            }
-            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.CTRL_LEFT])) {
-                //BACKWARD
-                this.moveDirection = new ƒ.Vector3(
-                    this.moveDirection.z,
                     this.moveDirection.y,
                     this.moveDirection.z
                 );

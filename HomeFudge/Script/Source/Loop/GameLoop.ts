@@ -32,5 +32,8 @@ namespace HomeFudge {
                 //Splice nulls from array
             }
         }
+        public static getAliveGameobjects():GameObject[]{
+            return this.objects;
+        }
     }
 }

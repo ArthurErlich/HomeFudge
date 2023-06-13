@@ -54,6 +54,9 @@ namespace HomeFudge {
             this.addComponent(animator);
         }
         public activate(activate: boolean) {
+            if (this.meshComp == null || this.meshComp == undefined) {
+                return;
+            }
             this.meshComp.activate(activate);
         }
         public isActivated(): boolean {

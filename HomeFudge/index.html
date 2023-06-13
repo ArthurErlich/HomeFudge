@@ -1,75 +1,51 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
+
 <head>
-<title>HomeFudge</title>
-<link rel="icon" href="Images/Home Fudge Logo.png" type="image/png" />
-<meta charset="utf-8" />
-<link rel="stylesheet" href="styles.css" />
+    <title>HomeFudge</title>
+    <link rel="icon" href="Images/Home Fudge Logo.png" type="image/png" />
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="styles.css" />
 
-<!--Editor settings of this project-->
-<meta type="settings" autoview="Graph|2023-04-21T17:05:28.109Z|61452" project="{'name':'HomeFudge','graphAutoView':'Graph|2023-04-21T17:05:28.109Z|61452'}" panels="[{'type':'PanelParticleSystem','state':{}},{'type':'PanelProject','state':{}},{'type':'PanelGraph','state':{'graph':'Graph|2023-04-25T14:30:46.195Z|98798'}}]" />
+    <!--Editor settings of this project-->
+    <meta type="settings" autoview="Graph|2023-04-21T17:05:28.109Z|61452"
+        project="{'name':'HomeFudge','graphAutoView':'Graph|2023-04-21T17:05:28.109Z|61452'}"
+        panels="[{'type':'PanelParticleSystem','state':{}},{'type':'PanelProject','state':{}},{'type':'PanelGraph','state':{'graph':'Graph|2023-04-25T14:30:46.195Z|98798'}}]" />
 
-<!--Activate the following line to include the FUDGE-version of Oimo-Physics. You may want to download a local copy to work offline and be independent from future changes!-->
-<script type="text/javascript" src="https://arthurerlich.github.io/FUDGE/Physics/OimoPhysics.js"></script>
+    <!--Activate the following line to include the FUDGE-version of Oimo-Physics. You may want to download a local copy to work offline and be independent from future changes!-->
+    <script type="text/javascript" src="https://arthurerlich.github.io/FUDGE/Physics/OimoPhysics.js"></script>
 
-<!--Load local copy of FUDGE. -->
-<script type="text/javascript" src="https://arthurerlich.github.io/FUDGE/Core/Build/FudgeCore.js"></script>
-<script type="text/javascript" src="https://arthurerlich.github.io/FUDGE/Aid/Build/FudgeAid.js"></script>
+    <!--Load local copy of FUDGE. -->
+    <script type="text/javascript" src="https://arthurerlich.github.io/FUDGE/Core/Build/FudgeCore.js"></script>
+    <script type="text/javascript" src="https://arthurerlich.github.io/FUDGE/Aid/Build/FudgeAid.js"></script>
+    <script type="text/javascript" src="https://arthurerlich.github.io/FUDGE/UserInterface/Build/FudgeUserInterface.js"></script>
 
-<!--Link internal resources. The editor only loads the first, but at runtime, multiple files can contribute-->
-<link type="resources" src="Internal.json" />
+    <!--Link internal resources. The editor only loads the first, but at runtime, multiple files can contribute-->
+    <link type="resources" src="Internal.json" />
 
-<!--Load custom scripts-->
-<script type="text/javascript" src="Script/Build/Script.js" editor="true"></script>
+    <!--Load custom scripts-->
+    <script type="text/javascript" src="Script/Build/Script.js" editor="true"></script>
 
 
 </head>
+
 <body>
-<!--Dialog shown at startup only-->
-<dialog>
-    <div id="HFAutoview">
-        <p>FUDGE Autoview</p>
-        <h1>Title (will be replaced by Autoview)</h1>
-        <p>click to start</p>
-    
-    <!--Canvas for FUDGE to render to-->
+    <!--Dialog shown at startup only-->
+    <dialog>
+        <div id="HFAutoview">
+            <p>FUDGE Autoview</p>
+            <h1>Title (will be replaced by Autoview)</h1>
+            <p>click to start</p>
+
+            <!--Canvas for FUDGE to render to-->
+    </dialog>
     <canvas class="fullscreen">
-</canvas>
-</div>
+    </canvas>
+    </div>
 
 
-<img id="loadingIMG" src="Images/FudgeHome_LoadingHackSpinner.apng" alt="" width="100" height="100" hidden="true" loading="lazy" />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-</dialog>
-
-
-
+    <img id="loadingIMG" src="Images/FudgeHome_LoadingHackSpinner.apng" alt="" width="100" height="100" hidden="true"
+        loading="lazy" />
 </body>
+
 </html>
