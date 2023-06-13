@@ -146,7 +146,8 @@ namespace HomeFudge {
             this.rigidBody = new ƒ.ComponentRigidbody(
                 Config.destroyer.mass,
                 Destroyer.seedRigidBody.typeBody,
-                Destroyer.seedRigidBody.typeCollider,
+                // Destroyer.seedRigidBody.typeCollider,<<< since the CONVEX colider is not suportet in Editor, manual setting needs be done;
+                ƒ.COLLIDER_TYPE.CONVEX,
                 ƒ.COLLISION_GROUP.DEFAULT,
                 startTransform,
                 Destroyer.convexHull
