@@ -147,7 +147,8 @@ declare namespace HomeFudge {
     let _viewport: ƒ.Viewport;
     enum UPDATE_EVENTS {
         GAME_OBJECTS = "GameObjectUpdate",
-        PLAYER_INPUT = "PlayerInputUpdate"
+        PLAYER_INPUT = "PlayerInputUpdate",
+        UI = "UI"
     }
 }
 declare namespace HomeFudge {
@@ -228,7 +229,7 @@ declare namespace HomeFudge {
         d: any;
         update(): void;
         static getLarge(): SIZE;
-        static spawn(location: ƒ.Vector3, size?: SIZE): void;
+        static spawn(location: ƒ.Vector3, size?: SIZE): Astroid;
         alive(): boolean;
         remove(): void;
         protected static loadMeshList(nodes: ƒ.Node[]): ƒ.Mesh[];
@@ -584,9 +585,14 @@ declare namespace HomeFudge {
 }
 declare namespace HomeFudge {
     import ƒ = FudgeCore;
-    class UI_AstroidTEST extends ƒ.Mutable {
-        private static uiElement;
+    class UI_EnemySelection extends ƒ.Mutable {
+        private static ui_RingSelection;
+        private static ui_HealthMeter;
         static setPosition(pos: ƒ.Vector2): void;
+        static setSize(distanceToPlayer: number): void;
+        static setHealthBar(hpPercent: number): void;
+        private static initUiRingSelection;
+        private static initUiHealthStatus;
         constructor();
         protected reduceMutator(_mutator: ƒ.Mutator): void;
     }

@@ -21,15 +21,16 @@ d
         public static getLarge(): SIZE {
             return SIZE.LARGE //RNG°
         }
-        public static spawn(location: ƒ.Vector3, size?: SIZE): void {//MAKE RNG number. Look at dev doc
-
+        public static spawn(location: ƒ.Vector3, size?: SIZE): Astroid {//MAKE RNG number. Look at dev doc
+            let astroid:Astroid = null;
             if (size == null || size == undefined) {
                 size = Astroid.getLarge(); // change to random when ready
             }
 
             switch (size) {
                 case SIZE.LARGE:
-                    _worldNode.addChild(new AstroidLarge(location));
+                    astroid =  new AstroidLarge(location);
+                    _worldNode.addChild(astroid);
                     break;
                 case SIZE.MEDIUM:
                     console.warn("Medium astroids dont have a class");
@@ -42,6 +43,7 @@ d
                 default:
                     break;
             }
+            return astroid;
         }
 
         public alive(): boolean {

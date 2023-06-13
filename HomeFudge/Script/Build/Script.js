@@ -316,12 +316,13 @@ var HomeFudge;
     ///Player\\\
     let p1 = null;
     ///Destroyer\\\
-    let destroyer = null;
+    let astroidList = null;
     /// ------------T-E-S-T--A-R-E-A------------------\\\
     let UPDATE_EVENTS;
     (function (UPDATE_EVENTS) {
         UPDATE_EVENTS["GAME_OBJECTS"] = "GameObjectUpdate";
         UPDATE_EVENTS["PLAYER_INPUT"] = "PlayerInputUpdate";
+        UPDATE_EVENTS["UI"] = "UI";
     })(UPDATE_EVENTS = HomeFudge.UPDATE_EVENTS || (HomeFudge.UPDATE_EVENTS = {}));
     /// ------------T-E-S-T--A-R-E-A------------------\\\
     async function start(_event) {
@@ -346,7 +347,7 @@ var HomeFudge;
             HomeFudge._viewport.getBranch().addChild(p1);
             HomeFudge._mainCamera.attachToShip(p1.destroyer);
             /// ------------T-E-S-T--A-R-E-A------------------\\\
-            destroyer = new HomeFudge.Destroyer(ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(500, 0, 0)));
+            let destroyer = new HomeFudge.Destroyer(ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(500, 0, 0)));
             let mtx = ƒ.Matrix4x4.TRANSLATION(new ƒ.Vector3(400, 30, 0));
             mtx.rotation = new ƒ.Vector3(0, 90, 0);
             let destroyer2 = new HomeFudge.Destroyer(mtx);
@@ -365,11 +366,12 @@ var HomeFudge;
         let x = 200;
         let y = 0;
         let z = -100;
+        astroidList = new Array(50);
         for (let index = 0; index < 50; index++) {
-            HomeFudge.Astroid.spawn(new ƒ.Vector3(x * index * Math.random() - x / 2, y * index * Math.random() + 100 - y / 2, -z * index * Math.random()), HomeFudge.Astroid.getLarge());
+            astroidList[index] = HomeFudge.Astroid.spawn(new ƒ.Vector3(x * index * Math.random() - x / 2, y * index * Math.random() + 100 - y / 2, -z * index * Math.random()), HomeFudge.Astroid.getLarge());
         }
-        let astroid_UI = new HomeFudge.UI_AstroidTEST();
-        HomeFudge.UI_AstroidTEST.setPosition(new ƒ.Vector2(100, 100));
+        let astroid_UI = new HomeFudge.UI_EnemySelection();
+        HomeFudge.UI_EnemySelection.setPosition(new ƒ.Vector2(100, 100));
         /// ------------T-E-S-T--A-R-E-A------------------\\\
         ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, update);
         ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 35); // start the game loop to continuously draw the _viewport, update the audiosystem and drive the physics i/a
@@ -380,13 +382,17 @@ var HomeFudge;
         ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.PLAYER_INPUT));
         ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.GAME_OBJECTS));
         // GameLoop.update(); <-- different approach instant of dispatching an event for the loop.
-        /// ------------T-E-S-T--A-R-E-A------------------\\\
-        // let uiPos: ƒ.Vector2 = _viewport.pointWorldToClient(destroyer.mtxWorld.translation); //TODO: learn the VUI!
-        let uiPos = HomeFudge._viewport.pointWorldToClient(destroyer.mtxWorld.translation);
-        HomeFudge.UI_AstroidTEST.setPosition(uiPos);
-        /// ------------T-E-S-T--A-R-E-A------------------\\\
+        // /// ------------T-E-S-T--A-R-E-A------------------\\\
+        // /// ------------T-E-S-T--A-R-E-A------------------\\\
         ƒ.AudioManager.default.update();
         HomeFudge._viewport.draw();
+        ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.UI)); // UI needs to be updated after drawing the frame
+        /// ------------T-E-S-T--A-R-E-A------------------\\\
+        // let uiPos: ƒ.Vector2 = _viewport.pointWorldToClient(destroyer.mtxWorld.translation); //TODO: learn the VUI!
+        let uiPos = HomeFudge._viewport.pointWorldToClient(astroidList[10].mtxWorld.translation);
+        HomeFudge.UI_EnemySelection.setPosition(uiPos);
+        HomeFudge.UI_EnemySelection.setSize(p1.destroyer.mtxWorld.translation.getDistance(astroidList[10].mtxWorld.translation));
+        /// ------------T-E-S-T--A-R-E-A------------------\\\
     }
     /// ------------T-E-S-T--A-R-E-A------------------\\\
     // function getPosTest(): void {
@@ -572,12 +578,14 @@ var HomeFudge;
             return SIZE.LARGE; //RNG°
         }
         static spawn(location, size) {
+            let astroid = null;
             if (size == null || size == undefined) {
                 size = Astroid.getLarge(); // change to random when ready
             }
             switch (size) {
                 case SIZE.LARGE:
-                    HomeFudge._worldNode.addChild(new HomeFudge.AstroidLarge(location));
+                    astroid = new HomeFudge.AstroidLarge(location);
+                    HomeFudge._worldNode.addChild(astroid);
                     break;
                 case SIZE.MEDIUM:
                     console.warn("Medium astroids dont have a class");
@@ -588,6 +596,7 @@ var HomeFudge;
                 default:
                     break;
             }
+            return astroid;
         }
         alive() {
             throw new Error("Method not implemented.");
@@ -2009,25 +2018,58 @@ var HomeFudge;
 (function (HomeFudge) {
     var ƒ = FudgeCore;
     var ƒUi = FudgeUserInterface;
-    class UI_AstroidTEST extends ƒ.Mutable {
-        static uiElement;
+    class UI_EnemySelection extends ƒ.Mutable {
+        static ui_RingSelection;
+        static ui_HealthMeter;
+        //Helatbar lenght 6ev
         static setPosition(pos) {
-            let width = (UI_AstroidTEST.uiElement.clientWidth) / 2;
-            UI_AstroidTEST.uiElement.style.top = (pos.y - width) + "px";
-            UI_AstroidTEST.uiElement.style.left = (pos.x - width) + "px";
+            let widthSelector = (UI_EnemySelection.ui_RingSelection.clientWidth) / 2;
+            let hightHealth = (UI_EnemySelection.ui_HealthMeter.clientHeight);
+            UI_EnemySelection.ui_RingSelection.style.top = (pos.y - widthSelector) + "px";
+            UI_EnemySelection.ui_RingSelection.style.left = (pos.x - widthSelector) + "px";
+            UI_EnemySelection.ui_HealthMeter.style.top = (pos.y - hightHealth - 5) + "px";
+            UI_EnemySelection.ui_HealthMeter.style.left = (pos.x + 20) + "px";
+        }
+        static setSize(distanceToPlayer) {
+            let widthSelector = (UI_EnemySelection.ui_RingSelection.clientWidth);
+            let scale = 4000 / distanceToPlayer;
+            UI_EnemySelection.ui_RingSelection.style.width = scale + "vw";
+            UI_EnemySelection.ui_RingSelection.style.height = scale + "vw";
+        }
+        static setHealthBar(hpPercent) {
+            let healthSteps = 6 / 100;
+            UI_EnemySelection.ui_HealthMeter.style.width = healthSteps * hpPercent + "vw";
+        }
+        static initUiRingSelection() {
+            UI_EnemySelection.ui_RingSelection = document.querySelector("div#RingSelection");
+            UI_EnemySelection.ui_RingSelection.style.position = "absolute";
+            UI_EnemySelection.ui_RingSelection.style.visibility = "visible";
+            UI_EnemySelection.ui_RingSelection.style.width = "2vw";
+            UI_EnemySelection.ui_RingSelection.style.height = "2vw";
+            UI_EnemySelection.ui_RingSelection.style.borderRadius = "100%";
+            UI_EnemySelection.ui_RingSelection.style.borderColor = "rgba(255, 0, 0, 0.5)";
+            UI_EnemySelection.ui_RingSelection.style.borderStyle = "solid";
+            UI_EnemySelection.ui_RingSelection.style.borderWidth = "-2px";
+            UI_EnemySelection.ui_RingSelection.style.position = "absolute";
+        }
+        static initUiHealthStatus() {
+            UI_EnemySelection.ui_HealthMeter = document.querySelector("div#HealthMeeter");
+            UI_EnemySelection.ui_HealthMeter.style.visibility = "visible";
+            UI_EnemySelection.ui_HealthMeter.style.position = "absolute";
+            UI_EnemySelection.ui_HealthMeter.style.width = "6vw";
+            UI_EnemySelection.ui_HealthMeter.style.height = "1vw";
+            UI_EnemySelection.ui_HealthMeter.style.backgroundColor = "rgba(255, 0, 0, 0.8)";
         }
         constructor() {
             super();
-            UI_AstroidTEST.uiElement = document.querySelector("div#vui");
-            UI_AstroidTEST.uiElement.style.visibility = "visible";
-            UI_AstroidTEST.uiElement.style.width = "10vw";
-            UI_AstroidTEST.uiElement.style.height = "10vw";
-            new ƒUi.Controller(this, UI_AstroidTEST.uiElement);
-            this.addEventListener("mutate" /* ƒ.EVENT.MUTATE */, () => console.log(this));
+            UI_EnemySelection.initUiRingSelection();
+            UI_EnemySelection.initUiHealthStatus();
+            new ƒUi.Controller(this, UI_EnemySelection.ui_RingSelection);
+            // new ƒUi.Controller(this, UI_EnemySelection.uiHealthMeter);
         }
         reduceMutator(_mutator) {
         }
     }
-    HomeFudge.UI_AstroidTEST = UI_AstroidTEST;
+    HomeFudge.UI_EnemySelection = UI_EnemySelection;
 })(HomeFudge || (HomeFudge = {}));
 //# sourceMappingURL=Script.js.map
