@@ -1,0 +1,24 @@
+{
+    "graphID": "Graph|2023-04-25T14:30:46.195Z|98798",
+    "size": {
+        "SMALL": {
+            "hitpoints": 100
+        },
+        "MEDIUM": {
+            "hitpoints": 250
+        },
+        "LARGE": {
+            "hitpoints": 500
+        }
+    },
+    "seedNodes": {
+        "small": [null],
+        "medium": [null],
+        "large": [
+            "Astroid_L_01",
+            "Astroid_L_02",
+            "Astroid_L_03",
+            "Astroid_L_04"
+        ]
+    }
+}
