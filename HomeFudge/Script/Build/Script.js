@@ -376,6 +376,7 @@ var HomeFudge;
         ƒ.Physics.simulate(); // make an update loop just for the Physics. fixed at 30fps
         ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.PLAYER_INPUT));
         ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.GAME_OBJECTS));
+        // GameLoop.update(); <-- different approach instant of dispatching an event for the loop.
         /// ------------T-E-S-T--A-R-E-A------------------\\\
         // let uiPos: ƒ.Vector2 = _viewport.pointWorldToClient(destroyer.mtxWorld.translation); //TODO: learn the VUI!
         /// ------------T-E-S-T--A-R-E-A------------------\\\
