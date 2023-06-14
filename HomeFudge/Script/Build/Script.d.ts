@@ -147,7 +147,8 @@ declare namespace HomeFudge {
     let _viewport: ƒ.Viewport;
     enum UPDATE_EVENTS {
         GAME_OBJECTS = "GameObjectUpdate",
-        PLAYER_INPUT = "PlayerInputUpdate"
+        PLAYER_INPUT = "PlayerInputUpdate",
+        UI = "UI"
     }
 }
 declare namespace HomeFudge {
@@ -225,13 +226,15 @@ declare namespace HomeFudge {
     }
     export class Astroid extends GameObject {
         private SIZE;
+        d: any;
         update(): void;
         static getLarge(): SIZE;
-        static spawn(location: ƒ.Vector3, size?: SIZE): void;
+        static spawn(location: ƒ.Vector3, size?: SIZE): Astroid;
         alive(): boolean;
         remove(): void;
         protected static loadMeshList(nodes: ƒ.Node[]): ƒ.Mesh[];
         protected static loadMaterialList(nodes: ƒ.Node[]): ƒ.Material[];
+        protected static setupRigidbody(location: ƒ.Vector3, boundingBox: ƒ.Vector3, spawnRotEffect: number): ƒ.ComponentRigidbody;
         constructor(name: string);
     }
     export {};
@@ -249,7 +252,6 @@ declare namespace HomeFudge {
         remove(): void;
         private init;
         private setAllComponents;
-        private addRigidbody;
         constructor(location: ƒ.Vector3);
     }
 }
@@ -583,7 +585,15 @@ declare namespace HomeFudge {
 }
 declare namespace HomeFudge {
     import ƒ = FudgeCore;
-    class UI_Astroid extends ƒ.Mutable {
+    class UI_EnemySelection extends ƒ.Mutable {
+        private static ui_RingSelection;
+        private static ui_HealthMeter;
+        static setPosition(pos: ƒ.Vector2): void;
+        static setSize(distanceToPlayer: number): void;
+        static setHealthBar(hpPercent: number): void;
+        private static initUiRingSelection;
+        private static initUiHealthStatus;
+        constructor();
         protected reduceMutator(_mutator: ƒ.Mutator): void;
     }
 }

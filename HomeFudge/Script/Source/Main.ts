@@ -23,7 +23,7 @@ namespace HomeFudge {
   let p1: Player = null;
 
   ///Destroyer\\\
-
+  let astroidList:Astroid[] = null;
 
 
 
@@ -31,6 +31,7 @@ namespace HomeFudge {
   export enum UPDATE_EVENTS {
     GAME_OBJECTS = "GameObjectUpdate",
     PLAYER_INPUT = "PlayerInputUpdate",
+    UI = "UI",
   }
   /// ------------T-E-S-T--A-R-E-A------------------\\\
 
@@ -40,7 +41,7 @@ namespace HomeFudge {
     _worldNode = _viewport.getBranch();
 
 
-    _viewport.physicsDebugMode =ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
+    // _viewport.physicsDebugMode =ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
 
     console.log(_viewport);
     //Loads Config then initializes the world in the right order
@@ -79,13 +80,12 @@ namespace HomeFudge {
     let x = 200;
     let y = 0;
     let z = -100;
+    astroidList = new Array(50);
     for (let index = 0; index < 50; index++) {
-      Astroid.spawn(new ƒ.Vector3(x*index*Math.random()-x/2, y*index*Math.random()+100-y/2, z*index*Math.random()), Astroid.getLarge());
-      
+      astroidList[index] = Astroid.spawn(new ƒ.Vector3(x*index*Math.random()-x/2, y*index*Math.random()+100-y/2, -z*index*Math.random()), Astroid.getLarge());
     }
-
-    let astroid = 
-
+    let astroid_UI:UI_EnemySelection = new UI_EnemySelection();
+    UI_EnemySelection.setPosition(new ƒ.Vector2(100,100));
     /// ------------T-E-S-T--A-R-E-A------------------\\\
 
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);
@@ -98,13 +98,24 @@ namespace HomeFudge {
     ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.PLAYER_INPUT));
     ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.GAME_OBJECTS));
 
+    // GameLoop.update(); <-- different approach instant of dispatching an event for the loop.
 
-    /// ------------T-E-S-T--A-R-E-A------------------\\\
-    // let uiPos: ƒ.Vector2 = _viewport.pointWorldToClient(destroyer.mtxWorld.translation); //TODO: learn the VUI!
-    /// ------------T-E-S-T--A-R-E-A------------------\\\
+
+    // /// ------------T-E-S-T--A-R-E-A------------------\\\
+
+    // /// ------------T-E-S-T--A-R-E-A------------------\\\
 
     ƒ.AudioManager.default.update();
     _viewport.draw();
+    ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.UI)); // UI needs to be updated after drawing the frame
+
+    /// ------------T-E-S-T--A-R-E-A------------------\\\
+    // let uiPos: ƒ.Vector2 = _viewport.pointWorldToClient(destroyer.mtxWorld.translation); //TODO: learn the VUI!
+    let uiPos: ƒ.Vector2 = _viewport.pointWorldToClient(astroidList[10].mtxWorld.translation);
+
+    UI_EnemySelection.setPosition(uiPos);
+    UI_EnemySelection.setSize(p1.destroyer.mtxWorld.translation.getDistance(astroidList[10].mtxWorld.translation));
+    /// ------------T-E-S-T--A-R-E-A------------------\\\
 
   }
 

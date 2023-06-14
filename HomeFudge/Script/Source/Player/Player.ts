@@ -15,6 +15,9 @@ namespace HomeFudge {
             if (Mouse.isPressedOne([MOUSE_CODE.LEFT])) {
                 this.destroyer.fireWeapon(this.selectedWeapon, this.tempAimTarget);
             }
+            if(ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.F])){
+               
+            }
             // if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE."BUTTON"])) {
             //     console.error("Switch NOT IMPLEMENTED!!!");
 

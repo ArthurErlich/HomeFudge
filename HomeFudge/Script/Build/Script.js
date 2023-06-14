@@ -316,18 +316,20 @@ var HomeFudge;
     ///Player\\\
     let p1 = null;
     ///Destroyer\\\
+    let astroidList = null;
     /// ------------T-E-S-T--A-R-E-A------------------\\\
     let UPDATE_EVENTS;
     (function (UPDATE_EVENTS) {
         UPDATE_EVENTS["GAME_OBJECTS"] = "GameObjectUpdate";
         UPDATE_EVENTS["PLAYER_INPUT"] = "PlayerInputUpdate";
+        UPDATE_EVENTS["UI"] = "UI";
     })(UPDATE_EVENTS = HomeFudge.UPDATE_EVENTS || (HomeFudge.UPDATE_EVENTS = {}));
     /// ------------T-E-S-T--A-R-E-A------------------\\\
     async function start(_event) {
         HomeFudge.LoadingScreen.remove();
         HomeFudge._viewport = _event.detail;
         HomeFudge._worldNode = HomeFudge._viewport.getBranch();
-        HomeFudge._viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
+        // _viewport.physicsDebugMode =ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
         console.log(HomeFudge._viewport);
         //Loads Config then initializes the world in the right order
         await loadConfig().then(initWorld).then(() => {
@@ -364,10 +366,12 @@ var HomeFudge;
         let x = 200;
         let y = 0;
         let z = -100;
+        astroidList = new Array(50);
         for (let index = 0; index < 50; index++) {
-            HomeFudge.Astroid.spawn(new ƒ.Vector3(x * index * Math.random() - x / 2, y * index * Math.random() + 100 - y / 2, z * index * Math.random()), HomeFudge.Astroid.getLarge());
+            astroidList[index] = HomeFudge.Astroid.spawn(new ƒ.Vector3(x * index * Math.random() - x / 2, y * index * Math.random() + 100 - y / 2, -z * index * Math.random()), HomeFudge.Astroid.getLarge());
         }
-        let astroid = 
+        let astroid_UI = new HomeFudge.UI_EnemySelection();
+        HomeFudge.UI_EnemySelection.setPosition(new ƒ.Vector2(100, 100));
         /// ------------T-E-S-T--A-R-E-A------------------\\\
         ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, update);
         ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 35); // start the game loop to continuously draw the _viewport, update the audiosystem and drive the physics i/a
@@ -377,11 +381,18 @@ var HomeFudge;
         ƒ.Physics.simulate(); // make an update loop just for the Physics. fixed at 30fps
         ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.PLAYER_INPUT));
         ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.GAME_OBJECTS));
-        /// ------------T-E-S-T--A-R-E-A------------------\\\
-        // let uiPos: ƒ.Vector2 = _viewport.pointWorldToClient(destroyer.mtxWorld.translation); //TODO: learn the VUI!
-        /// ------------T-E-S-T--A-R-E-A------------------\\\
+        // GameLoop.update(); <-- different approach instant of dispatching an event for the loop.
+        // /// ------------T-E-S-T--A-R-E-A------------------\\\
+        // /// ------------T-E-S-T--A-R-E-A------------------\\\
         ƒ.AudioManager.default.update();
         HomeFudge._viewport.draw();
+        ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.UI)); // UI needs to be updated after drawing the frame
+        /// ------------T-E-S-T--A-R-E-A------------------\\\
+        // let uiPos: ƒ.Vector2 = _viewport.pointWorldToClient(destroyer.mtxWorld.translation); //TODO: learn the VUI!
+        let uiPos = HomeFudge._viewport.pointWorldToClient(astroidList[10].mtxWorld.translation);
+        HomeFudge.UI_EnemySelection.setPosition(uiPos);
+        HomeFudge.UI_EnemySelection.setSize(p1.destroyer.mtxWorld.translation.getDistance(astroidList[10].mtxWorld.translation));
+        /// ------------T-E-S-T--A-R-E-A------------------\\\
     }
     /// ------------T-E-S-T--A-R-E-A------------------\\\
     // function getPosTest(): void {
@@ -555,6 +566,7 @@ var HomeFudge;
     })(SIZE || (SIZE = {}));
     class Astroid extends HomeFudge.GameObject {
         SIZE = SIZE;
+        d;
         //this is an large Astorid example
         //Mesh and Material index is equal to node index
         update() {
@@ -566,12 +578,14 @@ var HomeFudge;
             return SIZE.LARGE; //RNG°
         }
         static spawn(location, size) {
+            let astroid = null;
             if (size == null || size == undefined) {
                 size = Astroid.getLarge(); // change to random when ready
             }
             switch (size) {
                 case SIZE.LARGE:
-                    HomeFudge._worldNode.addChild(new HomeFudge.AstroidLarge(location));
+                    astroid = new HomeFudge.AstroidLarge(location);
+                    HomeFudge._worldNode.addChild(astroid);
                     break;
                 case SIZE.MEDIUM:
                     console.warn("Medium astroids dont have a class");
@@ -582,6 +596,7 @@ var HomeFudge;
                 default:
                     break;
             }
+            return astroid;
         }
         alive() {
             throw new Error("Method not implemented.");
@@ -610,6 +625,25 @@ var HomeFudge;
                 materialList[index] = nodes[index].getComponent(ƒ.ComponentMaterial).material;
             }
             return materialList;
+        }
+        static setupRigidbody(location, boundingBox, spawnRotEffect) {
+            let rotEffect = 0.0025;
+            let rigidBody;
+            rigidBody = new ƒ.ComponentRigidbody(HomeFudge.Config.astroid.size.LARGE.mass, ƒ.BODY_TYPE.DYNAMIC, ƒ.COLLIDER_TYPE.CUBE, ƒ.COLLISION_GROUP.DEFAULT, ƒ.Matrix4x4.TRANSLATION(location));
+            rigidBody.mtxPivot.scale(ƒ.Vector3.SUM(boundingBox, boundingBox));
+            rigidBody.setPosition(location);
+            rigidBody.restitution = 1;
+            rigidBody.effectRotation = new ƒ.Vector3(rotEffect, rotEffect, rotEffect);
+            rigidBody.dampRotation = 0;
+            rigidBody.dampTranslation = 0;
+            rigidBody.setAngularVelocity(new ƒ.Vector3(Math.random() * spawnRotEffect - (spawnRotEffect / 2), Math.random() * spawnRotEffect - (spawnRotEffect / 2), Math.random() * spawnRotEffect - (spawnRotEffect / 2)));
+            // spawnRotEffect = 100;
+            // this.rigidBody.setVelocity(new ƒ.Vector3(
+            //     Math.random() * spawnRotEffect - (spawnRotEffect / 2),
+            //     Math.random() * spawnRotEffect - (spawnRotEffect / 2),
+            //     Math.random() * spawnRotEffect - (spawnRotEffect / 2)
+            // ));
+            return rigidBody;
         }
         constructor(name) {
             super(name);
@@ -641,34 +675,22 @@ var HomeFudge;
             nodeList = await HomeFudge.Resources.getMultiplyComponentNodes(HomeFudge.Config.astroid.seedNodes.large, AstroidLarge.graph); //<-note: Config.astroid.seedNodes.large, is an array 
             AstroidLarge.meshList = HomeFudge.Astroid.loadMeshList(nodeList);
             AstroidLarge.materialList = HomeFudge.Astroid.loadMaterialList(nodeList);
-            this.setAllComponents(location);
-            this.addRigidbody(location);
+            //sets the configs for this Astroid
+            this.hitPoints = HomeFudge.Config.astroid.size.LARGE.hitpoints;
+            this.setAllComponents(location, nodeList.length);
         }
-        setAllComponents(location) {
+        setAllComponents(location, selectionLength) {
             if (AstroidLarge.materialList == null || AstroidLarge.meshList == null) {
                 console.warn(this.name + " Mesh and/or Material is missing");
                 return;
             }
             //random mat/mesh selection:
-            let selection = 0;
+            let selection = Math.floor(Math.random() * selectionLength);
             this.addComponent(new ƒ.ComponentMaterial(AstroidLarge.materialList[selection]));
             this.addComponent(new ƒ.ComponentMesh(AstroidLarge.meshList[selection]));
             this.addComponent(new ƒ.ComponentTransform(ƒ.Matrix4x4.TRANSLATION(location)));
-        }
-        addRigidbody(location) {
-            let rotEffect = 0.0025;
-            let spawnRotEffect = HomeFudge.Config.astroid.size.LARGE.spawnRotSpeed;
-            this.rigidBody = new ƒ.ComponentRigidbody(HomeFudge.Config.astroid.size.LARGE.mass, ƒ.BODY_TYPE.DYNAMIC, ƒ.COLLIDER_TYPE.CUBE, ƒ.COLLISION_GROUP.DEFAULT, ƒ.Matrix4x4.TRANSLATION(location));
-            this.rigidBody.mtxPivot.scale(ƒ.Vector3.SUM(AstroidLarge.meshList[0].boundingBox.min, AstroidLarge.meshList[0].boundingBox.min));
-            this.rigidBody.setPosition(location);
-            this.rigidBody.restitution = 0.1;
-            this.rigidBody.effectRotation = new ƒ.Vector3(rotEffect, rotEffect, rotEffect);
-            this.rigidBody.dampRotation = 0;
-            this.rigidBody.dampTranslation = 0;
+            this.rigidBody = AstroidLarge.setupRigidbody(location, AstroidLarge.meshList[selection].boundingBox.min, HomeFudge.Config.astroid.size.LARGE.spawnRotSpeed);
             this.addComponent(this.rigidBody);
-            this.rigidBody.setAngularVelocity(new ƒ.Vector3(Math.random() * spawnRotEffect - (spawnRotEffect / 2), Math.random() * spawnRotEffect - (spawnRotEffect / 2), Math.random() * spawnRotEffect - (spawnRotEffect / 2)));
-            spawnRotEffect = 100;
-            this.rigidBody.setVelocity(new ƒ.Vector3(Math.random() * spawnRotEffect - (spawnRotEffect / 2), Math.random() * spawnRotEffect - (spawnRotEffect / 2), Math.random() * spawnRotEffect - (spawnRotEffect / 2)));
         }
         constructor(location) {
             super("Astroid_Large_" + location.toString() + "_" + Date.now().valueOf());
@@ -1864,6 +1886,8 @@ var HomeFudge;
             if (HomeFudge.Mouse.isPressedOne([HomeFudge.MOUSE_CODE.LEFT])) {
                 this.destroyer.fireWeapon(this.selectedWeapon, this.tempAimTarget);
             }
+            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.F])) {
+            }
             // if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE."BUTTON"])) {
             //     console.error("Switch NOT IMPLEMENTED!!!");
             // } else {
@@ -1993,11 +2017,59 @@ var HomeFudge;
 var HomeFudge;
 (function (HomeFudge) {
     var ƒ = FudgeCore;
-    class UI_Astroid extends ƒ.Mutable {
+    var ƒUi = FudgeUserInterface;
+    class UI_EnemySelection extends ƒ.Mutable {
+        static ui_RingSelection;
+        static ui_HealthMeter;
+        //Helatbar lenght 6ev
+        static setPosition(pos) {
+            let widthSelector = (UI_EnemySelection.ui_RingSelection.clientWidth) / 2;
+            let hightHealth = (UI_EnemySelection.ui_HealthMeter.clientHeight);
+            UI_EnemySelection.ui_RingSelection.style.top = (pos.y - widthSelector) + "px";
+            UI_EnemySelection.ui_RingSelection.style.left = (pos.x - widthSelector) + "px";
+            UI_EnemySelection.ui_HealthMeter.style.top = (pos.y - hightHealth - 5) + "px";
+            UI_EnemySelection.ui_HealthMeter.style.left = (pos.x + 20) + "px";
+        }
+        static setSize(distanceToPlayer) {
+            let widthSelector = (UI_EnemySelection.ui_RingSelection.clientWidth);
+            let scale = 4000 / distanceToPlayer;
+            UI_EnemySelection.ui_RingSelection.style.width = scale + "vw";
+            UI_EnemySelection.ui_RingSelection.style.height = scale + "vw";
+        }
+        static setHealthBar(hpPercent) {
+            let healthSteps = 6 / 100;
+            UI_EnemySelection.ui_HealthMeter.style.width = healthSteps * hpPercent + "vw";
+        }
+        static initUiRingSelection() {
+            UI_EnemySelection.ui_RingSelection = document.querySelector("div#RingSelection");
+            UI_EnemySelection.ui_RingSelection.style.position = "absolute";
+            UI_EnemySelection.ui_RingSelection.style.visibility = "visible";
+            UI_EnemySelection.ui_RingSelection.style.width = "2vw";
+            UI_EnemySelection.ui_RingSelection.style.height = "2vw";
+            UI_EnemySelection.ui_RingSelection.style.borderRadius = "100%";
+            UI_EnemySelection.ui_RingSelection.style.borderColor = "rgba(255, 0, 0, 0.5)";
+            UI_EnemySelection.ui_RingSelection.style.borderStyle = "solid";
+            UI_EnemySelection.ui_RingSelection.style.borderWidth = "-2px";
+            UI_EnemySelection.ui_RingSelection.style.position = "absolute";
+        }
+        static initUiHealthStatus() {
+            UI_EnemySelection.ui_HealthMeter = document.querySelector("div#HealthMeeter");
+            UI_EnemySelection.ui_HealthMeter.style.visibility = "visible";
+            UI_EnemySelection.ui_HealthMeter.style.position = "absolute";
+            UI_EnemySelection.ui_HealthMeter.style.width = "6vw";
+            UI_EnemySelection.ui_HealthMeter.style.height = "1vw";
+            UI_EnemySelection.ui_HealthMeter.style.backgroundColor = "rgba(255, 0, 0, 0.8)";
+        }
+        constructor() {
+            super();
+            UI_EnemySelection.initUiRingSelection();
+            UI_EnemySelection.initUiHealthStatus();
+            new ƒUi.Controller(this, UI_EnemySelection.ui_RingSelection);
+            // new ƒUi.Controller(this, UI_EnemySelection.uiHealthMeter);
+        }
         reduceMutator(_mutator) {
-            throw new Error("Method not implemented.");
         }
     }
-    HomeFudge.UI_Astroid = UI_Astroid;
+    HomeFudge.UI_EnemySelection = UI_EnemySelection;
 })(HomeFudge || (HomeFudge = {}));
 //# sourceMappingURL=Script.js.map

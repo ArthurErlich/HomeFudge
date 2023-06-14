@@ -26,3 +26,21 @@ canvas.fullscreen {
   opacity: 2;
   transition: opacity 1s;
 }
+div#RingSelection { /* make the settings inside the game and add config file for the ui*/
+  visibility: hidden;
+  /* position: absolute;
+  background-color: rgba(255, 0, 0, 0.123);
+  top: 0;
+  left: 0;
+  width: 10vw;
+  height: 10vw;
+  color: white;
+  border-radius: 100%;
+  border-color:  rgba(255, 0, 0, 0.123);
+  border-style: solid;
+  border-width: -2px;
+  pointer-events: none;  */
+}
+div#HealthMeeter { /* make the settings inside the game and add config file for the ui*/
+  visibility: hidden;
+}
