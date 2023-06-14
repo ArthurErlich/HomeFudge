@@ -6,7 +6,7 @@ namespace HomeFudge {
         // Register the script as component for use in the editor via drag&drop
         public static readonly iSubclass: number = ƒ.Component.registerSubclass(PlayerSpawnerComponent);
         // Properties may be mutated by users in the editor via the automatically created user interface
-        public message: string = "CustomComponentScript added to ";
+        
 
         #cmpTransform: ƒ.ComponentTransform; //Loook how the Transform is ben getting by RIGID BODY COMPONENT IN FUDGE CORE 
         private playerID: string; // input for setting the Player ID on add change look at the avalbe player span in game and check if ID is the same

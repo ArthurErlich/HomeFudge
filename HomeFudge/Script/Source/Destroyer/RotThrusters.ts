@@ -30,16 +30,47 @@ namespace HomeFudge {
                 case "FL":
                     this.mtxLocal.rotateY(-90);
                     break;
+                case "FDL":
+                    this.mtxLocal.rotateY(-90);
+                    this.mtxLocal.rotateZ(-90);
+                    break;
+                case "FUL":
+                    this.mtxLocal.rotateY(-90);
+                    this.mtxLocal.rotateZ(90);
+                    break;
                 case "FR":
                     this.mtxLocal.rotateY(90);
+                    break;
+                case "FDR":
+                    this.mtxLocal.rotateY(90);
+                    this.mtxLocal.rotateZ(-90);
+                    break;
+                case "FUR":
+                    this.mtxLocal.rotateY(90);
+                    this.mtxLocal.rotateZ(90);
                     break;
                 case "BL":
                     this.mtxLocal.rotateY(-90);
                     break;
+                case "BDL":
+                    this.mtxLocal.rotateY(-90);
+                    this.mtxLocal.rotateZ(-90);
+                    break;
+                case "BUL":
+                    this.mtxLocal.rotateY(-90);
+                    this.mtxLocal.rotateZ(90);
+                    break;
                 case "BR":
                     this.mtxLocal.rotateY(90);
                     break;
-
+                case "BDR":
+                    this.mtxLocal.rotateY(90);
+                    this.mtxLocal.rotateZ(-90);
+                    break;
+                case "BUR":
+                    this.mtxLocal.rotateY(90);
+                    this.mtxLocal.rotateZ(90);
+                    break;
                 default:
                     break;
             }

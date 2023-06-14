@@ -61,9 +61,17 @@ declare namespace HomeFudge {
         mass: number;
         maxHealthPoints: number;
         RotThruster_FL: number[];
+        RotThruster_FDL: number[];
+        RotThruster_FUL: number[];
         RotThruster_FR: number[];
+        RotThruster_FDR: number[];
+        RotThruster_FUR: number[];
         RotThruster_BL: number[];
+        RotThruster_BDL: number[];
+        RotThruster_BUL: number[];
         RotThruster_BR: number[];
+        RotThruster_BDR: number[];
+        RotThruster_BUR: number[];
         MainThrusterA: number[];
         MainThrusterB: number[];
         [key: string]: string | number | number[];
@@ -156,7 +164,6 @@ declare namespace HomeFudge {
     class PlayerSpawnerComponent extends ƒ.ComponentScript {
         #private;
         static readonly iSubclass: number;
-        message: string;
         private playerID;
         constructor();
         hndEvent: (_event: Event) => void;

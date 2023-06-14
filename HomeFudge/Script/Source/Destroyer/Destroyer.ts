@@ -5,8 +5,8 @@ namespace HomeFudge {
         BEAM_TURRET,
         ROCKET_POD
     }
-    enum DIRECTION{
-
+    //empty enum wich is set by the Ship superclass
+    enum DIRECTION {
     }
     export class Destroyer extends Ship {
         public remove(): void {
@@ -120,8 +120,20 @@ namespace HomeFudge {
         private addThrusters(): void {
             this.rotThruster[0] = new RotThrusters("FL", JSONparser.toVector3(Config.destroyer.RotThruster_FL));
             this.rotThruster[1] = new RotThrusters("FR", JSONparser.toVector3(Config.destroyer.RotThruster_FR));
+
+
             this.rotThruster[2] = new RotThrusters("BL", JSONparser.toVector3(Config.destroyer.RotThruster_BL));
             this.rotThruster[3] = new RotThrusters("BR", JSONparser.toVector3(Config.destroyer.RotThruster_BR));
+
+            this.rotThruster[4] = new RotThrusters("FDL", JSONparser.toVector3(Config.destroyer.RotThruster_FDL));
+            this.rotThruster[5] = new RotThrusters("FUL", JSONparser.toVector3(Config.destroyer.RotThruster_FUL));
+            this.rotThruster[6] = new RotThrusters("FDR", JSONparser.toVector3(Config.destroyer.RotThruster_FDR));
+            this.rotThruster[7] = new RotThrusters("FUR", JSONparser.toVector3(Config.destroyer.RotThruster_FUR));
+
+            this.rotThruster[8] = new RotThrusters("BDL", JSONparser.toVector3(Config.destroyer.RotThruster_BDL));
+            this.rotThruster[9] = new RotThrusters("BUL", JSONparser.toVector3(Config.destroyer.RotThruster_BUL));
+            this.rotThruster[10] = new RotThrusters("BDR", JSONparser.toVector3(Config.destroyer.RotThruster_BDR));
+            this.rotThruster[11] = new RotThrusters("BUR", JSONparser.toVector3(Config.destroyer.RotThruster_BUR));
 
             this.rotThruster.forEach(thruster => {
                 this.addChild(thruster);
@@ -231,12 +243,30 @@ namespace HomeFudge {
                     }
                     break;
                 case Ship.DIRECTION.PITCH_UP:
+                    this.rotThruster[5].activate(true);
+                    this.rotThruster[7].activate(true);
+                    this.rotThruster[8].activate(true);
+                    this.rotThruster[10].activate(true);
                     break;
                 case Ship.DIRECTION.PITCH_DOWN:
+                    this.rotThruster[4].activate(true);
+                    this.rotThruster[6].activate(true);
+                    this.rotThruster[9].activate(true);
+                    this.rotThruster[11].activate(true);
                     break;
                 case Ship.DIRECTION.ROLL_LEFT:
+                    this.rotThruster[4].activate(true);
+                    this.rotThruster[7].activate(true);
+
+                    this.rotThruster[8].activate(true);
+                    this.rotThruster[11].activate(true);
                     break;
                 case Ship.DIRECTION.ROLL_RIGHT:
+                    this.rotThruster[5].activate(true);
+                    this.rotThruster[6].activate(true);
+
+                    this.rotThruster[9].activate(true);
+                    this.rotThruster[10].activate(true);
                     break;
 
                 case Ship.DIRECTION.OFF:
@@ -300,6 +330,14 @@ namespace HomeFudge {
                 //stop rotLeft
                 this.rotateTo(Ship.DIRECTION.YAW_RIGHT);
             }
+
+            if (angularVelocity.x < -0.1) {
+                //stop rollLeft
+                this.rotateTo(Ship.DIRECTION.ROLL_RIGHT);
+            } else if (angularVelocity.x > 0.1) {
+                //stop rollRight
+                this.rotateTo(Ship.DIRECTION.ROLL_LEFT);
+            }
         }
 
         public alive(): boolean {
@@ -355,7 +393,7 @@ namespace HomeFudge {
             //add acceleration
         }
         public rotateTo(rotate: typeof Ship.DIRECTION[keyof typeof Ship.DIRECTION], _on?: boolean): void {
-            //Resets the Thruster fire Anim bevor adding the others
+            //Resets the Thruster fire Anim before adding the others
             this.fireThrusters(Ship.DIRECTION.OFF);
             /*
             Rotation Direction : 
@@ -428,6 +466,12 @@ namespace HomeFudge {
                 yawLeft = true;
             }
 
+            if (rotateX < 0) {
+                rollLeft = true;
+            } else if (rotateX > 0) {
+                rollRight = true;
+            }
+            
             // Stops applaying more force to the rotation if the maximum rotatin speed is gainend by setting the change to 0
             if (yawRight && angularVelocity.y <= -this.maxTurnSpeed) {
                 rotateY = 0;
@@ -442,7 +486,15 @@ namespace HomeFudge {
             if (pitchUp && angularVelocity.z >= this.maxTurnSpeed) {
                 rotateZ = 0;
             }
-            //Applays the rotation force
+
+            if (rollLeft && angularVelocity.x <= -this.maxTurnSpeed) {
+                rotateX = 0;
+            }
+            if (rollRight && angularVelocity.x >= this.maxTurnSpeed) {
+                rotateX = 0;
+            }
+
+            //Aplays the rotation force
             this.desireRotation.set((rotateX * this.maxTurnAcceleration) * _deltaSeconds, (rotateY * this.maxTurnAcceleration) * _deltaSeconds, (rotateZ * this.maxTurnAcceleration) * _deltaSeconds);
 
         }

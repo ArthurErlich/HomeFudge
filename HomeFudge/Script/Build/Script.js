@@ -428,7 +428,6 @@ var HomeFudge;
         // Register the script as component for use in the editor via drag&drop
         static iSubclass = ƒ.Component.registerSubclass(PlayerSpawnerComponent);
         // Properties may be mutated by users in the editor via the automatically created user interface
-        message = "CustomComponentScript added to ";
         #cmpTransform; //Loook how the Transform is ben getting by RIGID BODY COMPONENT IN FUDGE CORE 
         playerID; // input for setting the Player ID on add change look at the avalbe player span in game and check if ID is the same
         constructor() {
@@ -852,6 +851,7 @@ var HomeFudge;
         WEAPONS[WEAPONS["BEAM_TURRET"] = 1] = "BEAM_TURRET";
         WEAPONS[WEAPONS["ROCKET_POD"] = 2] = "ROCKET_POD";
     })(WEAPONS || (WEAPONS = {}));
+    //empty enum wich is set by the Ship superclass
     let DIRECTION;
     (function (DIRECTION) {
     })(DIRECTION || (DIRECTION = {}));
@@ -939,6 +939,14 @@ var HomeFudge;
             this.rotThruster[1] = new HomeFudge.RotThrusters("FR", HomeFudge.JSONparser.toVector3(HomeFudge.Config.destroyer.RotThruster_FR));
             this.rotThruster[2] = new HomeFudge.RotThrusters("BL", HomeFudge.JSONparser.toVector3(HomeFudge.Config.destroyer.RotThruster_BL));
             this.rotThruster[3] = new HomeFudge.RotThrusters("BR", HomeFudge.JSONparser.toVector3(HomeFudge.Config.destroyer.RotThruster_BR));
+            this.rotThruster[4] = new HomeFudge.RotThrusters("FDL", HomeFudge.JSONparser.toVector3(HomeFudge.Config.destroyer.RotThruster_FDL));
+            this.rotThruster[5] = new HomeFudge.RotThrusters("FUL", HomeFudge.JSONparser.toVector3(HomeFudge.Config.destroyer.RotThruster_FUL));
+            this.rotThruster[6] = new HomeFudge.RotThrusters("FDR", HomeFudge.JSONparser.toVector3(HomeFudge.Config.destroyer.RotThruster_FDR));
+            this.rotThruster[7] = new HomeFudge.RotThrusters("FUR", HomeFudge.JSONparser.toVector3(HomeFudge.Config.destroyer.RotThruster_FUR));
+            this.rotThruster[8] = new HomeFudge.RotThrusters("BDL", HomeFudge.JSONparser.toVector3(HomeFudge.Config.destroyer.RotThruster_BDL));
+            this.rotThruster[9] = new HomeFudge.RotThrusters("BUL", HomeFudge.JSONparser.toVector3(HomeFudge.Config.destroyer.RotThruster_BUL));
+            this.rotThruster[10] = new HomeFudge.RotThrusters("BDR", HomeFudge.JSONparser.toVector3(HomeFudge.Config.destroyer.RotThruster_BDR));
+            this.rotThruster[11] = new HomeFudge.RotThrusters("BUR", HomeFudge.JSONparser.toVector3(HomeFudge.Config.destroyer.RotThruster_BUR));
             this.rotThruster.forEach(thruster => {
                 this.addChild(thruster);
             });
@@ -1034,12 +1042,28 @@ var HomeFudge;
                     }
                     break;
                 case HomeFudge.Ship.DIRECTION.PITCH_UP:
+                    this.rotThruster[5].activate(true);
+                    this.rotThruster[7].activate(true);
+                    this.rotThruster[8].activate(true);
+                    this.rotThruster[10].activate(true);
                     break;
                 case HomeFudge.Ship.DIRECTION.PITCH_DOWN:
+                    this.rotThruster[4].activate(true);
+                    this.rotThruster[6].activate(true);
+                    this.rotThruster[9].activate(true);
+                    this.rotThruster[11].activate(true);
                     break;
                 case HomeFudge.Ship.DIRECTION.ROLL_LEFT:
+                    this.rotThruster[4].activate(true);
+                    this.rotThruster[7].activate(true);
+                    this.rotThruster[8].activate(true);
+                    this.rotThruster[11].activate(true);
                     break;
                 case HomeFudge.Ship.DIRECTION.ROLL_RIGHT:
+                    this.rotThruster[5].activate(true);
+                    this.rotThruster[6].activate(true);
+                    this.rotThruster[9].activate(true);
+                    this.rotThruster[10].activate(true);
                     break;
                 case HomeFudge.Ship.DIRECTION.OFF:
                     this.rotThruster.forEach(thruster => {
@@ -1098,6 +1122,14 @@ var HomeFudge;
                 //stop rotLeft
                 this.rotateTo(HomeFudge.Ship.DIRECTION.YAW_RIGHT);
             }
+            if (angularVelocity.x < -0.1) {
+                //stop rollLeft
+                this.rotateTo(HomeFudge.Ship.DIRECTION.ROLL_RIGHT);
+            }
+            else if (angularVelocity.x > 0.1) {
+                //stop rollRight
+                this.rotateTo(HomeFudge.Ship.DIRECTION.ROLL_LEFT);
+            }
         }
         alive() {
             console.error("Method not implemented.");
@@ -1148,7 +1180,7 @@ var HomeFudge;
             //add acceleration
         }
         rotateTo(rotate, _on) {
-            //Resets the Thruster fire Anim bevor adding the others
+            //Resets the Thruster fire Anim before adding the others
             this.fireThrusters(HomeFudge.Ship.DIRECTION.OFF);
             /*
             Rotation Direction :
@@ -1218,6 +1250,12 @@ var HomeFudge;
             else if (rotateY > 0) {
                 yawLeft = true;
             }
+            if (rotateX < 0) {
+                rollLeft = true;
+            }
+            else if (rotateX > 0) {
+                rollRight = true;
+            }
             // Stops applaying more force to the rotation if the maximum rotatin speed is gainend by setting the change to 0
             if (yawRight && angularVelocity.y <= -this.maxTurnSpeed) {
                 rotateY = 0;
@@ -1231,7 +1269,13 @@ var HomeFudge;
             if (pitchUp && angularVelocity.z >= this.maxTurnSpeed) {
                 rotateZ = 0;
             }
-            //Applays the rotation force
+            if (rollLeft && angularVelocity.x <= -this.maxTurnSpeed) {
+                rotateX = 0;
+            }
+            if (rollRight && angularVelocity.x >= this.maxTurnSpeed) {
+                rotateX = 0;
+            }
+            //Aplays the rotation force
             this.desireRotation.set((rotateX * this.maxTurnAcceleration) * HomeFudge._deltaSeconds, (rotateY * this.maxTurnAcceleration) * HomeFudge._deltaSeconds, (rotateZ * this.maxTurnAcceleration) * HomeFudge._deltaSeconds);
         }
         constructor(startTransform) {
@@ -1538,14 +1582,46 @@ var HomeFudge;
                 case "FL":
                     this.mtxLocal.rotateY(-90);
                     break;
+                case "FDL":
+                    this.mtxLocal.rotateY(-90);
+                    this.mtxLocal.rotateZ(-90);
+                    break;
+                case "FUL":
+                    this.mtxLocal.rotateY(-90);
+                    this.mtxLocal.rotateZ(90);
+                    break;
                 case "FR":
                     this.mtxLocal.rotateY(90);
+                    break;
+                case "FDR":
+                    this.mtxLocal.rotateY(90);
+                    this.mtxLocal.rotateZ(-90);
+                    break;
+                case "FUR":
+                    this.mtxLocal.rotateY(90);
+                    this.mtxLocal.rotateZ(90);
                     break;
                 case "BL":
                     this.mtxLocal.rotateY(-90);
                     break;
+                case "BDL":
+                    this.mtxLocal.rotateY(-90);
+                    this.mtxLocal.rotateZ(-90);
+                    break;
+                case "BUL":
+                    this.mtxLocal.rotateY(-90);
+                    this.mtxLocal.rotateZ(90);
+                    break;
                 case "BR":
                     this.mtxLocal.rotateY(90);
+                    break;
+                case "BDR":
+                    this.mtxLocal.rotateY(90);
+                    this.mtxLocal.rotateZ(-90);
+                    break;
+                case "BUR":
+                    this.mtxLocal.rotateY(90);
+                    this.mtxLocal.rotateZ(90);
                     break;
                 default:
                     break;
