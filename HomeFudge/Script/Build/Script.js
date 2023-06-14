@@ -1344,6 +1344,7 @@ var HomeFudge;
             this.getNodeResources(node);
             this.addComponent(new ƒ.ComponentTransform(spawnTransform));
             this.addComponent(new ƒ.ComponentMesh(GatlingBullet.mesh));
+            this.getComponent(ƒ.ComponentMesh).mtxPivot.scale(new ƒ.Vector3(2, 2, 2));
             this.addComponent(new ƒ.ComponentMaterial(GatlingBullet.material));
             this.rigidBody = new ƒ.ComponentRigidbody(HomeFudge.Config.gatlingBullet.mass, GatlingBullet.seedRigidBody.typeBody, GatlingBullet.seedRigidBody.typeCollider);
             this.rigidBody.mtxPivot = GatlingBullet.seedRigidBody.mtxPivot;
