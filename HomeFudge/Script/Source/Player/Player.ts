@@ -9,14 +9,17 @@ namespace HomeFudge {
 
         private selectedWeapon: number = null; //TODO:Check if ok
 
-        private moveDirection: ƒ.Vector3 = ƒ.Vector3.ZERO();
+        private moveDirection: ƒ.Vector3 = ƒ.Vector3.ZERO(); // TODO: remove moveDirection -> better to do in the Destroyer.
+
+        //empty list for the inputs to be listed. Makes so that if W and A is pressed both get executed in the end of the update.
+        // private inputList: ƒ.KEYBOARD_CODE[] = null;
 
         private update = (): void => {
             if (Mouse.isPressedOne([MOUSE_CODE.LEFT])) {
                 this.destroyer.fireWeapon(this.selectedWeapon, this.tempAimTarget);
             }
-            if(ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.F])){
-               
+            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.F])) {
+
             }
             // if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE."BUTTON"])) {
             //     console.error("Switch NOT IMPLEMENTED!!!");
@@ -26,6 +29,11 @@ namespace HomeFudge {
             // }
             this.updateShipMovement();
             this.updateWeaponSelection();
+
+            //execute the movement commands TODO: refactor inputs to make that here work
+            // for (let i: number = 0; i < this.inputList.length; i++){
+            //     this.destroyer
+            // }
 
             this.destroyer.move(this.moveDirection);
             this.moveDirection = ƒ.Vector3.ZERO();

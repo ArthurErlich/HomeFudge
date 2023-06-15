@@ -363,6 +363,7 @@ var HomeFudge;
         }
         /// ------------T-E-S-T--A-R-E-A------------------\\\
         //TODO: Before the loop starts. Add an Game Menu draws on frame while updating
+        selectedObject = p1;
         let x = 200;
         let y = 0;
         let z = -100;
@@ -376,9 +377,10 @@ var HomeFudge;
         ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, update);
         ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 35); // start the game loop to continuously draw the _viewport, update the audiosystem and drive the physics i/a
     }
+    let selectedObject = p1; //TODO:REMOVE
     function update(_event) {
         HomeFudge._deltaSeconds = ƒ.Loop.timeFrameGame / 1000;
-        ƒ.Physics.simulate(); // make an update loop just for the Physics. fixed at 30fps
+        ƒ.Physics.simulate(); // make an update loop just for the Physics. fixed at 30fps to avoid some physics bugs by to many fps
         ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.PLAYER_INPUT));
         ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.GAME_OBJECTS));
         // GameLoop.update(); <-- different approach instant of dispatching an event for the loop.
@@ -388,10 +390,14 @@ var HomeFudge;
         HomeFudge._viewport.draw();
         ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.UI)); // UI needs to be updated after drawing the frame
         /// ------------T-E-S-T--A-R-E-A------------------\\\
-        // let uiPos: ƒ.Vector2 = _viewport.pointWorldToClient(destroyer.mtxWorld.translation); //TODO: learn the VUI!
-        let uiPos = HomeFudge._viewport.pointWorldToClient(astroidList[10].mtxWorld.translation);
+        if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.F])) {
+            let pickViewport = ƒ.Picker.pickViewport(HomeFudge._viewport, HomeFudge.Mouse.position);
+            pickViewport.sort((a, b) => a.zBuffer - b.zBuffer);
+            selectedObject = pickViewport[0].node;
+        }
+        let uiPos = HomeFudge._viewport.pointWorldToClient(selectedObject.mtxWorld.translation);
         HomeFudge.UI_EnemySelection.setPosition(uiPos);
-        HomeFudge.UI_EnemySelection.setSize(p1.destroyer.mtxWorld.translation.getDistance(astroidList[10].mtxWorld.translation));
+        HomeFudge.UI_EnemySelection.setSize(p1.destroyer.mtxWorld.translation.getDistance(selectedObject.mtxWorld.translation));
         /// ------------T-E-S-T--A-R-E-A------------------\\\
     }
     /// ------------T-E-S-T--A-R-E-A------------------\\\
@@ -1958,7 +1964,9 @@ var HomeFudge;
         destroyer = null;
         playerID = null;
         selectedWeapon = null; //TODO:Check if ok
-        moveDirection = ƒ.Vector3.ZERO();
+        moveDirection = ƒ.Vector3.ZERO(); // TODO: remove moveDirection -> better to do in the Destroyer.
+        //empty list for the inputs to be listed. Makes so that if W and A is pressed both get executed in the end of the update.
+        // private inputList: ƒ.KEYBOARD_CODE[] = null;
         update = () => {
             if (HomeFudge.Mouse.isPressedOne([HomeFudge.MOUSE_CODE.LEFT])) {
                 this.destroyer.fireWeapon(this.selectedWeapon, this.tempAimTarget);
@@ -1972,6 +1980,10 @@ var HomeFudge;
             // }
             this.updateShipMovement();
             this.updateWeaponSelection();
+            //execute the movement commands TODO: refactor inputs to make that here work
+            // for (let i: number = 0; i < this.inputList.length; i++){
+            //     this.destroyer
+            // }
             this.destroyer.move(this.moveDirection);
             this.moveDirection = ƒ.Vector3.ZERO();
             // //TODO: use PlayerCamera instant of mainCamera
@@ -2108,6 +2120,7 @@ var HomeFudge;
             UI_EnemySelection.ui_HealthMeter.style.left = (pos.x + 20) + "px";
         }
         static setSize(distanceToPlayer) {
+            return; // spots scaling
             let widthSelector = (UI_EnemySelection.ui_RingSelection.clientWidth);
             let scale = 4000 / distanceToPlayer;
             UI_EnemySelection.ui_RingSelection.style.width = scale + "vw";

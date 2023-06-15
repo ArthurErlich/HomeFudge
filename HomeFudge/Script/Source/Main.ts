@@ -23,7 +23,7 @@ namespace HomeFudge {
   let p1: Player = null;
 
   ///Destroyer\\\
-  let astroidList:Astroid[] = null;
+  let astroidList: Astroid[] = null;
 
 
 
@@ -77,24 +77,29 @@ namespace HomeFudge {
 
     /// ------------T-E-S-T--A-R-E-A------------------\\\
     //TODO: Before the loop starts. Add an Game Menu draws on frame while updating
+    selectedObject = p1;
+
     let x = 200;
     let y = 0;
     let z = -100;
     astroidList = new Array(50);
     for (let index = 0; index < 50; index++) {
-      astroidList[index] = Astroid.spawn(new ƒ.Vector3(x*index*Math.random()-x/2, y*index*Math.random()+100-y/2, -z*index*Math.random()), Astroid.getLarge());
+      astroidList[index] = Astroid.spawn(new ƒ.Vector3(x * index * Math.random() - x / 2, y * index * Math.random() + 100 - y / 2, -z * index * Math.random()), Astroid.getLarge());
     }
-    let astroid_UI:UI_EnemySelection = new UI_EnemySelection();
-    UI_EnemySelection.setPosition(new ƒ.Vector2(100,100));
+    let astroid_UI: UI_EnemySelection = new UI_EnemySelection();
+    UI_EnemySelection.setPosition(new ƒ.Vector2(100, 100));
     /// ------------T-E-S-T--A-R-E-A------------------\\\
 
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);
     ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 35);  // start the game loop to continuously draw the _viewport, update the audiosystem and drive the physics i/a
   }
 
+
+  let selectedObject: ƒ.Node = p1;//TODO:REMOVE
+
   function update(_event: Event): void {
     _deltaSeconds = ƒ.Loop.timeFrameGame / 1000;
-    ƒ.Physics.simulate();  // make an update loop just for the Physics. fixed at 30fps
+    ƒ.Physics.simulate();  // make an update loop just for the Physics. fixed at 30fps to avoid some physics bugs by to many fps
     ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.PLAYER_INPUT));
     ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.GAME_OBJECTS));
 
@@ -110,14 +115,23 @@ namespace HomeFudge {
     ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.UI)); // UI needs to be updated after drawing the frame
 
     /// ------------T-E-S-T--A-R-E-A------------------\\\
-    // let uiPos: ƒ.Vector2 = _viewport.pointWorldToClient(destroyer.mtxWorld.translation); //TODO: learn the VUI!
-    let uiPos: ƒ.Vector2 = _viewport.pointWorldToClient(astroidList[10].mtxWorld.translation);
 
+    if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.F])) {
+      let pickViewport: ƒ.Pick[] = ƒ.Picker.pickViewport(_viewport, Mouse.position);
+
+      pickViewport.sort((a, b) => a.zBuffer - b.zBuffer);
+      selectedObject = pickViewport[0].node;
+    }
+
+
+    let uiPos: ƒ.Vector2 = _viewport.pointWorldToClient(selectedObject.mtxWorld.translation);
     UI_EnemySelection.setPosition(uiPos);
-    UI_EnemySelection.setSize(p1.destroyer.mtxWorld.translation.getDistance(astroidList[10].mtxWorld.translation));
+    UI_EnemySelection.setSize(p1.destroyer.mtxWorld.translation.getDistance(selectedObject.mtxWorld.translation));
     /// ------------T-E-S-T--A-R-E-A------------------\\\
-
   }
+
+
+
 
   /// ------------T-E-S-T--A-R-E-A------------------\\\
   // function getPosTest(): void {

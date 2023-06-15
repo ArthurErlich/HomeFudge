@@ -20,6 +20,7 @@ namespace HomeFudge {
             UI_EnemySelection.ui_HealthMeter.style.left = (pos.x+20)+"px";
         }
         public static setSize(distanceToPlayer:number):void{
+            return; // spots scaling
             let widthSelector: number = (UI_EnemySelection.ui_RingSelection.clientWidth);
             let scale: number = 4000/distanceToPlayer;
             UI_EnemySelection.ui_RingSelection.style.width = scale+"vw";
