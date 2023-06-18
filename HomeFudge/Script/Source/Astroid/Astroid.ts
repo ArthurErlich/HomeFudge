@@ -8,12 +8,14 @@ namespace HomeFudge {
     }
     export class Astroid extends GameObject {
         private SIZE = SIZE;
-d
+
+        protected maxHealth:number;
+        protected hitPoints: number;
+
         //this is an large Astorid example
         //Mesh and Material index is equal to node index
 
         public update(): void {
-
         }
         // public static getRandomSize():SIZE{
         //     return SIZE.LARGE //RNG°
@@ -51,6 +53,12 @@ d
         }
         public remove(): void {
             throw new Error("Method not implemented.");
+        }
+        public getMaxHP():number{
+            return this.maxHealth;
+        }
+        public getHP():number{
+            return this.hitPoints;
         }
 
         protected static loadMeshList(nodes: ƒ.Node[]): ƒ.Mesh[] {

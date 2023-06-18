@@ -3,7 +3,8 @@ namespace HomeFudge {
     export class AstroidLarge extends Astroid {
         private static graph: ƒ.Graph = null;
 
-        private hitPoints = null;
+        protected maxHealth:number  = null;
+        protected hitPoints: number = null;
 
         private static meshList: ƒ.Mesh[] = null;
         private static materialList: ƒ.Material[] = null;
@@ -30,8 +31,9 @@ namespace HomeFudge {
             AstroidLarge.materialList = Astroid.loadMaterialList(nodeList);
 
             //sets the configs for this Astroid
-            this.hitPoints = Config.astroid.size.LARGE.hitpoints;
-
+            let hitPoints = Config.astroid.size.LARGE.hitpoints + (Math.round(Math.random()*100)); //TODO:remove this after tests with ui is done
+            this.hitPoints = hitPoints;
+            this.maxHealth = hitPoints;
             this.setAllComponents(location, nodeList.length);
 
         }
@@ -59,7 +61,7 @@ namespace HomeFudge {
 
 
         constructor(location: ƒ.Vector3) {
-            super("Astroid_Large_" + location.toString() + "_" + Date.now().valueOf());
+            super("Astroid_Large");
             this.init(location);
         }
     }
