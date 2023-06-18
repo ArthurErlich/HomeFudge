@@ -8,6 +8,7 @@ namespace HomeFudge {
         public playerID: string = null;
 
         private selectedWeapon: number = null; //TODO:Check if ok
+        private selectedObject: ƒ.Node = null;
 
         private moveDirection: ƒ.Vector3 = ƒ.Vector3.ZERO(); // TODO: remove moveDirection -> better to do in the Destroyer.
 
@@ -50,7 +51,11 @@ namespace HomeFudge {
             //     _mainCamera.camComp.mtxPivot.rotation.z
             // );
         }
-        private selectWeapon(weapon: number) {
+        private selectObject(): void{
+
+        }
+
+        private selectWeapon(weapon: number): void {
             switch (weapon) {
                 case this.destroyer.WEAPONS.GATLING_TURRET:
                     if (this.selectedWeapon != weapon) {
@@ -142,7 +147,7 @@ namespace HomeFudge {
             //inits Music Soundtrack
             let audioComp = new ƒ.ComponentAudio(new ƒ.Audio("Sound/Background/10.Cycles.mp3"), true); //TODO:Move sound to recourses
             //Sound by IXION!
-            audioComp.volume = 0.1;
+            audioComp.volume = 0.01;
             audioComp.play(true);
             _mainCamera.camNode.addComponent(audioComp);//TODO: Change to player Camera
         }
