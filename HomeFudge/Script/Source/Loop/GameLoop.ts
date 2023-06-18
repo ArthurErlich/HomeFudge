@@ -1,6 +1,12 @@
 /// <reference path="../Abstract/GameObject.ts" />
 namespace HomeFudge {
 
+    /*TODO: for now the GameLoop class wont do anything. It will replace the Custom Event. 
+    Events ar nice to use but it would make more sense to have an Class which updates all the GameObjects. 
+    The list also shows how many objects are alive and which on are ready to get cleared ot of the array.
+    the collection and removing of the garbage will be done every so often, when possible it can be done on a different thread to boost up performance.
+
+    */
     //Refactor Event handling to method handling
     //TODO: remove event handling and replace it with that:
     export class GameLoop {
