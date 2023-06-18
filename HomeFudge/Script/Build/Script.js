@@ -2240,9 +2240,15 @@ var HomeFudge;
             //Fix for the time being. Later i will add an tag system
             if (!(node instanceof HomeFudge.Astroid)) {
                 UI_Selection.focusedNode = null;
+                UI_Selection.ringSelection.style.visibility = "hidden";
+                UI_Selection.healthMeter.style.visibility = "hidden";
+                UI_Selection.healthMeterNumber.style.visibility = "hidden";
                 return;
             }
             else {
+                UI_Selection.ringSelection.style.visibility = "visible";
+                UI_Selection.healthMeter.style.visibility = "visible";
+                UI_Selection.healthMeterNumber.style.visibility = "visible";
                 UI_Selection.focusedNode = node;
                 UI_Selection.updateHealthBar();
             }
