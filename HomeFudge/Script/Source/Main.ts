@@ -53,6 +53,7 @@ namespace HomeFudge {
       console.warn("LoadingConfigs");
       await Config.initConfigs();
       Mouse.init();
+      UI.init();
     }
     async function initWorld(): Promise<void> {
       ƒ.Physics.setGravity(ƒ.Vector3.ZERO());
@@ -86,8 +87,6 @@ namespace HomeFudge {
     for (let index = 0; index < 50; index++) {
       astroidList[index] = Astroid.spawn(new ƒ.Vector3(x * index * Math.random() - x / 2, y * index * Math.random() + 100 - y / 2, -z * index * Math.random()), Astroid.getLarge());
     }
-    let astroid_UI: UI_EnemySelection = new UI_EnemySelection();
-    UI_EnemySelection.setPosition(new ƒ.Vector2(100, 100));
     /// ------------T-E-S-T--A-R-E-A------------------\\\
 
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);
@@ -106,27 +105,25 @@ namespace HomeFudge {
     // GameLoop.update(); <-- different approach instant of dispatching an event for the loop.
 
 
-    // /// ------------T-E-S-T--A-R-E-A------------------\\\
-
-    // /// ------------T-E-S-T--A-R-E-A------------------\\\
-
+    /// ------------T-E-S-T--A-R-E-A------------------\\\
     ƒ.AudioManager.default.update();
     _viewport.draw();
     ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.UI)); // UI needs to be updated after drawing the frame
 
-    /// ------------T-E-S-T--A-R-E-A------------------\\\
 
+    //move to player, check if the same astroid is selected to stop/ or make a countdown of one second to stop selection spam/ or make
+    //Filter nodes. add tag to gameObject
     if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.F])) {
       let pickViewport: ƒ.Pick[] = ƒ.Picker.pickViewport(_viewport, Mouse.position);
 
       pickViewport.sort((a, b) => a.zBuffer - b.zBuffer);
       selectedObject = pickViewport[0].node;
+      UI_Selection.setNodeToFocus(selectedObject);
     }
 
-
-    let uiPos: ƒ.Vector2 = _viewport.pointWorldToClient(selectedObject.mtxWorld.translation);
-    UI_EnemySelection.setPosition(uiPos);
-    UI_EnemySelection.setSize(p1.destroyer.mtxWorld.translation.getDistance(selectedObject.mtxWorld.translation));
+    // UI_Selection.update();
+    // let uiPos: ƒ.Vector2 = _viewport.pointWorldToClient(selectedObject.mtxWorld.translation);
+    UI_Selection.setSize(p1.destroyer.mtxWorld.translation.getDistance(selectedObject.mtxWorld.translation));
     /// ------------T-E-S-T--A-R-E-A------------------\\\
   }
 
