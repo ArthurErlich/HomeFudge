@@ -10,6 +10,7 @@ var HomeFudge;
         static destroyer = null;
         static camera = null;
         static astroid = null;
+        static ui = null;
         /**
          * The function initializes configurations by fetching JSON files and assigning their contents
          * to corresponding variables.
@@ -22,6 +23,7 @@ var HomeFudge;
             let destroyerResponse = await fetch("Configs/destroyerConfig.json");
             let cameraResponse = await fetch("Configs/cameraConfig.json");
             let astroidResponse = await fetch("Configs/astroidConfig.json");
+            let uiResponse = await fetch("Configs/uiConfig.json");
             try {
                 Config.gatlingBullet = await gatBulletResponse.json();
             }
@@ -63,6 +65,12 @@ var HomeFudge;
             }
             catch (error) {
                 Config.printError(error, HomeFudge.Astroid.name);
+            }
+            try {
+                Config.ui = await uiResponse.json();
+            }
+            catch (error) {
+                Config.printError(error, "UI");
             }
         }
         static printError(error, object) {
@@ -121,7 +129,21 @@ var HomeFudge;
             this.spawnRotSpeed = _spawnRotSpeed;
         }
     }
-    //#endregion Astroid
+    class UI_Selection {
+        healthBarWidth;
+        healthBarHight;
+        healthBarTextSize;
+        selectionRingRadius;
+        ringBorderWidth;
+        constructor(_healthBarWidth, _healthBarHight, _healthBarTextSize, _selectionRingRadius, _ringBorderWidth) {
+            this.healthBarWidth = _healthBarWidth;
+            this.healthBarHight = _healthBarHight;
+            this.healthBarTextSize = _healthBarTextSize;
+            this.selectionRingRadius = _selectionRingRadius;
+            this.ringBorderWidth = _ringBorderWidth;
+        }
+    }
+    //#endregion UI
 })(HomeFudge || (HomeFudge = {}));
 var HomeFudge;
 (function (HomeFudge) {
@@ -136,43 +158,6 @@ var HomeFudge;
     }
     HomeFudge.ConvexHull = ConvexHull;
 })(HomeFudge || (HomeFudge = {}));
-var Script;
-(function (Script) {
-    var ƒ = FudgeCore;
-    ƒ.Project.registerScriptNamespace(Script); // Register the namespace to FUDGE for serialization
-    class CustomComponentScript extends ƒ.ComponentScript {
-        // Register the script as component for use in the editor via drag&drop
-        static iSubclass = ƒ.Component.registerSubclass(CustomComponentScript);
-        // Properties may be mutated by users in the editor via the automatically created user interface
-        message = "CustomComponentScript added to ";
-        constructor() {
-            super();
-            // Don't start when running in editor
-            if (ƒ.Project.mode == ƒ.MODE.EDITOR)
-                return;
-            // Listen to this component being added to or removed from a node
-            this.addEventListener("componentAdd" /* ƒ.EVENT.COMPONENT_ADD */, this.hndEvent);
-            this.addEventListener("componentRemove" /* ƒ.EVENT.COMPONENT_REMOVE */, this.hndEvent);
-            this.addEventListener("nodeDeserialized" /* ƒ.EVENT.NODE_DESERIALIZED */, this.hndEvent);
-        }
-        // Activate the functions of this component as response to events
-        hndEvent = (_event) => {
-            switch (_event.type) {
-                case "componentAdd" /* ƒ.EVENT.COMPONENT_ADD */:
-                    ƒ.Debug.log(this.message, this.node);
-                    break;
-                case "componentRemove" /* ƒ.EVENT.COMPONENT_REMOVE */:
-                    this.removeEventListener("componentAdd" /* ƒ.EVENT.COMPONENT_ADD */, this.hndEvent);
-                    this.removeEventListener("componentRemove" /* ƒ.EVENT.COMPONENT_REMOVE */, this.hndEvent);
-                    break;
-                case "nodeDeserialized" /* ƒ.EVENT.NODE_DESERIALIZED */:
-                    // if deserialized the node is now fully reconstructed and access to all its components and children is possible
-                    break;
-            }
-        };
-    }
-    Script.CustomComponentScript = CustomComponentScript;
-})(Script || (Script = {}));
 var HomeFudge;
 (function (HomeFudge) {
     var ƒ = FudgeCore;
@@ -340,6 +325,7 @@ var HomeFudge;
             console.warn("LoadingConfigs");
             await HomeFudge.Config.initConfigs();
             HomeFudge.Mouse.init();
+            HomeFudge.UI.init();
         }
         async function initWorld() {
             ƒ.Physics.setGravity(ƒ.Vector3.ZERO());
@@ -371,8 +357,6 @@ var HomeFudge;
         for (let index = 0; index < 50; index++) {
             astroidList[index] = HomeFudge.Astroid.spawn(new ƒ.Vector3(x * index * Math.random() - x / 2, y * index * Math.random() + 100 - y / 2, -z * index * Math.random()), HomeFudge.Astroid.getLarge());
         }
-        let astroid_UI = new HomeFudge.UI_EnemySelection();
-        HomeFudge.UI_EnemySelection.setPosition(new ƒ.Vector2(100, 100));
         /// ------------T-E-S-T--A-R-E-A------------------\\\
         ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, update);
         ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 35); // start the game loop to continuously draw the _viewport, update the audiosystem and drive the physics i/a
@@ -384,20 +368,21 @@ var HomeFudge;
         ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.PLAYER_INPUT));
         ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.GAME_OBJECTS));
         // GameLoop.update(); <-- different approach instant of dispatching an event for the loop.
-        // /// ------------T-E-S-T--A-R-E-A------------------\\\
-        // /// ------------T-E-S-T--A-R-E-A------------------\\\
+        /// ------------T-E-S-T--A-R-E-A------------------\\\
         ƒ.AudioManager.default.update();
         HomeFudge._viewport.draw();
         ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.UI)); // UI needs to be updated after drawing the frame
-        /// ------------T-E-S-T--A-R-E-A------------------\\\
+        //move to player, check if the same astroid is selected to stop/ or make a countdown of one second to stop selection spam/ or make
+        //Filter nodes. add tag to gameObject
         if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.F])) {
             let pickViewport = ƒ.Picker.pickViewport(HomeFudge._viewport, HomeFudge.Mouse.position);
             pickViewport.sort((a, b) => a.zBuffer - b.zBuffer);
             selectedObject = pickViewport[0].node;
+            HomeFudge.UI_Selection.setNodeToFocus(selectedObject);
         }
-        let uiPos = HomeFudge._viewport.pointWorldToClient(selectedObject.mtxWorld.translation);
-        HomeFudge.UI_EnemySelection.setPosition(uiPos);
-        HomeFudge.UI_EnemySelection.setSize(p1.destroyer.mtxWorld.translation.getDistance(selectedObject.mtxWorld.translation));
+        // UI_Selection.update();
+        // let uiPos: ƒ.Vector2 = _viewport.pointWorldToClient(selectedObject.mtxWorld.translation);
+        HomeFudge.UI_Selection.setSize(p1.destroyer.mtxWorld.translation.getDistance(selectedObject.mtxWorld.translation));
         /// ------------T-E-S-T--A-R-E-A------------------\\\
     }
     /// ------------T-E-S-T--A-R-E-A------------------\\\
@@ -425,45 +410,6 @@ var HomeFudge;
         }
     }
     /// ------------T-E-S-T--A-R-E-A------------------\\\
-})(HomeFudge || (HomeFudge = {}));
-var HomeFudge;
-(function (HomeFudge) {
-    var ƒ = FudgeCore;
-    ƒ.Project.registerScriptNamespace(Script); // Register the namespace to FUDGE for serialization
-    class PlayerSpawnerComponent extends ƒ.ComponentScript {
-        // Register the script as component for use in the editor via drag&drop
-        static iSubclass = ƒ.Component.registerSubclass(PlayerSpawnerComponent);
-        // Properties may be mutated by users in the editor via the automatically created user interface
-        #cmpTransform; //Loook how the Transform is ben getting by RIGID BODY COMPONENT IN FUDGE CORE 
-        playerID; // input for setting the Player ID on add change look at the avalbe player span in game and check if ID is the same
-        constructor() {
-            super();
-            // Don't start when running in editor
-            // if (ƒ.Project.mode == ƒ.MODE.EDITOR)
-            //     return;
-            // Listen to this component being added to or removed from a node
-            this.addEventListener("componentAdd" /* ƒ.EVENT.COMPONENT_ADD */, this.hndEvent);
-            this.addEventListener("componentRemove" /* ƒ.EVENT.COMPONENT_REMOVE */, this.hndEvent);
-            this.addEventListener("nodeDeserialized" /* ƒ.EVENT.NODE_DESERIALIZED */, this.hndEvent);
-        }
-        // Activate the functions of this component as response to events
-        hndEvent = (_event) => {
-            switch (_event.type) {
-                case "componentAdd" /* ƒ.EVENT.COMPONENT_ADD */:
-                    this.#cmpTransform = this.node.getComponent(ƒ.ComponentTransform);
-                case "componentRemove" /* ƒ.EVENT.COMPONENT_REMOVE */:
-                    this.removeEventListener("componentAdd" /* ƒ.EVENT.COMPONENT_ADD */, this.hndEvent);
-                    this.removeEventListener("componentRemove" /* ƒ.EVENT.COMPONENT_REMOVE */, this.hndEvent);
-                    break;
-                case "nodeDeserialized" /* ƒ.EVENT.NODE_DESERIALIZED */:
-                    // if deserialized the node is now fully reconstructed and access to all its components and children is possible
-                    break;
-                case "renderPrepare" /* ƒ.EVENT.RENDER_PREPARE */:
-                    break;
-            }
-        };
-    }
-    HomeFudge.PlayerSpawnerComponent = PlayerSpawnerComponent;
 })(HomeFudge || (HomeFudge = {}));
 var HomeFudge;
 (function (HomeFudge) {
@@ -506,9 +452,9 @@ var HomeFudge;
             return HomeFudge.GameLoop.getAliveGameobjects();
         }
         constructor(idString) {
-            super(idString + "_" + (Math.random() * 100));
-            HomeFudge.GameLoop.addGameObject(this);
+            super(idString + "_"); //+ (Math.random()*100) + location.toString() + "_" + Date.now().valueOf() plus random string to make the ame Unique. Maybe usefull -> Hash functions
             //TODO: TEST out updater list
+            // GameLoop.addGameObject(this);// es mention in the GameLoop class, this is a future performance optimization.
             ƒ.Loop.addEventListener(HomeFudge.UPDATE_EVENTS.GAME_OBJECTS, () => {
                 this.update();
             });
@@ -524,7 +470,6 @@ var HomeFudge;
         constructor(idString) {
             super("Bullet" + idString);
             HomeFudge._worldNode.addChild(this);
-            //register to update event            
         }
     }
     HomeFudge.Bullet = Bullet;
@@ -571,7 +516,8 @@ var HomeFudge;
     })(SIZE || (SIZE = {}));
     class Astroid extends HomeFudge.GameObject {
         SIZE = SIZE;
-        d;
+        maxHealth;
+        hitPoints;
         //this is an large Astorid example
         //Mesh and Material index is equal to node index
         update() {
@@ -608,6 +554,12 @@ var HomeFudge;
         }
         remove() {
             throw new Error("Method not implemented.");
+        }
+        getMaxHP() {
+            return this.maxHealth;
+        }
+        getHP() {
+            return this.hitPoints;
         }
         static loadMeshList(nodes) {
             if (nodes[0].name == undefined) {
@@ -661,6 +613,7 @@ var HomeFudge;
     var ƒ = FudgeCore;
     class AstroidLarge extends HomeFudge.Astroid {
         static graph = null;
+        maxHealth = null;
         hitPoints = null;
         static meshList = null;
         static materialList = null;
@@ -681,7 +634,9 @@ var HomeFudge;
             AstroidLarge.meshList = HomeFudge.Astroid.loadMeshList(nodeList);
             AstroidLarge.materialList = HomeFudge.Astroid.loadMaterialList(nodeList);
             //sets the configs for this Astroid
-            this.hitPoints = HomeFudge.Config.astroid.size.LARGE.hitpoints;
+            let hitPoints = HomeFudge.Config.astroid.size.LARGE.hitpoints + (Math.round(Math.random() * 100)); //TODO:remove this after tests with ui is done
+            this.hitPoints = hitPoints;
+            this.maxHealth = hitPoints;
             this.setAllComponents(location, nodeList.length);
         }
         setAllComponents(location, selectionLength) {
@@ -698,11 +653,131 @@ var HomeFudge;
             this.addComponent(this.rigidBody);
         }
         constructor(location) {
-            super("Astroid_Large_" + location.toString() + "_" + Date.now().valueOf());
+            super("Astroid_Large");
             this.init(location);
         }
     }
     HomeFudge.AstroidLarge = AstroidLarge;
+})(HomeFudge || (HomeFudge = {}));
+var HomeFudge;
+(function (HomeFudge) {
+    var ƒ = FudgeCore;
+    ƒ.Project.registerScriptNamespace(HomeFudge); // Register the namespace to FUDGE for serialization
+    class ComponentPlayerSpawner extends ƒ.ComponentScript {
+        // Register the script as component for use in the editor via drag&drop
+        static iSubclass = ƒ.Component.registerSubclass(ComponentPlayerSpawner);
+        // Properties may be mutated by users in the editor via the automatically created user interface
+        #cmpTransform; //Loook how the Transform is ben getting by RIGID BODY COMPONENT IN FUDGE CORE 
+        playerID; // input for setting the Player ID on add change look at the avalbe player span in game and check if ID is the same
+        constructor() {
+            super();
+            // Don't start when running in editor
+            // if (ƒ.Project.mode == ƒ.MODE.EDITOR)
+            //     return;
+            // Listen to this component being added to or removed from a node
+            this.addEventListener("componentAdd" /* ƒ.EVENT.COMPONENT_ADD */, this.hndEvent);
+            this.addEventListener("componentRemove" /* ƒ.EVENT.COMPONENT_REMOVE */, this.hndEvent);
+            this.addEventListener("nodeDeserialized" /* ƒ.EVENT.NODE_DESERIALIZED */, this.hndEvent);
+        }
+        // Activate the functions of this component as response to events
+        hndEvent = (_event) => {
+            switch (_event.type) {
+                case "componentAdd" /* ƒ.EVENT.COMPONENT_ADD */:
+                    this.#cmpTransform = this.node.getComponent(ƒ.ComponentTransform);
+                case "componentRemove" /* ƒ.EVENT.COMPONENT_REMOVE */:
+                    this.removeEventListener("componentAdd" /* ƒ.EVENT.COMPONENT_ADD */, this.hndEvent);
+                    this.removeEventListener("componentRemove" /* ƒ.EVENT.COMPONENT_REMOVE */, this.hndEvent);
+                    break;
+                case "nodeDeserialized" /* ƒ.EVENT.NODE_DESERIALIZED */:
+                    // if deserialized the node is now fully reconstructed and access to all its components and children is possible
+                    break;
+                case "renderPrepare" /* ƒ.EVENT.RENDER_PREPARE */:
+                    break;
+            }
+        };
+    }
+    HomeFudge.ComponentPlayerSpawner = ComponentPlayerSpawner;
+})(HomeFudge || (HomeFudge = {}));
+var HomeFudge;
+(function (HomeFudge) {
+    var ƒ = FudgeCore;
+    ƒ.Project.registerScriptNamespace(HomeFudge); // Register the namespace to FUDGE for serialization
+    class ComponentTag extends ƒ.ComponentScript {
+        // Register the script as component for use in the editor via drag&drop
+        static iSubclass = ƒ.Component.registerSubclass(ComponentTag);
+        // Properties may be mutated by users in the editor via the automatically created user interface
+        message = "CustomComponentScript added to ";
+        tag;
+        setTag(_tag) {
+            this.tag = _tag;
+        }
+        getTag() {
+            return this.tag;
+        }
+        constructor() {
+            super();
+            // Don't start when running in editor
+            if (ƒ.Project.mode == ƒ.MODE.EDITOR)
+                return;
+            // Listen to this component being added to or removed from a node
+            this.addEventListener("componentAdd" /* ƒ.EVENT.COMPONENT_ADD */, this.hndEvent);
+            this.addEventListener("componentRemove" /* ƒ.EVENT.COMPONENT_REMOVE */, this.hndEvent);
+            this.addEventListener("nodeDeserialized" /* ƒ.EVENT.NODE_DESERIALIZED */, this.hndEvent);
+        }
+        // Activate the functions of this component as response to events
+        hndEvent = (_event) => {
+            switch (_event.type) {
+                case "componentAdd" /* ƒ.EVENT.COMPONENT_ADD */:
+                    ƒ.Debug.log(this.message, this.node);
+                    break;
+                case "componentRemove" /* ƒ.EVENT.COMPONENT_REMOVE */:
+                    this.removeEventListener("componentAdd" /* ƒ.EVENT.COMPONENT_ADD */, this.hndEvent);
+                    this.removeEventListener("componentRemove" /* ƒ.EVENT.COMPONENT_REMOVE */, this.hndEvent);
+                    break;
+                case "nodeDeserialized" /* ƒ.EVENT.NODE_DESERIALIZED */:
+                    // if deserialized the node is now fully reconstructed and access to all its components and children is possible
+                    break;
+            }
+        };
+    }
+    HomeFudge.ComponentTag = ComponentTag;
+})(HomeFudge || (HomeFudge = {}));
+var HomeFudge;
+(function (HomeFudge) {
+    var ƒ = FudgeCore;
+    ƒ.Project.registerScriptNamespace(HomeFudge); // Register the namespace to FUDGE for serialization
+    class CustomComponentScript extends ƒ.ComponentScript {
+        // Register the script as component for use in the editor via drag&drop
+        static iSubclass = ƒ.Component.registerSubclass(CustomComponentScript);
+        // Properties may be mutated by users in the editor via the automatically created user interface
+        message = "CustomComponentScript added to ";
+        constructor() {
+            super();
+            // Don't start when running in editor
+            if (ƒ.Project.mode == ƒ.MODE.EDITOR)
+                return;
+            // Listen to this component being added to or removed from a node
+            this.addEventListener("componentAdd" /* ƒ.EVENT.COMPONENT_ADD */, this.hndEvent);
+            this.addEventListener("componentRemove" /* ƒ.EVENT.COMPONENT_REMOVE */, this.hndEvent);
+            this.addEventListener("nodeDeserialized" /* ƒ.EVENT.NODE_DESERIALIZED */, this.hndEvent);
+        }
+        // Activate the functions of this component as response to events
+        hndEvent = (_event) => {
+            switch (_event.type) {
+                case "componentAdd" /* ƒ.EVENT.COMPONENT_ADD */:
+                    ƒ.Debug.log(this.message, this.node);
+                    break;
+                case "componentRemove" /* ƒ.EVENT.COMPONENT_REMOVE */:
+                    this.removeEventListener("componentAdd" /* ƒ.EVENT.COMPONENT_ADD */, this.hndEvent);
+                    this.removeEventListener("componentRemove" /* ƒ.EVENT.COMPONENT_REMOVE */, this.hndEvent);
+                    break;
+                case "nodeDeserialized" /* ƒ.EVENT.NODE_DESERIALIZED */:
+                    // if deserialized the node is now fully reconstructed and access to all its components and children is possible
+                    break;
+            }
+        };
+    }
+    HomeFudge.CustomComponentScript = CustomComponentScript;
 })(HomeFudge || (HomeFudge = {}));
 var HomeFudge;
 (function (HomeFudge) {
@@ -1353,6 +1428,8 @@ var HomeFudge;
             this.getComponent(ƒ.ComponentMesh).mtxPivot.scale(new ƒ.Vector3(2, 2, 2));
             this.addComponent(new ƒ.ComponentMaterial(GatlingBullet.material));
             this.rigidBody = new ƒ.ComponentRigidbody(HomeFudge.Config.gatlingBullet.mass, GatlingBullet.seedRigidBody.typeBody, GatlingBullet.seedRigidBody.typeCollider);
+            let rotEffect = 0.1;
+            this.rigidBody.effectRotation = new ƒ.Vector3(rotEffect, rotEffect, rotEffect);
             this.rigidBody.mtxPivot = GatlingBullet.seedRigidBody.mtxPivot;
             this.rigidBody.setPosition(spawnTransform.translation);
             this.rigidBody.setRotation(spawnTransform.rotation);
@@ -1666,6 +1743,12 @@ var HomeFudge;
 var HomeFudge;
 /// <reference path="../Abstract/GameObject.ts" />
 (function (HomeFudge) {
+    /*TODO: for now the GameLoop class wont do anything. It will replace the Custom Event.
+    Events ar nice to use but it would make more sense to have an Class which updates all the GameObjects.
+    The list also shows how many objects are alive and which on are ready to get cleared ot of the array.
+    the collection and removing of the garbage will be done every so often, when possible it can be done on a different thread to boost up performance.
+
+    */
     //Refactor Event handling to method handling
     //TODO: remove event handling and replace it with that:
     class GameLoop {
@@ -1703,12 +1786,11 @@ var HomeFudge;
     }
     HomeFudge.GameLoop = GameLoop;
 })(HomeFudge || (HomeFudge = {}));
-var FudgeCore;
-(function (FudgeCore) {
-    class InputLoop {
-    }
-    FudgeCore.InputLoop = InputLoop;
-})(FudgeCore || (FudgeCore = {}));
+// namespace FudgeCore{
+//     export class InputLoop{
+//     }
+// }
+//TODO: This input loops update the Input of the Player, for now its not used berceuse the Player class updats itsfels by using an custom Event.
 var HomeFudge;
 (function (HomeFudge) {
     var ƒ = FudgeCore;
@@ -1964,6 +2046,7 @@ var HomeFudge;
         destroyer = null;
         playerID = null;
         selectedWeapon = null; //TODO:Check if ok
+        selectedObject = null;
         moveDirection = ƒ.Vector3.ZERO(); // TODO: remove moveDirection -> better to do in the Destroyer.
         //empty list for the inputs to be listed. Makes so that if W and A is pressed both get executed in the end of the update.
         // private inputList: ƒ.KEYBOARD_CODE[] = null;
@@ -1995,6 +2078,8 @@ var HomeFudge;
             //     _mainCamera.camComp.mtxPivot.rotation.z
             // );
         };
+        selectObject() {
+        }
         selectWeapon(weapon) {
             switch (weapon) {
                 case this.destroyer.WEAPONS.GATLING_TURRET:
@@ -2077,7 +2162,7 @@ var HomeFudge;
             //inits Music Soundtrack
             let audioComp = new ƒ.ComponentAudio(new ƒ.Audio("Sound/Background/10.Cycles.mp3"), true); //TODO:Move sound to recourses
             //Sound by IXION!
-            audioComp.volume = 0.1;
+            audioComp.volume = 0.01;
             audioComp.play(true);
             HomeFudge._mainCamera.camNode.addComponent(audioComp); //TODO: Change to player Camera
         }
@@ -2106,60 +2191,167 @@ var HomeFudge;
 var HomeFudge;
 (function (HomeFudge) {
     var ƒ = FudgeCore;
-    var ƒUi = FudgeUserInterface;
-    class UI_EnemySelection extends ƒ.Mutable {
-        static ui_RingSelection;
-        static ui_HealthMeter;
-        //Helatbar lenght 6ev
-        static setPosition(pos) {
-            let widthSelector = (UI_EnemySelection.ui_RingSelection.clientWidth) / 2;
-            let hightHealth = (UI_EnemySelection.ui_HealthMeter.clientHeight);
-            UI_EnemySelection.ui_RingSelection.style.top = (pos.y - widthSelector) + "px";
-            UI_EnemySelection.ui_RingSelection.style.left = (pos.x - widthSelector) + "px";
-            UI_EnemySelection.ui_HealthMeter.style.top = (pos.y - hightHealth - 5) + "px";
-            UI_EnemySelection.ui_HealthMeter.style.left = (pos.x + 20) + "px";
+    class UI extends ƒ.Mutable {
+        static scale = null;
+        static ui_elements = new Array(0);
+        static init() {
+            //List of UI elements to initialize
+            UI.ui_elements.push(new HomeFudge.UI_Selection());
         }
-        static setSize(distanceToPlayer) {
-            return; // spots scaling
-            let widthSelector = (UI_EnemySelection.ui_RingSelection.clientWidth);
-            let scale = 4000 / distanceToPlayer;
-            UI_EnemySelection.ui_RingSelection.style.width = scale + "vw";
-            UI_EnemySelection.ui_RingSelection.style.height = scale + "vw";
+        ;
+        static setScaleAndReload(scale) {
+            //updates UI elements to new Scale and re Initializes the elements.
+            HomeFudge.UI_Selection.setScaleAndReload(scale);
         }
-        static setHealthBar(hpPercent) {
-            let healthSteps = 6 / 100;
-            UI_EnemySelection.ui_HealthMeter.style.width = healthSteps * hpPercent + "vw";
-        }
-        static initUiRingSelection() {
-            UI_EnemySelection.ui_RingSelection = document.querySelector("div#RingSelection");
-            UI_EnemySelection.ui_RingSelection.style.position = "absolute";
-            UI_EnemySelection.ui_RingSelection.style.visibility = "visible";
-            UI_EnemySelection.ui_RingSelection.style.width = "2vw";
-            UI_EnemySelection.ui_RingSelection.style.height = "2vw";
-            UI_EnemySelection.ui_RingSelection.style.borderRadius = "100%";
-            UI_EnemySelection.ui_RingSelection.style.borderColor = "rgba(255, 0, 0, 0.5)";
-            UI_EnemySelection.ui_RingSelection.style.borderStyle = "solid";
-            UI_EnemySelection.ui_RingSelection.style.borderWidth = "-2px";
-            UI_EnemySelection.ui_RingSelection.style.position = "absolute";
-        }
-        static initUiHealthStatus() {
-            UI_EnemySelection.ui_HealthMeter = document.querySelector("div#HealthMeeter");
-            UI_EnemySelection.ui_HealthMeter.style.visibility = "visible";
-            UI_EnemySelection.ui_HealthMeter.style.position = "absolute";
-            UI_EnemySelection.ui_HealthMeter.style.width = "6vw";
-            UI_EnemySelection.ui_HealthMeter.style.height = "1vw";
-            UI_EnemySelection.ui_HealthMeter.style.backgroundColor = "rgba(255, 0, 0, 0.8)";
+        ;
+        reduceMutator(_mutator) {
         }
         constructor() {
             super();
-            UI_EnemySelection.initUiRingSelection();
-            UI_EnemySelection.initUiHealthStatus();
-            new ƒUi.Controller(this, UI_EnemySelection.ui_RingSelection);
-            // new ƒUi.Controller(this, UI_EnemySelection.uiHealthMeter);
+            UI.scale = HomeFudge.Config.ui.scaling;
+            ƒ.Loop.addEventListener(HomeFudge.UPDATE_EVENTS.UI, () => {
+                this.update();
+            });
+        }
+    }
+    HomeFudge.UI = UI;
+})(HomeFudge || (HomeFudge = {}));
+/// <reference path="UI.ts" />
+var HomeFudge;
+/// <reference path="UI.ts" />
+(function (HomeFudge) {
+    var ƒUi = FudgeUserInterface;
+    class UI_Selection extends HomeFudge.UI {
+        static ringSelection;
+        static healthMeter;
+        static healthMeterNumber;
+        static distanceNumbers;
+        static connectionLine;
+        static fontSize = null;
+        static healthBarWidth = null;
+        static healthBarHight = null;
+        static ringRadius = null;
+        static ringBorderWidth = null;
+        static focusedNode = null;
+        static maxNodeHealth = 0;
+        static actualNodeHealth = 0;
+        static setNodeToFocus(_focusedNode) {
+            let node = _focusedNode;
+            //Fix for the time being. Later i will add an tag system
+            if (!(node instanceof HomeFudge.Astroid)) {
+                UI_Selection.focusedNode = null;
+                return;
+            }
+            else {
+                UI_Selection.focusedNode = node;
+                UI_Selection.updateHealthBar();
+            }
+        }
+        update() {
+            if (UI_Selection.focusedNode == null) {
+                return;
+            }
+            let pos = HomeFudge._viewport.pointWorldToClient(UI_Selection.focusedNode.mtxWorld.translation);
+            let widthSelector = (UI_Selection.ringSelection.clientWidth) / 2;
+            let hightHealth = (UI_Selection.healthMeter.clientHeight);
+            UI_Selection.ringSelection.style.top = (pos.y - widthSelector) + "px";
+            UI_Selection.ringSelection.style.left = (pos.x - widthSelector) + "px";
+            UI_Selection.healthMeter.style.top = (pos.y - hightHealth - UI_Selection.ringRadius / 2) + "px";
+            UI_Selection.healthMeter.style.left = (pos.x + UI_Selection.ringRadius / 2 + 20) + "px";
+            UI_Selection.updateHealthBar();
+            // UI_Selection.setSize("p1".destroyer.mtxWorld.translation.getDistance(this.focusedNode.mtxWorld.translation))
+        }
+        static setSize(distanceToPlayer) {
+            return; // spots scaling
+            //TODO: adding max and min scaling for the ui
+            //replace vw to something  else. 
+            let widthSelector = (UI_Selection.ringSelection.clientWidth);
+            let scale = 4000 / distanceToPlayer;
+            UI_Selection.ringSelection.style.width = scale + "vw";
+            UI_Selection.ringSelection.style.height = scale + "vw";
+        }
+        static updateHealthBar() {
+            //only if astroid
+            UI_Selection.maxNodeHealth = UI_Selection.focusedNode.getMaxHP();
+            UI_Selection.actualNodeHealth = UI_Selection.focusedNode.getHP();
+            let healthSteps = UI_Selection.healthBarWidth / UI_Selection.maxNodeHealth;
+            UI_Selection.healthMeter.style.width = healthSteps * UI_Selection.actualNodeHealth + "px";
+            UI_Selection.healthMeterNumber.innerText = UI_Selection.actualNodeHealth + "HP";
+        }
+        static initUiRingSelection() {
+            UI_Selection.ringSelection = document.querySelector("div#RingSelection");
+            UI_Selection.globalSettings(UI_Selection.ringSelection);
+            UI_Selection.ringSelection.style.width = UI_Selection.ringRadius + "px";
+            UI_Selection.ringSelection.style.height = UI_Selection.ringRadius + "px";
+            UI_Selection.ringSelection.style.borderRadius = "100%";
+            UI_Selection.ringSelection.style.borderColor = "rgba(255, 0, 0, 0.5)";
+            UI_Selection.ringSelection.style.borderStyle = "solid";
+            UI_Selection.ringSelection.style.borderWidth = UI_Selection.ringBorderWidth + "px";
+        }
+        static initUiHealthMeterStatus() {
+            UI_Selection.healthMeter = document.querySelector("div#HealthMeeter");
+            UI_Selection.globalSettings(UI_Selection.healthMeter);
+            UI_Selection.healthMeter.style.borderRadius = "2px";
+            UI_Selection.healthMeter.style.width = UI_Selection.healthBarWidth + "px";
+            UI_Selection.healthMeter.style.height = UI_Selection.healthBarHight + "px";
+            UI_Selection.healthMeter.style.backgroundColor = "rgba(200, 0, 0, 0.8)";
+        }
+        static initUIHealtHMeterNumber() {
+            if (document.querySelector("div#HealthMeeterNumber") == null) {
+                UI_Selection.healthMeterNumber = document.createElement("div");
+                UI_Selection.healthMeterNumber.id = "HealthMeeterNumber";
+            }
+            else {
+                UI_Selection.healthMeterNumber = document.querySelector("div#HealthMeeterNumber");
+            }
+            UI_Selection.globalSettings(UI_Selection.healthMeterNumber);
+            UI_Selection.healthMeterNumber.innerText = "1000 HP";
+            UI_Selection.healthMeterNumber.style.color = "white";
+            UI_Selection.healthMeterNumber.style.textAlign = "left";
+            UI_Selection.healthMeterNumber.style.fontSize = UI_Selection.fontSize + "px";
+            UI_Selection.healthMeterNumber.style.whiteSpace = "nowrap";
+            UI_Selection.healthMeterNumber.style.textOverflow = "clip";
+            UI_Selection.healthMeterNumber.style.padding = "2px";
+            UI_Selection.healthMeterNumber.style.lineHeight = "normal";
+            UI_Selection.healthMeterNumber.style.display = "inline-block";
+            UI_Selection.healthMeterNumber.style.verticalAlign = "middle";
+            UI_Selection.healthMeter.appendChild(UI_Selection.healthMeterNumber);
+        }
+        static globalSettings(element) {
+            element.style.visibility = "visible";
+            element.style.position = "absolute";
+            element.style.pointerEvents = "none";
+        }
+        static initUIConnectionLine() {
+            UI_Selection.connectionLine = document.createElement("svg");
+            UI_Selection.healthMeter.appendChild(UI_Selection.connectionLine);
+        }
+        static init() {
+            //loadConfigs
+            UI_Selection.fontSize = HomeFudge.Config.ui.fontSize * HomeFudge.Config.ui.scaling;
+            UI_Selection.ringRadius = HomeFudge.Config.ui.selection.selectionRingRadius * 2 * (HomeFudge.Config.ui.scaling / 2);
+            UI_Selection.ringBorderWidth = HomeFudge.Config.ui.selection.ringBorderWidth * HomeFudge.Config.ui.scaling;
+            UI_Selection.healthBarHight = HomeFudge.Config.ui.selection.healthBarHight * HomeFudge.Config.ui.scaling;
+            UI_Selection.healthBarWidth = HomeFudge.Config.ui.selection.healthBarWidth * HomeFudge.Config.ui.scaling;
+            UI_Selection.initUiRingSelection();
+            UI_Selection.initUiHealthMeterStatus();
+            UI_Selection.initUIHealtHMeterNumber();
+        }
+        static setScaleAndReload(scale) {
+            HomeFudge.Config.ui.scaling = scale;
+            UI_Selection.init();
         }
         reduceMutator(_mutator) {
         }
+        constructor() {
+            super();
+            UI_Selection.init();
+            new ƒUi.Controller(this, UI_Selection.ringSelection);
+            new ƒUi.Controller(this, UI_Selection.healthMeter);
+            new ƒUi.Controller(this, UI_Selection.healthMeterNumber);
+            this.addEventListener("mutate" /* ƒ.EVENT.MUTATE */, () => console.log(this));
+        }
     }
-    HomeFudge.UI_EnemySelection = UI_EnemySelection;
+    HomeFudge.UI_Selection = UI_Selection;
 })(HomeFudge || (HomeFudge = {}));
 //# sourceMappingURL=Script.js.map

@@ -1,13 +1,14 @@
 declare namespace HomeFudge {
     export class Config {
         private static errorText;
-        static gatlingBullet: GatlingBulletConfig;
-        static gatlingTurret: GatlingTurretConfig;
-        static beamTurret: BeamTurretConfig;
+        static gatlingBullet: GatlingBullet;
+        static gatlingTurret: GatlingTurret;
+        static beamTurret: BeamTurret;
         static laserBeam: LaserBeam;
-        static destroyer: DestroyerConfig;
-        static camera: CameraConfig;
-        static astroid: AstroidConfig;
+        static destroyer: Destroyer;
+        static camera: Camera;
+        static astroid: Astroid;
+        static ui: Ui;
         /**
          * The function initializes configurations by fetching JSON files and assigning their contents
          * to corresponding variables.
@@ -15,7 +16,7 @@ declare namespace HomeFudge {
         static initConfigs(): Promise<void>;
         private static printError;
     }
-    interface GatlingTurretConfig {
+    interface GatlingTurret {
         graphID: string;
         headPosition: number[];
         basePosition: number[];
@@ -28,7 +29,7 @@ declare namespace HomeFudge {
         magazineCapacity: number;
         [key: string]: number[] | number | string;
     }
-    interface GatlingBulletConfig {
+    interface GatlingBullet {
         graphID: string;
         maxLifeTime: number;
         maxSpeed: number;
@@ -36,7 +37,7 @@ declare namespace HomeFudge {
         mass: number;
         [key: string]: string | number;
     }
-    interface BeamTurretConfig {
+    interface BeamTurret {
         graphID: string;
         maxRotSpeed: number;
         maxPitch: number;
@@ -52,7 +53,7 @@ declare namespace HomeFudge {
         graphID: string;
         [key: string]: string;
     }
-    interface DestroyerConfig {
+    interface Destroyer {
         graphID: string;
         maxAcceleration: number;
         maxSpeed: number;
@@ -76,11 +77,11 @@ declare namespace HomeFudge {
         MainThrusterB: number[];
         [key: string]: string | number | number[];
     }
-    interface CameraConfig {
+    interface Camera {
         offset: number[];
         [key: string]: number[];
     }
-    interface AstroidConfig {
+    interface Astroid {
         graphID: string;
         size: AstroidSize;
         seedNodes: AstroidSeedNodes;
@@ -104,21 +105,26 @@ declare namespace HomeFudge {
         spawnRotSpeed: number;
         constructor(_hitpoints: number, _mass: number, _spawnRotSpeed: number);
     }
+    interface Ui {
+        scaling: number;
+        fontSize: number;
+        selection: UI_Selection;
+        [key: string]: number | UI_Selection;
+    }
+    class UI_Selection {
+        healthBarWidth: number;
+        healthBarHight: number;
+        healthBarTextSize: number;
+        selectionRingRadius: number;
+        ringBorderWidth: number;
+        constructor(_healthBarWidth: number, _healthBarHight: number, _healthBarTextSize: number, _selectionRingRadius: number, _ringBorderWidth: number);
+    }
     export {};
 }
 declare namespace HomeFudge {
     import ƒ = FudgeCore;
     class ConvexHull {
         static convertToFloat32Array(convexMesh: ƒ.Mesh): Float32Array;
-    }
-}
-declare namespace Script {
-    import ƒ = FudgeCore;
-    class CustomComponentScript extends ƒ.ComponentScript {
-        static readonly iSubclass: number;
-        message: string;
-        constructor();
-        hndEvent: (_event: Event) => void;
     }
 }
 declare namespace HomeFudge {
@@ -157,16 +163,6 @@ declare namespace HomeFudge {
         GAME_OBJECTS = "GameObjectUpdate",
         PLAYER_INPUT = "PlayerInputUpdate",
         UI = "UI"
-    }
-}
-declare namespace HomeFudge {
-    import ƒ = FudgeCore;
-    class PlayerSpawnerComponent extends ƒ.ComponentScript {
-        #private;
-        static readonly iSubclass: number;
-        private playerID;
-        constructor();
-        hndEvent: (_event: Event) => void;
     }
 }
 declare namespace HomeFudge {
@@ -233,12 +229,15 @@ declare namespace HomeFudge {
     }
     export class Astroid extends GameObject {
         private SIZE;
-        d: any;
+        protected maxHealth: number;
+        protected hitPoints: number;
         update(): void;
         static getLarge(): SIZE;
         static spawn(location: ƒ.Vector3, size?: SIZE): Astroid;
         alive(): boolean;
         remove(): void;
+        getMaxHP(): number;
+        getHP(): number;
         protected static loadMeshList(nodes: ƒ.Node[]): ƒ.Mesh[];
         protected static loadMaterialList(nodes: ƒ.Node[]): ƒ.Material[];
         protected static setupRigidbody(location: ƒ.Vector3, boundingBox: ƒ.Vector3, spawnRotEffect: number): ƒ.ComponentRigidbody;
@@ -250,7 +249,8 @@ declare namespace HomeFudge {
     import ƒ = FudgeCore;
     class AstroidLarge extends Astroid {
         private static graph;
-        private hitPoints;
+        protected maxHealth: number;
+        protected hitPoints: number;
         private static meshList;
         private static materialList;
         private rigidBody;
@@ -260,6 +260,37 @@ declare namespace HomeFudge {
         private init;
         private setAllComponents;
         constructor(location: ƒ.Vector3);
+    }
+}
+declare namespace HomeFudge {
+    import ƒ = FudgeCore;
+    class ComponentPlayerSpawner extends ƒ.ComponentScript {
+        #private;
+        static readonly iSubclass: number;
+        private playerID;
+        constructor();
+        hndEvent: (_event: Event) => void;
+    }
+}
+declare namespace HomeFudge {
+    import ƒ = FudgeCore;
+    class ComponentTag extends ƒ.ComponentScript {
+        static readonly iSubclass: number;
+        message: string;
+        private tag;
+        setTag(_tag: string): void;
+        getTag(): string;
+        constructor();
+        hndEvent: (_event: Event) => void;
+    }
+}
+declare namespace HomeFudge {
+    import ƒ = FudgeCore;
+    class CustomComponentScript extends ƒ.ComponentScript {
+        static readonly iSubclass: number;
+        message: string;
+        constructor();
+        hndEvent: (_event: Event) => void;
     }
 }
 declare namespace HomeFudge {
@@ -441,10 +472,6 @@ declare namespace HomeFudge {
         static getAliveGameobjects(): GameObject[];
     }
 }
-declare namespace FudgeCore {
-    class InputLoop {
-    }
-}
 declare namespace HomeFudge {
     import ƒ = FudgeCore;
     class Mathf {
@@ -579,8 +606,10 @@ declare namespace HomeFudge {
         destroyer: Destroyer;
         playerID: string;
         private selectedWeapon;
+        private selectedObject;
         private moveDirection;
         private update;
+        private selectObject;
         private selectWeapon;
         private updateWeaponSelection;
         private updateShipMovement;
@@ -592,15 +621,44 @@ declare namespace HomeFudge {
 }
 declare namespace HomeFudge {
     import ƒ = FudgeCore;
-    class UI_EnemySelection extends ƒ.Mutable {
-        private static ui_RingSelection;
-        private static ui_HealthMeter;
-        static setPosition(pos: ƒ.Vector2): void;
-        static setSize(distanceToPlayer: number): void;
-        static setHealthBar(hpPercent: number): void;
-        private static initUiRingSelection;
-        private static initUiHealthStatus;
-        constructor();
+    abstract class UI extends ƒ.Mutable {
+        static scale: number;
+        static ui_elements: UI[];
+        abstract update(): void;
+        static init(): void;
+        static setScaleAndReload(scale: number): void;
         protected reduceMutator(_mutator: ƒ.Mutator): void;
+        constructor();
+    }
+}
+declare namespace HomeFudge {
+    import ƒ = FudgeCore;
+    class UI_Selection extends UI {
+        private static ringSelection;
+        private static healthMeter;
+        private static healthMeterNumber;
+        private static distanceNumbers;
+        private static connectionLine;
+        private static fontSize;
+        private static healthBarWidth;
+        private static healthBarHight;
+        private static ringRadius;
+        private static ringBorderWidth;
+        private static focusedNode;
+        private static maxNodeHealth;
+        private static actualNodeHealth;
+        static setNodeToFocus(_focusedNode: ƒ.Node): void;
+        update(): void;
+        static setSize(distanceToPlayer: number): void;
+        static updateHealthBar(): void;
+        private static initUiRingSelection;
+        private static initUiHealthMeterStatus;
+        private static initUIHealtHMeterNumber;
+        private static globalSettings;
+        private static initUIConnectionLine;
+        static init(): void;
+        static setScaleAndReload(scale: number): void;
+        protected reduceMutator(_mutator: ƒ.Mutator): void;
+        constructor();
     }
 }
