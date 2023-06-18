@@ -75,6 +75,8 @@ namespace HomeFudge {
                 GatlingBullet.seedRigidBody.typeBody,
                 GatlingBullet.seedRigidBody.typeCollider
             );
+            let rotEffect: number = 0.1;
+            this.rigidBody.effectRotation = new ƒ.Vector3(rotEffect, rotEffect, rotEffect);
             this.rigidBody.mtxPivot = GatlingBullet.seedRigidBody.mtxPivot;
             this.rigidBody.setPosition(spawnTransform.translation);
             this.rigidBody.setRotation(spawnTransform.rotation);
