@@ -92,7 +92,8 @@ var HomeFudge;
         SMALL;
         MEDIUM;
         LARGE;
-        constructor(_small, _medium, _large) {
+        scale;
+        constructor(_small, _medium, _large, _scale) {
             if (_small == undefined) {
                 throw new Error("Small Astroid is undefined in the config!");
             }
@@ -111,7 +112,8 @@ var HomeFudge;
         hitpoints;
         mass;
         spawnRotSpeed;
-        constructor(_hitpoints, _mass, _spawnRotSpeed) {
+        scale;
+        constructor(_hitpoints, _mass, _spawnRotSpeed, _scale) {
             if (_mass == undefined || typeof _mass == 'number') {
                 this.mass = 0;
                 throw new Error("Mass is undefined in the config!");
@@ -124,9 +126,14 @@ var HomeFudge;
                 this.spawnRotSpeed = 0;
                 throw new Error("Spawn rotation speed is undefined in the config!");
             }
+            if (_scale == undefined || typeof _scale == 'number') {
+                this.spawnRotSpeed = 0;
+                throw new Error("Spawn rotation speed is undefined in the config!");
+            }
             this.hitpoints = _hitpoints;
             this.mass = _mass;
             this.spawnRotSpeed = _spawnRotSpeed;
+            this.scale = _scale;
         }
     }
     class UI_Selection {
@@ -350,12 +357,12 @@ var HomeFudge;
         /// ------------T-E-S-T--A-R-E-A------------------\\\
         //TODO: Before the loop starts. Add an Game Menu draws on frame while updating
         selectedObject = p1;
-        let x = 200;
-        let y = 0;
-        let z = -100;
-        astroidList = new Array(50);
-        for (let index = 0; index < 50; index++) {
-            astroidList[index] = HomeFudge.Astroid.spawn(new ƒ.Vector3(x * index * Math.random() - x / 2, y * index * Math.random() + 100 - y / 2, -z * index * Math.random()), HomeFudge.Astroid.getLarge());
+        let x = 400;
+        let y = 10;
+        let z = -300;
+        astroidList = new Array(20);
+        for (let index = 0; index < 20; index++) {
+            astroidList[index] = HomeFudge.Astroid.spawn(new ƒ.Vector3(x * index * Math.random() - x / 2 + 100, y * index * Math.random() + 1000 - y / 2, -z * index * Math.random() + 100), HomeFudge.Astroid.getLarge());
         }
         /// ------------T-E-S-T--A-R-E-A------------------\\\
         ƒ.Loop.addEventListener("loopFrame" /* ƒ.EVENT.LOOP_FRAME */, update);
@@ -648,7 +655,10 @@ var HomeFudge;
             let selection = Math.floor(Math.random() * selectionLength);
             this.addComponent(new ƒ.ComponentMaterial(AstroidLarge.materialList[selection]));
             this.addComponent(new ƒ.ComponentMesh(AstroidLarge.meshList[selection]));
-            this.addComponent(new ƒ.ComponentTransform(ƒ.Matrix4x4.TRANSLATION(location)));
+            let mtxComp = new ƒ.ComponentTransform(ƒ.Matrix4x4.TRANSLATION(location));
+            //Scales up the Astroid definend on the Configs
+            mtxComp.mtxLocal.scale(new ƒ.Vector3(HomeFudge.Config.astroid.size.LARGE.scale, HomeFudge.Config.astroid.size.LARGE.scale, HomeFudge.Config.astroid.size.LARGE.scale));
+            this.addComponent(mtxComp);
             this.rigidBody = AstroidLarge.setupRigidbody(location, AstroidLarge.meshList[selection].boundingBox.min, HomeFudge.Config.astroid.size.LARGE.spawnRotSpeed);
             this.addComponent(this.rigidBody);
         }

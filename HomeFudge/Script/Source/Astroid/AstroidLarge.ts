@@ -50,7 +50,10 @@ namespace HomeFudge {
 
             this.addComponent(new ƒ.ComponentMaterial(AstroidLarge.materialList[selection]));
             this.addComponent(new ƒ.ComponentMesh(AstroidLarge.meshList[selection]));
-            this.addComponent(new ƒ.ComponentTransform(ƒ.Matrix4x4.TRANSLATION(location)));
+            let mtxComp :ƒ.ComponentTransform = new ƒ.ComponentTransform(ƒ.Matrix4x4.TRANSLATION(location));
+            //Scales up the Astroid definend on the Configs
+            mtxComp.mtxLocal.scale(new ƒ.Vector3(Config.astroid.size.LARGE.scale,Config.astroid.size.LARGE.scale,Config.astroid.size.LARGE.scale));
+            this.addComponent(mtxComp);
 
             this.rigidBody = AstroidLarge.setupRigidbody(location, AstroidLarge.meshList[selection].boundingBox.min, Config.astroid.size.LARGE.spawnRotSpeed);
             this.addComponent(this.rigidBody);

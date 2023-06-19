@@ -80,12 +80,12 @@ namespace HomeFudge {
     //TODO: Before the loop starts. Add an Game Menu draws on frame while updating
     selectedObject = p1;
 
-    let x = 200;
-    let y = 0;
-    let z = -100;
-    astroidList = new Array(50);
-    for (let index = 0; index < 50; index++) {
-      astroidList[index] = Astroid.spawn(new ƒ.Vector3(x * index * Math.random() - x / 2, y * index * Math.random() + 100 - y / 2, -z * index * Math.random()), Astroid.getLarge());
+    let x = 400;
+    let y = 10;
+    let z = -300;
+    astroidList = new Array(20);
+    for (let index = 0; index < 20; index++) {
+      astroidList[index] = Astroid.spawn(new ƒ.Vector3(x * index * Math.random() - x / 2+100, y * index * Math.random() + 1000 - y / 2, -z * index * Math.random()+100), Astroid.getLarge());
     }
     /// ------------T-E-S-T--A-R-E-A------------------\\\
 

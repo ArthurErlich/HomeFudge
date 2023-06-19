@@ -169,8 +169,9 @@ namespace HomeFudge {
         public SMALL: AstroidData;
         public MEDIUM: AstroidData;
         public LARGE: AstroidData;
+        public scale: number;
 
-        constructor(_small: AstroidData, _medium: AstroidData, _large: AstroidData) {
+        constructor(_small: AstroidData, _medium: AstroidData, _large: AstroidData, _scale:) {
             if (_small == undefined) {
                 throw new Error("Small Astroid is undefined in the config!");
             }
@@ -189,7 +190,8 @@ namespace HomeFudge {
         public hitpoints: number;
         public mass: number;
         public spawnRotSpeed: number;
-        constructor(_hitpoints: number, _mass: number, _spawnRotSpeed: number) {
+        public scale: number;
+        constructor(_hitpoints: number, _mass: number, _spawnRotSpeed: number, _scale: number) {
             if (_mass == undefined || typeof _mass == 'number') {
                 this.mass = 0;
                 throw new Error("Mass is undefined in the config!");
@@ -202,9 +204,14 @@ namespace HomeFudge {
                 this.spawnRotSpeed = 0;
                 throw new Error("Spawn rotation speed is undefined in the config!");
             }
+            if (_scale == undefined || typeof _scale == 'number') {
+                this.spawnRotSpeed = 0;
+                throw new Error("Spawn rotation speed is undefined in the config!");
+            }
             this.hitpoints = _hitpoints;
             this.mass = _mass;
             this.spawnRotSpeed = _spawnRotSpeed;
+            this.scale = _scale;
         }
     }
     //#endregion Astroid
