@@ -4,7 +4,7 @@
 
 ## Table of Contents
 
-- [heWelcome to the Document about HomeFudge](#hewelcome-to-the-document-about-homefudge)
+- [Welcome to the Document about HomeFudge](#welcome-to-the-document-about-homefudge)
   - [Table of Contents](#table-of-contents)
   - [Why this document?](#why-this-document)
   - [Idea](#idea)
@@ -127,3 +127,15 @@ Test with 1000 [iterations](https://www.typescriptlang.org/play?#code/LAKANgpgLg
 `[LOG]: [184, 327, 489]`
 
 -->
+
+here is a way to find out how many Logical cpu cores the users has:
+```typescript	
+window.navigator.hardwareConcurrency/2;
+
+```
+by using we can use Threading in Java to make the game run faster/smoother!
+```typescript	
+const worker = new Worker('worker.js');
+```
+https://www.youtube.com/watch?v=pQPqhZRUz3U
+https://vkguide.dev/docs/extra-chapter/multithreading/
