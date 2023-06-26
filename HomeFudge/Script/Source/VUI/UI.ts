@@ -3,18 +3,24 @@ namespace HomeFudge{
     import ƒ = FudgeCore;
     export abstract class UI extends ƒ.Mutable{
         static scale:number = null;
-        static ui_elements: UI[]=new Array(0);
+        static width:number = null;
+        static height:number = null;
+        static elements: UI[]=new Array(0);
 
         public abstract update():void;
 
         public static init():void{
             //List of UI elements to initialize
-            UI.ui_elements.push(new UI_Selection());
+            UI.elements.push(new UI_Selection());
+            UI.elements.push(new UI_FirstStart());
         };
         public static setScaleAndReload(scale:number):void{
-            //updates UI elements to new Scale and re Initializes the elements.
-            UI_Selection.setScaleAndReload(scale);
         };
+        public static globalSettings(element: HTMLElement) {
+            element.style.visibility = "visible";
+            element.style.position = "absolute";
+            element.style.pointerEvents = "none";
+        }
         
         protected reduceMutator(_mutator: ƒ.Mutator): void {
         }
@@ -24,7 +30,15 @@ namespace HomeFudge{
             ƒ.Loop.addEventListener(UPDATE_EVENTS.UI, () => {
                 this.update();
             });
+            UI.width = _viewport.canvas.width;
+            UI.height = _viewport.canvas.height;
+
         }
     }
 
 }
+
+//TODO: Move to "nice to have doc"
+//Reflect.get(cmp,Audio,"source") <- hack way to get hidden stuff behinde private members
+//mtxPivot.mutate("{tranlation":{x:y, y:3}})
+// using controll for delay on the camera movment. Let the camere pivot node lagg behinde the real world coordinate

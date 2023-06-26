@@ -85,7 +85,7 @@ namespace HomeFudge {
         private static initUiRingSelection(): void {
 
             UI_Selection.ringSelection = document.querySelector("div#RingSelection");
-            UI_Selection.globalSettings(UI_Selection.ringSelection);
+            UI.globalSettings(UI_Selection.ringSelection);
 
             UI_Selection.ringSelection.style.width = UI_Selection.ringRadius + "px";
             UI_Selection.ringSelection.style.height = UI_Selection.ringRadius + "px";
@@ -98,7 +98,7 @@ namespace HomeFudge {
 
         private static initUiHealthMeterStatus(): void {
             UI_Selection.healthMeter = document.querySelector("div#HealthMeeter");
-            UI_Selection.globalSettings(UI_Selection.healthMeter);
+            UI.globalSettings(UI_Selection.healthMeter);
 
             UI_Selection.healthMeter.style.borderRadius = "2px";
             UI_Selection.healthMeter.style.width = UI_Selection.healthBarWidth + "px";
@@ -115,7 +115,7 @@ namespace HomeFudge {
             } else {
                 UI_Selection.healthMeterNumber = document.querySelector("div#HealthMeeterNumber")
             }
-            UI_Selection.globalSettings(UI_Selection.healthMeterNumber);
+            UI.globalSettings(UI_Selection.healthMeterNumber);
 
             UI_Selection.healthMeterNumber.innerText = "1000 HP";
             UI_Selection.healthMeterNumber.style.color = "white";
@@ -131,15 +131,11 @@ namespace HomeFudge {
 
             UI_Selection.healthMeter.appendChild(UI_Selection.healthMeterNumber);
         }
-        private static globalSettings(element: HTMLElement) {
-            element.style.visibility = "visible";
-            element.style.position = "absolute";
-            element.style.pointerEvents = "none";
-        }
+
         private static initUIConnectionLine(): void {
             UI_Selection.connectionLine = document.createElement("svg");
 
-
+        //TODO: connect the Circle and Healthbar
             UI_Selection.healthMeter.appendChild(UI_Selection.connectionLine);
 
         }
@@ -155,7 +151,6 @@ namespace HomeFudge {
             UI_Selection.initUiRingSelection();
             UI_Selection.initUiHealthMeterStatus();
             UI_Selection.initUIHealtHMeterNumber();
-
         }
 
         public static setScaleAndReload(scale: number): void {
@@ -172,9 +167,6 @@ namespace HomeFudge {
             new ƒUi.Controller(this, UI_Selection.healthMeterNumber);
             this.addEventListener(ƒ.EVENT.MUTATE, () => console.log(this));
         }
-
-
-
 
     }
 }

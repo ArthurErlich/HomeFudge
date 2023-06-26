@@ -316,6 +316,9 @@ var HomeFudge;
         UPDATE_EVENTS["PLAYER_INPUT"] = "PlayerInputUpdate";
         UPDATE_EVENTS["UI"] = "UI";
     })(UPDATE_EVENTS = HomeFudge.UPDATE_EVENTS || (HomeFudge.UPDATE_EVENTS = {}));
+    //settings coockie for controll tutorial
+    let cookies = document.cookie = "firstTime= true";
+    console.log(getCookie("firstTime"));
     /// ------------T-E-S-T--A-R-E-A------------------\\\
     async function start(_event) {
         HomeFudge.LoadingScreen.remove();
@@ -415,6 +418,20 @@ var HomeFudge;
         if (event.code == "Insert") {
             ƒ.Loop.continue();
         }
+    }
+    function getCookie(cName) {
+        let name = cName + "=";
+        let ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
     }
     /// ------------T-E-S-T--A-R-E-A------------------\\\
 })(HomeFudge || (HomeFudge = {}));
@@ -2203,17 +2220,23 @@ var HomeFudge;
     var ƒ = FudgeCore;
     class UI extends ƒ.Mutable {
         static scale = null;
-        static ui_elements = new Array(0);
+        static width = null;
+        static height = null;
+        static elements = new Array(0);
         static init() {
             //List of UI elements to initialize
-            UI.ui_elements.push(new HomeFudge.UI_Selection());
+            UI.elements.push(new HomeFudge.UI_Selection());
+            UI.elements.push(new HomeFudge.UI_FirstStart());
         }
         ;
         static setScaleAndReload(scale) {
-            //updates UI elements to new Scale and re Initializes the elements.
-            HomeFudge.UI_Selection.setScaleAndReload(scale);
         }
         ;
+        static globalSettings(element) {
+            element.style.visibility = "visible";
+            element.style.position = "absolute";
+            element.style.pointerEvents = "none";
+        }
         reduceMutator(_mutator) {
         }
         constructor() {
@@ -2222,10 +2245,16 @@ var HomeFudge;
             ƒ.Loop.addEventListener(HomeFudge.UPDATE_EVENTS.UI, () => {
                 this.update();
             });
+            UI.width = HomeFudge._viewport.canvas.width;
+            UI.height = HomeFudge._viewport.canvas.height;
         }
     }
     HomeFudge.UI = UI;
 })(HomeFudge || (HomeFudge = {}));
+//TODO: Move to "nice to have doc"
+//Reflect.get(cmp,Audio,"source") <- hack way to get hidden stuff behinde private members
+//mtxPivot.mutate("{tranlation":{x:y, y:3}})
+// using controll for delay on the camera movment. Let the camere pivot node lagg behinde the real world coordinate
 /// <reference path="UI.ts" />
 var HomeFudge;
 /// <reference path="UI.ts" />
@@ -2296,7 +2325,7 @@ var HomeFudge;
         }
         static initUiRingSelection() {
             UI_Selection.ringSelection = document.querySelector("div#RingSelection");
-            UI_Selection.globalSettings(UI_Selection.ringSelection);
+            HomeFudge.UI.globalSettings(UI_Selection.ringSelection);
             UI_Selection.ringSelection.style.width = UI_Selection.ringRadius + "px";
             UI_Selection.ringSelection.style.height = UI_Selection.ringRadius + "px";
             UI_Selection.ringSelection.style.borderRadius = "100%";
@@ -2306,7 +2335,7 @@ var HomeFudge;
         }
         static initUiHealthMeterStatus() {
             UI_Selection.healthMeter = document.querySelector("div#HealthMeeter");
-            UI_Selection.globalSettings(UI_Selection.healthMeter);
+            HomeFudge.UI.globalSettings(UI_Selection.healthMeter);
             UI_Selection.healthMeter.style.borderRadius = "2px";
             UI_Selection.healthMeter.style.width = UI_Selection.healthBarWidth + "px";
             UI_Selection.healthMeter.style.height = UI_Selection.healthBarHight + "px";
@@ -2320,7 +2349,7 @@ var HomeFudge;
             else {
                 UI_Selection.healthMeterNumber = document.querySelector("div#HealthMeeterNumber");
             }
-            UI_Selection.globalSettings(UI_Selection.healthMeterNumber);
+            HomeFudge.UI.globalSettings(UI_Selection.healthMeterNumber);
             UI_Selection.healthMeterNumber.innerText = "1000 HP";
             UI_Selection.healthMeterNumber.style.color = "white";
             UI_Selection.healthMeterNumber.style.textAlign = "left";
@@ -2333,13 +2362,9 @@ var HomeFudge;
             UI_Selection.healthMeterNumber.style.verticalAlign = "middle";
             UI_Selection.healthMeter.appendChild(UI_Selection.healthMeterNumber);
         }
-        static globalSettings(element) {
-            element.style.visibility = "visible";
-            element.style.position = "absolute";
-            element.style.pointerEvents = "none";
-        }
         static initUIConnectionLine() {
             UI_Selection.connectionLine = document.createElement("svg");
+            //TODO: connect the Circle and Healthbar
             UI_Selection.healthMeter.appendChild(UI_Selection.connectionLine);
         }
         static init() {
@@ -2369,5 +2394,37 @@ var HomeFudge;
         }
     }
     HomeFudge.UI_Selection = UI_Selection;
+})(HomeFudge || (HomeFudge = {}));
+/// <reference path="UI.ts" />
+var HomeFudge;
+/// <reference path="UI.ts" />
+(function (HomeFudge) {
+    var ƒUi = FudgeUserInterface;
+    class UI_FirstStart extends HomeFudge.UI {
+        static mainCanvas;
+        update() {
+            return;
+        }
+        static initCanvas() {
+            UI_FirstStart.mainCanvas = document.querySelector("div#MainFirstStart");
+            if (UI_FirstStart.mainCanvas == null) {
+                throw new Error("UI First start html element is empty! " + UI_FirstStart.mainCanvas);
+            }
+            HomeFudge.UI.globalSettings(UI_FirstStart.mainCanvas);
+            UI_FirstStart.mainCanvas.style.width = "50px";
+            UI_FirstStart.mainCanvas.style.height = "50px";
+            UI_FirstStart.mainCanvas.style.top = (HomeFudge.UI.height / 2) - 50 / 2 + "px";
+            UI_FirstStart.mainCanvas.style.left = (HomeFudge.UI.width / 2) - 50 / 2 + "px";
+            UI_FirstStart.mainCanvas.style.backgroundColor = "blue";
+            UI_FirstStart.mainCanvas.style.visibility = "visible";
+        }
+        constructor() {
+            super();
+            UI_FirstStart.initCanvas();
+            new ƒUi.Controller(this, UI_FirstStart.mainCanvas);
+            this.addEventListener("mutate" /* ƒ.EVENT.MUTATE */, () => console.log(this));
+        }
+    }
+    HomeFudge.UI_FirstStart = UI_FirstStart;
 })(HomeFudge || (HomeFudge = {}));
 //# sourceMappingURL=Script.js.map

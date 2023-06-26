@@ -33,6 +33,11 @@ namespace HomeFudge {
     PLAYER_INPUT = "PlayerInputUpdate",
     UI = "UI",
   }
+  
+  //settings coockie for controll tutorial
+  let cookies = document.cookie = "firstTime= true";
+  console.log(getCookie("firstTime"));
+  
   /// ------------T-E-S-T--A-R-E-A------------------\\\
 
   async function start(_event: CustomEvent): Promise<void> {
@@ -157,6 +162,21 @@ namespace HomeFudge {
     if (event.code == "Insert") {
       ƒ.Loop.continue();
     }
+  }
+
+  function getCookie(cName:string) {
+    let name = cName + "=";
+    let ca = document.cookie.split(';');
+    for(let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return "";
   }
   /// ------------T-E-S-T--A-R-E-A------------------\\\
 }
