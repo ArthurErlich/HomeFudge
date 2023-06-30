@@ -37,6 +37,7 @@ namespace HomeFudge {
                     // if deserialized the node is now fully reconstructed and access to all its components and children is possible
                     break;
                 case ƒ.EVENT.RENDER_PREPARE:
+                    
                     break;
             }
         }
