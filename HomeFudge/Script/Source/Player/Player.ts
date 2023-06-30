@@ -16,6 +16,7 @@ namespace HomeFudge {
         // private inputList: ƒ.KEYBOARD_CODE[] = null;
 
         private update = (): void => {
+            UI_FirstStart.resetAllButtonColor();
             if (Mouse.isPressedOne([MOUSE_CODE.LEFT])) {
                 this.destroyer.fireWeapon(this.selectedWeapon, this.tempAimTarget);
             }
@@ -95,29 +96,37 @@ namespace HomeFudge {
             }
         }
         private updateShipMovement() {
+
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.A])) {
-                //LEFT STARVE
+                //LEFT STRAFE
                 this.destroyer.rotateTo(Ship.DIRECTION.YAW_LEFT);
+                UI_FirstStart.setButtonColor(Ship.DIRECTION.YAW_LEFT);
+
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.D])) {
-                //RIGHT STARVE
+                //RIGHT STRAFE
                 this.destroyer.rotateTo(Ship.DIRECTION.YAW_RIGHT);
+                UI_FirstStart.setButtonColor(Ship.DIRECTION.YAW_RIGHT);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.W])) {
                 //Down
                 this.destroyer.rotateTo(Ship.DIRECTION.PITCH_DOWN);
+                UI_FirstStart.setButtonColor(Ship.DIRECTION.PITCH_DOWN);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.S])) {
                 //Up
                 this.destroyer.rotateTo(Ship.DIRECTION.PITCH_UP);
+                UI_FirstStart.setButtonColor(Ship.DIRECTION.PITCH_UP);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.Q])) {
                 //Down
                 this.destroyer.rotateTo(Ship.DIRECTION.ROLL_LEFT);
+                UI_FirstStart.setButtonColor(Ship.DIRECTION.ROLL_LEFT);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.E])) {
                 //Up
                 this.destroyer.rotateTo(Ship.DIRECTION.ROLL_RIGHT);
+                UI_FirstStart.setButtonColor(Ship.DIRECTION.ROLL_RIGHT);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.C])) {
                 //FORWARD
@@ -127,6 +136,7 @@ namespace HomeFudge {
                     this.moveDirection.y,
                     this.moveDirection.z
                 );
+                UI_FirstStart.setButtonColor(Ship.DIRECTION.FORWARDS);
 
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.V])) {
@@ -137,6 +147,7 @@ namespace HomeFudge {
                     this.moveDirection.y,
                     this.moveDirection.z
                 );
+                UI_FirstStart.setButtonColor(Ship.DIRECTION.BACKWARDS);
             }
         }
         private init() {

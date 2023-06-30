@@ -221,8 +221,9 @@ namespace HomeFudge {
         scaling: number;
         fontSize: number;
         selection: UI_Selection;
+        buttons: UI_Buttons;
 
-        [key: string]: number | UI_Selection;
+        [key: string]: number | UI_Selection | UI_Buttons;
     }
     class UI_Selection {
         healthBarWidth: number;
@@ -230,7 +231,7 @@ namespace HomeFudge {
         healthBarTextSize: number;
         selectionRingRadius: number;
         ringBorderWidth: number;
-        constructor(_healthBarWidth: number, _healthBarHight: number, _healthBarTextSize: number, _selectionRingRadius: number, _ringBorderWidth: number) {
+        constructor(_healthBarWidth: number, _healthBarHight: number, _healthBarTextSize: number, _selectionRingRadius: number, _ringBorderWidth: number, _buttons: UI_Buttons) {
             this.healthBarWidth = _healthBarWidth;
             this.healthBarHight = _healthBarHight;
             this.healthBarTextSize = _healthBarTextSize;
@@ -238,8 +239,25 @@ namespace HomeFudge {
             this.ringBorderWidth = _ringBorderWidth;
         }
     }
-    class UI_Buttons{
-        
+    class UI_Buttons {
+        FORWARDS: string;
+        BACKWARDS: string;
+        YAW_LEFT: string;
+        YAW_RIGHT: string;
+        ROLL_LEFT: string;
+        ROLL_RIGHT: string;
+        PITCH_UP: string;
+        PITCH_DOWN: string;
+        constructor(_FORWARDS: string, _BACKWARDS: string, ROLL_LEFT: string, ROLL_RIGHT: string, _YAW_LEFT: string, _YAW_RIGHT: string, _PITCH_UP: string, _PITCH_DOWN: string) {
+            this.FORWARDS = _FORWARDS;
+            this.BACKWARDS = _BACKWARDS;
+            this.ROLL_LEFT = ROLL_LEFT;
+            this.ROLL_RIGHT = ROLL_RIGHT;
+            this.YAW_LEFT = _YAW_LEFT;
+            this.YAW_RIGHT = _YAW_RIGHT;
+            this.PITCH_UP = _PITCH_UP;
+            this.PITCH_DOWN = _PITCH_DOWN;
+        }
     }
     //#endregion UI
 }

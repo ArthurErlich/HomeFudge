@@ -142,7 +142,7 @@ var HomeFudge;
         healthBarTextSize;
         selectionRingRadius;
         ringBorderWidth;
-        constructor(_healthBarWidth, _healthBarHight, _healthBarTextSize, _selectionRingRadius, _ringBorderWidth) {
+        constructor(_healthBarWidth, _healthBarHight, _healthBarTextSize, _selectionRingRadius, _ringBorderWidth, _buttons) {
             this.healthBarWidth = _healthBarWidth;
             this.healthBarHight = _healthBarHight;
             this.healthBarTextSize = _healthBarTextSize;
@@ -151,6 +151,24 @@ var HomeFudge;
         }
     }
     class UI_Buttons {
+        FORWARDS;
+        BACKWARDS;
+        YAW_LEFT;
+        YAW_RIGHT;
+        ROLL_LEFT;
+        ROLL_RIGHT;
+        PITCH_UP;
+        PITCH_DOWN;
+        constructor(_FORWARDS, _BACKWARDS, ROLL_LEFT, ROLL_RIGHT, _YAW_LEFT, _YAW_RIGHT, _PITCH_UP, _PITCH_DOWN) {
+            this.FORWARDS = _FORWARDS;
+            this.BACKWARDS = _BACKWARDS;
+            this.ROLL_LEFT = ROLL_LEFT;
+            this.ROLL_RIGHT = ROLL_RIGHT;
+            this.YAW_LEFT = _YAW_LEFT;
+            this.YAW_RIGHT = _YAW_RIGHT;
+            this.PITCH_UP = _PITCH_UP;
+            this.PITCH_DOWN = _PITCH_DOWN;
+        }
     }
     //#endregion UI
 })(HomeFudge || (HomeFudge = {}));
@@ -2160,6 +2178,7 @@ var HomeFudge;
         //empty list for the inputs to be listed. Makes so that if W and A is pressed both get executed in the end of the update.
         // private inputList: ƒ.KEYBOARD_CODE[] = null;
         update = () => {
+            HomeFudge.UI_FirstStart.resetAllButtonColor();
             if (HomeFudge.Mouse.isPressedOne([HomeFudge.MOUSE_CODE.LEFT])) {
                 this.destroyer.fireWeapon(this.selectedWeapon, this.tempAimTarget);
             }
@@ -2229,38 +2248,46 @@ var HomeFudge;
         }
         updateShipMovement() {
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.A])) {
-                //LEFT STARVE
+                //LEFT STRAFE
                 this.destroyer.rotateTo(HomeFudge.Ship.DIRECTION.YAW_LEFT);
+                HomeFudge.UI_FirstStart.setButtonColor(HomeFudge.Ship.DIRECTION.YAW_LEFT);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.D])) {
-                //RIGHT STARVE
+                //RIGHT STRAFE
                 this.destroyer.rotateTo(HomeFudge.Ship.DIRECTION.YAW_RIGHT);
+                HomeFudge.UI_FirstStart.setButtonColor(HomeFudge.Ship.DIRECTION.YAW_RIGHT);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.W])) {
                 //Down
                 this.destroyer.rotateTo(HomeFudge.Ship.DIRECTION.PITCH_DOWN);
+                HomeFudge.UI_FirstStart.setButtonColor(HomeFudge.Ship.DIRECTION.PITCH_DOWN);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.S])) {
                 //Up
                 this.destroyer.rotateTo(HomeFudge.Ship.DIRECTION.PITCH_UP);
+                HomeFudge.UI_FirstStart.setButtonColor(HomeFudge.Ship.DIRECTION.PITCH_UP);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.Q])) {
                 //Down
                 this.destroyer.rotateTo(HomeFudge.Ship.DIRECTION.ROLL_LEFT);
+                HomeFudge.UI_FirstStart.setButtonColor(HomeFudge.Ship.DIRECTION.ROLL_LEFT);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.E])) {
                 //Up
                 this.destroyer.rotateTo(HomeFudge.Ship.DIRECTION.ROLL_RIGHT);
+                HomeFudge.UI_FirstStart.setButtonColor(HomeFudge.Ship.DIRECTION.ROLL_RIGHT);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.C])) {
                 //FORWARD
                 //TODO:Move to Destroyer
                 this.moveDirection.set(1, this.moveDirection.y, this.moveDirection.z);
+                HomeFudge.UI_FirstStart.setButtonColor(HomeFudge.Ship.DIRECTION.FORWARDS);
             }
             if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.V])) {
                 //BACKWARD
                 //TODO:Move to Destroyer
                 this.moveDirection.set(-1, this.moveDirection.y, this.moveDirection.z);
+                HomeFudge.UI_FirstStart.setButtonColor(HomeFudge.Ship.DIRECTION.BACKWARDS);
             }
         }
         init() {
@@ -2481,11 +2508,37 @@ var HomeFudge;
 var HomeFudge;
 /// <reference path="UI.ts" />
 (function (HomeFudge) {
+    var ƒ = FudgeCore;
     var ƒUi = FudgeUserInterface;
     class UI_FirstStart extends HomeFudge.UI {
         static mainCanvas;
+        static rollLeft;
+        static rollRight;
+        static pitchUp;
+        static pitchDown;
+        static yawLeft;
+        static yawRight;
+        static forward;
+        static backwards;
+        static pressedButton = new Array(0);
+        static size = new ƒ.Vector2(50, 50);
         update() {
+            UI_FirstStart.setAllButtonColors();
             return;
+        }
+        static createButtons(name, pos) {
+            let element = document.createElement("div");
+            element.style.width = this.size.x + "px";
+            element.style.height = this.size.y + "px";
+            HomeFudge.UI.globalSettings(element);
+            element.style.left = pos.x - (this.size.x / 2) + "px";
+            element.style.top = pos.y - (this.size.y / 2) + "px";
+            element.style.borderRadius = "2px";
+            element.style.backgroundColor = "rgba(255, 255, 255, 0.5)";
+            element.style.textAlign = "center";
+            element.innerText = name;
+            element.style.visibility = "visible";
+            return element;
         }
         static initCanvas() {
             UI_FirstStart.mainCanvas = document.querySelector("div#MainFirstStart");
@@ -2493,12 +2546,105 @@ var HomeFudge;
                 throw new Error("UI First start html element is empty! " + UI_FirstStart.mainCanvas);
             }
             HomeFudge.UI.globalSettings(UI_FirstStart.mainCanvas);
-            UI_FirstStart.mainCanvas.style.width = "50px";
-            UI_FirstStart.mainCanvas.style.height = "50px";
-            UI_FirstStart.mainCanvas.style.top = (HomeFudge.UI.height / 2) - 50 / 2 + "px";
-            UI_FirstStart.mainCanvas.style.left = (HomeFudge.UI.width / 2) - 50 / 2 + "px";
-            UI_FirstStart.mainCanvas.style.backgroundColor = "blue";
+            if (HomeFudge.GameStats.getPlayedStatus()) {
+                return;
+            }
+            UI_FirstStart.mainCanvas.style.width = "1vw";
+            UI_FirstStart.mainCanvas.style.height = "1vh";
+            UI_FirstStart.mainCanvas.style.top = 0 + "px";
+            UI_FirstStart.mainCanvas.style.left = 0 + "px";
+            // UI_FirstStart.mainCanvas.style.backgroundColor = "blue";
             UI_FirstStart.mainCanvas.style.visibility = "visible";
+            UI_FirstStart.rollLeft = UI_FirstStart.createButtons(HomeFudge.Config.ui.buttons.ROLL_LEFT, new ƒ.Vector2(HomeFudge.UI.width / 2 - 80, HomeFudge.UI.height / 2 + 80));
+            UI_FirstStart.rollRight = UI_FirstStart.createButtons(HomeFudge.Config.ui.buttons.ROLL_RIGHT, new ƒ.Vector2(HomeFudge.UI.width / 2 + 80, HomeFudge.UI.height / 2 + 80));
+            UI_FirstStart.forward = UI_FirstStart.createButtons(HomeFudge.Config.ui.buttons.FORWARDS, new ƒ.Vector2(HomeFudge.UI.width / 2 + 250, HomeFudge.UI.height / 2 + 100));
+            UI_FirstStart.backwards = UI_FirstStart.createButtons(HomeFudge.Config.ui.buttons.BACKWARDS, new ƒ.Vector2(HomeFudge.UI.width / 2 + 250, HomeFudge.UI.height / 2 + 280));
+            UI_FirstStart.yawLeft = UI_FirstStart.createButtons(HomeFudge.Config.ui.buttons.YAW_LEFT, new ƒ.Vector2(HomeFudge.UI.width / 2 - 180, HomeFudge.UI.height / 2 + 200));
+            UI_FirstStart.yawRight = UI_FirstStart.createButtons(HomeFudge.Config.ui.buttons.YAW_RIGHT, new ƒ.Vector2(HomeFudge.UI.width / 2 + 180, HomeFudge.UI.height / 2 + 200));
+            UI_FirstStart.pitchUp = UI_FirstStart.createButtons(HomeFudge.Config.ui.buttons.PITCH_UP, new ƒ.Vector2(HomeFudge.UI.width / 2, HomeFudge.UI.height / 2 + 50));
+            UI_FirstStart.pitchDown = UI_FirstStart.createButtons(HomeFudge.Config.ui.buttons.PITCH_DOWN, new ƒ.Vector2(HomeFudge.UI.width / 2, HomeFudge.UI.height / 2 + 280));
+            UI_FirstStart.mainCanvas.appendChild(UI_FirstStart.rollLeft);
+            UI_FirstStart.mainCanvas.appendChild(UI_FirstStart.rollRight);
+            UI_FirstStart.mainCanvas.appendChild(UI_FirstStart.forward);
+            UI_FirstStart.mainCanvas.appendChild(UI_FirstStart.backwards);
+            UI_FirstStart.mainCanvas.appendChild(UI_FirstStart.yawLeft);
+            UI_FirstStart.mainCanvas.appendChild(UI_FirstStart.yawRight);
+            UI_FirstStart.mainCanvas.appendChild(UI_FirstStart.pitchUp);
+            UI_FirstStart.mainCanvas.appendChild(UI_FirstStart.pitchDown);
+        }
+        static resetAllButtonColor() {
+            this.pressedButton = new Array(0);
+            this.rollLeft.style.backgroundColor = "rgba(255, 255, 255, 0.5)";
+            this.rollRight.style.backgroundColor = "rgba(255, 255, 255, 0.5)";
+            this.forward.style.backgroundColor = "rgba(255, 255, 255, 0.5)";
+            this.backwards.style.backgroundColor = "rgba(255, 255, 255, 0.5)";
+            this.yawLeft.style.backgroundColor = "rgba(255, 255, 255, 0.5)";
+            this.yawRight.style.backgroundColor = "rgba(255, 255, 255, 0.5)";
+            this.pitchDown.style.backgroundColor = "rgba(255, 255, 255, 0.5)";
+            this.pitchUp.style.backgroundColor = "rgba(255, 255, 255, 0.5)";
+        }
+        static setButtonColor(BUTTONS) {
+            switch (BUTTONS) {
+                case HomeFudge.Ship.DIRECTION.FORWARDS:
+                    this.pressedButton.push(HomeFudge.Ship.DIRECTION.FORWARDS);
+                    break;
+                case HomeFudge.Ship.DIRECTION.BACKWARDS:
+                    this.pressedButton.push(HomeFudge.Ship.DIRECTION.BACKWARDS);
+                    break;
+                case HomeFudge.Ship.DIRECTION.YAW_LEFT:
+                    this.pressedButton.push(HomeFudge.Ship.DIRECTION.YAW_LEFT);
+                    break;
+                case HomeFudge.Ship.DIRECTION.YAW_RIGHT:
+                    this.pressedButton.push(HomeFudge.Ship.DIRECTION.YAW_RIGHT);
+                    break;
+                case HomeFudge.Ship.DIRECTION.PITCH_UP:
+                    this.pressedButton.push(HomeFudge.Ship.DIRECTION.PITCH_UP);
+                    break;
+                case HomeFudge.Ship.DIRECTION.PITCH_DOWN:
+                    this.pressedButton.push(HomeFudge.Ship.DIRECTION.PITCH_DOWN);
+                    break;
+                case HomeFudge.Ship.DIRECTION.ROLL_LEFT:
+                    this.pressedButton.push(HomeFudge.Ship.DIRECTION.ROLL_LEFT);
+                    break;
+                case HomeFudge.Ship.DIRECTION.ROLL_RIGHT:
+                    this.pressedButton.push(HomeFudge.Ship.DIRECTION.ROLL_RIGHT);
+                    break;
+                default:
+                    return;
+            }
+        }
+        static setAllButtonColors() {
+            let color = "rgba(255, 255, 255, 0.9)";
+            this.pressedButton.forEach(e => {
+                switch (e) {
+                    case HomeFudge.Ship.DIRECTION.FORWARDS:
+                        this.forward.style.backgroundColor = color;
+                        break;
+                    case HomeFudge.Ship.DIRECTION.BACKWARDS:
+                        this.backwards.style.backgroundColor = color;
+                        break;
+                    case HomeFudge.Ship.DIRECTION.YAW_LEFT:
+                        this.yawLeft.style.backgroundColor = color;
+                        break;
+                    case HomeFudge.Ship.DIRECTION.YAW_RIGHT:
+                        this.yawRight.style.backgroundColor = color;
+                        break;
+                    case HomeFudge.Ship.DIRECTION.PITCH_UP:
+                        this.pitchUp.style.backgroundColor = color;
+                        break;
+                    case HomeFudge.Ship.DIRECTION.PITCH_DOWN:
+                        this.pitchDown.style.backgroundColor = color;
+                        break;
+                    case HomeFudge.Ship.DIRECTION.ROLL_LEFT:
+                        this.rollLeft.style.backgroundColor = color;
+                        break;
+                    case HomeFudge.Ship.DIRECTION.ROLL_RIGHT:
+                        this.rollRight.style.backgroundColor = color;
+                        break;
+                    default:
+                        return;
+                }
+            });
         }
         constructor() {
             super();

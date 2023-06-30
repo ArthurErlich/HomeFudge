@@ -9,7 +9,14 @@
         "ringBorderWidth": 5
     },    
     "buttons":{
-        "Forwords":"W",
+        "FORWARDS":"C",
+        "BACKWARDS":"V",
+        "YAW_LEFT":"A",
+        "YAW_RIGHT":"D",
+        "ROLL_LEFT":"Q",
+        "ROLL_RIGHT":"E",
+        "PITCH_UP":"W",
+        "PITCH_DOWN":"S"
     }
 
 }
