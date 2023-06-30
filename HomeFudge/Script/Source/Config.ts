@@ -238,5 +238,8 @@ namespace HomeFudge {
             this.ringBorderWidth = _ringBorderWidth;
         }
     }
+    class UI_Buttons{
+        
+    }
     //#endregion UI
 }

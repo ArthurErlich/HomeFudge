@@ -35,8 +35,9 @@ namespace HomeFudge {
   }
   
   //settings coockie for controll tutorial
-  let cookies = document.cookie = "firstTime= true";
-  console.log(getCookie("firstTime"));
+  GameStats.setFlags();
+  console.log(GameStats.getPlayedStatus());
+  
   
   /// ------------T-E-S-T--A-R-E-A------------------\\\
 

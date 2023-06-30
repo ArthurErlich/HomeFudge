@@ -150,6 +150,8 @@ var HomeFudge;
             this.ringBorderWidth = _ringBorderWidth;
         }
     }
+    class UI_Buttons {
+    }
     //#endregion UI
 })(HomeFudge || (HomeFudge = {}));
 var HomeFudge;
@@ -164,6 +166,49 @@ var HomeFudge;
         }
     }
     HomeFudge.ConvexHull = ConvexHull;
+})(HomeFudge || (HomeFudge = {}));
+var HomeFudge;
+(function (HomeFudge) {
+    let GAME_STATS;
+    (function (GAME_STATS) {
+        GAME_STATS["PLAYED_ONCE"] = "PlayedOnce";
+    })(GAME_STATS || (GAME_STATS = {}));
+    class GameStats {
+        static playedOnce = false;
+        static setFlags() {
+            GameStats.getPlayedStatus();
+        }
+        static getPlayedStatus() {
+            let playStatus = localStorage.getItem(GAME_STATS.PLAYED_ONCE);
+            switch (playStatus) {
+                case "" || null:
+                    GameStats.setPlayedStatus(false);
+                    return false;
+                    break;
+                case "true":
+                    return true;
+                    break;
+                case "false":
+                    return false;
+                    break;
+                default:
+                    return false;
+                    break;
+            }
+        }
+        static setPlayedStatus(_playedOnce) {
+            let playStatus;
+            if (_playedOnce) {
+                playStatus = "true";
+            }
+            else {
+                playStatus = "false";
+            }
+            localStorage.setItem(GAME_STATS.PLAYED_ONCE, playStatus);
+            GameStats.playedOnce = _playedOnce;
+        }
+    }
+    HomeFudge.GameStats = GameStats;
 })(HomeFudge || (HomeFudge = {}));
 var HomeFudge;
 (function (HomeFudge) {
@@ -317,8 +362,8 @@ var HomeFudge;
         UPDATE_EVENTS["UI"] = "UI";
     })(UPDATE_EVENTS = HomeFudge.UPDATE_EVENTS || (HomeFudge.UPDATE_EVENTS = {}));
     //settings coockie for controll tutorial
-    let cookies = document.cookie = "firstTime= true";
-    console.log(getCookie("firstTime"));
+    HomeFudge.GameStats.setFlags();
+    console.log(HomeFudge.GameStats.getPlayedStatus());
     /// ------------T-E-S-T--A-R-E-A------------------\\\
     async function start(_event) {
         HomeFudge.LoadingScreen.remove();
@@ -685,6 +730,43 @@ var HomeFudge;
         }
     }
     HomeFudge.AstroidLarge = AstroidLarge;
+})(HomeFudge || (HomeFudge = {}));
+var HomeFudge;
+(function (HomeFudge) {
+    var ƒ = FudgeCore;
+    ƒ.Project.registerScriptNamespace(HomeFudge); // Register the namespace to FUDGE for serialization
+    class ComponentHugeAstroid extends ƒ.ComponentScript {
+        // Register the script as component for use in the editor via drag&drop
+        static iSubclass = ƒ.Component.registerSubclass(ComponentHugeAstroid);
+        // Properties may be mutated by users in the editor via the automatically created user interface
+        message = "Component-Huge-Astroid added to ";
+        constructor() {
+            super();
+            // Don't start when running in editor
+            // if (ƒ.Project.mode == ƒ.MODE.EDITOR)
+            //   return;
+            // Listen to this component being added to or removed from a node
+            this.addEventListener("componentAdd" /* ƒ.EVENT.COMPONENT_ADD */, this.hndEvent);
+            this.addEventListener("componentRemove" /* ƒ.EVENT.COMPONENT_REMOVE */, this.hndEvent);
+            this.addEventListener("nodeDeserialized" /* ƒ.EVENT.NODE_DESERIALIZED */, this.hndEvent);
+        }
+        // Activate the functions of this component as response to events
+        hndEvent = (_event) => {
+            switch (_event.type) {
+                case "componentAdd" /* ƒ.EVENT.COMPONENT_ADD */:
+                    ƒ.Debug.log(this.message, this.node);
+                    break;
+                case "componentRemove" /* ƒ.EVENT.COMPONENT_REMOVE */:
+                    this.removeEventListener("componentAdd" /* ƒ.EVENT.COMPONENT_ADD */, this.hndEvent);
+                    this.removeEventListener("componentRemove" /* ƒ.EVENT.COMPONENT_REMOVE */, this.hndEvent);
+                    break;
+                case "nodeDeserialized" /* ƒ.EVENT.NODE_DESERIALIZED */:
+                    // if deserialized the node is now fully reconstructed and access to all its components and children is possible
+                    break;
+            }
+        };
+    }
+    HomeFudge.ComponentHugeAstroid = ComponentHugeAstroid;
 })(HomeFudge || (HomeFudge = {}));
 var HomeFudge;
 (function (HomeFudge) {
