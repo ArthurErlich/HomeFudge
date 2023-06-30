@@ -32,10 +32,8 @@ namespace HomeFudge{
             });
             UI.width = _viewport.canvas.width;
             UI.height = _viewport.canvas.height;
-
         }
     }
-
 }
 
 //TODO: Move to "nice to have doc"
