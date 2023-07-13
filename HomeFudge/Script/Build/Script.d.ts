@@ -144,9 +144,9 @@ declare namespace HomeFudge {
 declare namespace HomeFudge {
     class GameStats {
         static playedOnce: boolean;
-        static setFlags(): void;
+        static setInGameFlags(): void;
         static getPlayedStatus(): boolean;
-        private static setPlayedStatus;
+        static setPlayedStatus(_playedOnce: boolean): void;
     }
 }
 declare namespace HomeFudge {
@@ -250,7 +250,7 @@ declare namespace HomeFudge {
         LARGE = "LARGE"
     }
     export class Astroid extends GameObject {
-        private SIZE;
+        static SIZE: typeof SIZE;
         protected maxHealth: number;
         protected hitPoints: number;
         update(): void;
@@ -287,7 +287,8 @@ declare namespace HomeFudge {
 declare namespace HomeFudge {
     import ƒ = FudgeCore;
     class ConsoleCommands {
-        static spawnDestoryer(position: ƒ.Vector3, rotation: ƒ.Vector3): void;
+        static spawnDestroyer(position: ƒ.Vector3, rotation: ƒ.Vector3): void;
+        static spawnAstroid(location: ƒ.Vector3, size: string): void;
     }
 }
 declare namespace HomeFudge {
@@ -721,6 +722,9 @@ declare namespace HomeFudge {
         static resetAllButtonColor(): void;
         static setButtonColor(BUTTONS: typeof Ship.DIRECTION[keyof typeof Ship.DIRECTION]): void;
         private static setAllButtonColors;
+        private static setButtonVisibility;
+        private static isButtonPressedOnce;
+        private static checkToHide;
         constructor();
     }
 }

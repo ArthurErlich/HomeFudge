@@ -6,7 +6,7 @@ namespace HomeFudge {
     export class GameStats {
 
         public static playedOnce: boolean = false;
-        public static setFlags() {
+        public static setInGameFlags() {
             GameStats.getPlayedStatus();
         }
 
@@ -29,7 +29,7 @@ namespace HomeFudge {
                     break;
             }
         }
-        private static setPlayedStatus(_playedOnce: boolean): void {
+        public static setPlayedStatus(_playedOnce: boolean): void {
             let playStatus: string;
             if (_playedOnce) {
                 playStatus = "true";

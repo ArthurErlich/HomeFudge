@@ -34,8 +34,8 @@ namespace HomeFudge {
     UI = "UI",
   }
   
-  //settings coockie for controll tutorial
-  GameStats.setFlags();
+  //this sets the flag for the Tutorial.
+  GameStats.setInGameFlags();
   console.log(GameStats.getPlayedStatus());
   
   
@@ -74,7 +74,7 @@ namespace HomeFudge {
       _worldNode.appendChild(destroyer2);
       _worldNode.appendChild(destroyer);
 
-      //Example command: ConsoleCommands.spawnDestoryer(new FudgeCore.Vector3(0,0,0),new FudgeCore.Vector3(0,0,0))
+      //Example command: ConsoleCommands.spawnDestroyer(new FudgeCore.Vector3(0,0,0),new FudgeCore.Vector3(0,0,0))
       (window as any).ConsoleCommands = ConsoleCommands; // attaches the ConsoleCommands globally to be useable in the console
 
 
@@ -114,13 +114,12 @@ namespace HomeFudge {
 
     // GameLoop.update(); <-- different approach instant of dispatching an event for the loop.
 
-
-    /// ------------T-E-S-T--A-R-E-A------------------\\\
     ƒ.AudioManager.default.update();
     _viewport.draw();
     ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.UI)); // UI needs to be updated after drawing the frame
-
-
+    
+    
+    /// ------------T-E-S-T--A-R-E-A------------------\\\
     //move to player, check if the same astroid is selected to stop/ or make a countdown of one second to stop selection spam/ or make
     //Filter nodes. add tag to gameObject
     if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.F])) {
@@ -140,21 +139,6 @@ namespace HomeFudge {
     if (event.code == "Insert") {
       ƒ.Loop.continue();
     }
-  }
-
-  function getCookie(cName:string) {
-    let name = cName + "=";
-    let ca = document.cookie.split(';');
-    for(let i = 0; i < ca.length; i++) {
-      let c = ca[i];
-      while (c.charAt(0) == ' ') {
-        c = c.substring(1);
-      }
-      if (c.indexOf(name) == 0) {
-        return c.substring(name.length, c.length);
-      }
-    }
-    return "";
   }
   /// ------------T-E-S-T--A-R-E-A------------------\\\
 }

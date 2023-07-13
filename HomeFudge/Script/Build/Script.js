@@ -193,7 +193,7 @@ var HomeFudge;
     })(GAME_STATS || (GAME_STATS = {}));
     class GameStats {
         static playedOnce = false;
-        static setFlags() {
+        static setInGameFlags() {
             GameStats.getPlayedStatus();
         }
         static getPlayedStatus() {
@@ -379,8 +379,8 @@ var HomeFudge;
         UPDATE_EVENTS["PLAYER_INPUT"] = "PlayerInputUpdate";
         UPDATE_EVENTS["UI"] = "UI";
     })(UPDATE_EVENTS = HomeFudge.UPDATE_EVENTS || (HomeFudge.UPDATE_EVENTS = {}));
-    //settings coockie for controll tutorial
-    HomeFudge.GameStats.setFlags();
+    //this sets the flag for the Tutorial.
+    HomeFudge.GameStats.setInGameFlags();
     console.log(HomeFudge.GameStats.getPlayedStatus());
     /// ------------T-E-S-T--A-R-E-A------------------\\\
     async function start(_event) {
@@ -412,7 +412,7 @@ var HomeFudge;
             let destroyer2 = new HomeFudge.Destroyer(mtx);
             HomeFudge._worldNode.appendChild(destroyer2);
             HomeFudge._worldNode.appendChild(destroyer);
-            //Example command: ConsoleCommands.spawnDestoryer(new FudgeCore.Vector3(0,0,0),new FudgeCore.Vector3(0,0,0))
+            //Example command: ConsoleCommands.spawnDestroyer(new FudgeCore.Vector3(0,0,0),new FudgeCore.Vector3(0,0,0))
             window.ConsoleCommands = HomeFudge.ConsoleCommands; // attaches the ConsoleCommands globally to be useable in the console
             // let node: ƒ.Node= new ƒ.Node("name");
             // let nodeMes = new ƒ.ComponentMesh(new ƒ.MeshSprite);
@@ -442,10 +442,10 @@ var HomeFudge;
         ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.PLAYER_INPUT));
         ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.GAME_OBJECTS));
         // GameLoop.update(); <-- different approach instant of dispatching an event for the loop.
-        /// ------------T-E-S-T--A-R-E-A------------------\\\
         ƒ.AudioManager.default.update();
         HomeFudge._viewport.draw();
         ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.UI)); // UI needs to be updated after drawing the frame
+        /// ------------T-E-S-T--A-R-E-A------------------\\\
         //move to player, check if the same astroid is selected to stop/ or make a countdown of one second to stop selection spam/ or make
         //Filter nodes. add tag to gameObject
         if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.F])) {
@@ -463,20 +463,6 @@ var HomeFudge;
         if (event.code == "Insert") {
             ƒ.Loop.continue();
         }
-    }
-    function getCookie(cName) {
-        let name = cName + "=";
-        let ca = document.cookie.split(';');
-        for (let i = 0; i < ca.length; i++) {
-            let c = ca[i];
-            while (c.charAt(0) == ' ') {
-                c = c.substring(1);
-            }
-            if (c.indexOf(name) == 0) {
-                return c.substring(name.length, c.length);
-            }
-        }
-        return "";
     }
     /// ------------T-E-S-T--A-R-E-A------------------\\\
 })(HomeFudge || (HomeFudge = {}));
@@ -584,7 +570,7 @@ var HomeFudge;
         SIZE["LARGE"] = "LARGE";
     })(SIZE || (SIZE = {}));
     class Astroid extends HomeFudge.GameObject {
-        SIZE = SIZE;
+        static SIZE = SIZE;
         maxHealth;
         hitPoints;
         //this is an large Astorid example
@@ -735,11 +721,21 @@ var HomeFudge;
 (function (HomeFudge) {
     var ƒ = FudgeCore;
     class ConsoleCommands {
-        static spawnDestoryer(position, rotation) {
+        //Commands
+        /*
+        ConsoleCommands.spawnDestroyer(new FudgeCore.Vector3(0,0,0),new FudgeCore.Vector3(0,0,0))
+        ConsoleCommands.spawnAstroid(new FudgeCore.Vector3(20,20,20),"large")
+        */
+        static spawnDestroyer(position, rotation) {
             let transformation = new ƒ.Matrix4x4();
             transformation.translation = position;
             transformation.rotation = rotation;
             HomeFudge._worldNode.appendChild(new HomeFudge.Destroyer(transformation));
+        }
+        static spawnAstroid(location, size) {
+            if (size.toLowerCase() == "large") {
+                HomeFudge.Astroid.spawn(location, HomeFudge.Astroid.SIZE.LARGE);
+            }
         }
     }
     HomeFudge.ConsoleCommands = ConsoleCommands;
@@ -2536,6 +2532,7 @@ var HomeFudge;
             element.style.textAlign = "center";
             element.innerText = name;
             element.style.visibility = "visible";
+            element.style.transition = "visibility 1s ,background-color 0.1s"; //TODO: check out a different way to hide the Buttons. Now the buttons will disappear after 1 second.
             return element;
         }
         static initCanvas() {
@@ -2544,13 +2541,17 @@ var HomeFudge;
                 throw new Error("UI First start html element is empty! " + UI_FirstStart.mainCanvas);
             }
             HomeFudge.UI.globalSettings(UI_FirstStart.mainCanvas);
-            if (HomeFudge.GameStats.getPlayedStatus()) {
-                return;
-            }
             UI_FirstStart.mainCanvas.style.width = "1vw";
             UI_FirstStart.mainCanvas.style.height = "1vh";
             UI_FirstStart.mainCanvas.style.top = 0 + "px";
             UI_FirstStart.mainCanvas.style.left = 0 + "px";
+            if (HomeFudge.GameStats.getPlayedStatus()) {
+                return;
+            }
+            else {
+                //TODO:DEBUG -> Remove after testing the tutorial UI
+                // GameStats.setPlayedStatus(true);
+            }
             // UI_FirstStart.mainCanvas.style.backgroundColor = "blue";
             UI_FirstStart.mainCanvas.style.visibility = "visible";
             UI_FirstStart.rollLeft = UI_FirstStart.createButtons(HomeFudge.Config.ui.buttons.ROLL_LEFT, new ƒ.Vector2(HomeFudge.UI.width / 2 - 80, HomeFudge.UI.height / 2 + 80));
@@ -2571,6 +2572,9 @@ var HomeFudge;
             UI_FirstStart.mainCanvas.appendChild(UI_FirstStart.pitchDown);
         }
         static resetAllButtonColor() {
+            if (this.rollLeft == null) {
+                return;
+            }
             this.pressedButton = new Array(0);
             this.rollLeft.style.backgroundColor = "rgba(255, 255, 255, 0.5)";
             this.rollRight.style.backgroundColor = "rgba(255, 255, 255, 0.5)";
@@ -2580,32 +2584,52 @@ var HomeFudge;
             this.yawRight.style.backgroundColor = "rgba(255, 255, 255, 0.5)";
             this.pitchDown.style.backgroundColor = "rgba(255, 255, 255, 0.5)";
             this.pitchUp.style.backgroundColor = "rgba(255, 255, 255, 0.5)";
+            //hides the button after the first click
+            this.checkToHide(this.forward);
+            this.checkToHide(this.backwards);
+            this.checkToHide(this.rollRight);
+            this.checkToHide(this.rollLeft);
+            this.checkToHide(this.yawLeft);
+            this.checkToHide(this.yawRight);
+            this.checkToHide(this.pitchDown);
+            this.checkToHide(this.pitchUp);
         }
         static setButtonColor(BUTTONS) {
+            if (this.rollLeft == null) {
+                return;
+            }
             switch (BUTTONS) {
                 case HomeFudge.Ship.DIRECTION.FORWARDS:
                     this.pressedButton.push(HomeFudge.Ship.DIRECTION.FORWARDS);
+                    this.forward.dataset.pushedOnce = "true";
                     break;
                 case HomeFudge.Ship.DIRECTION.BACKWARDS:
                     this.pressedButton.push(HomeFudge.Ship.DIRECTION.BACKWARDS);
+                    this.backwards.dataset.pushedOnce = "true";
                     break;
                 case HomeFudge.Ship.DIRECTION.YAW_LEFT:
                     this.pressedButton.push(HomeFudge.Ship.DIRECTION.YAW_LEFT);
+                    this.yawLeft.dataset.pushedOnce = "true";
                     break;
                 case HomeFudge.Ship.DIRECTION.YAW_RIGHT:
                     this.pressedButton.push(HomeFudge.Ship.DIRECTION.YAW_RIGHT);
+                    this.yawRight.dataset.pushedOnce = "true";
                     break;
                 case HomeFudge.Ship.DIRECTION.PITCH_UP:
                     this.pressedButton.push(HomeFudge.Ship.DIRECTION.PITCH_UP);
+                    this.pitchUp.dataset.pushedOnce = "true";
                     break;
                 case HomeFudge.Ship.DIRECTION.PITCH_DOWN:
                     this.pressedButton.push(HomeFudge.Ship.DIRECTION.PITCH_DOWN);
+                    this.pitchDown.dataset.pushedOnce = "true";
                     break;
                 case HomeFudge.Ship.DIRECTION.ROLL_LEFT:
                     this.pressedButton.push(HomeFudge.Ship.DIRECTION.ROLL_LEFT);
+                    this.rollLeft.dataset.pushedOnce = "true";
                     break;
                 case HomeFudge.Ship.DIRECTION.ROLL_RIGHT:
                     this.pressedButton.push(HomeFudge.Ship.DIRECTION.ROLL_RIGHT);
+                    this.rollRight.dataset.pushedOnce = "true";
                     break;
                 default:
                     return;
@@ -2643,6 +2667,22 @@ var HomeFudge;
                         return;
                 }
             });
+        }
+        static setButtonVisibility(element, visible) {
+            if (visible) {
+                element.style.visibility = "visible";
+            }
+            else {
+                element.style.visibility = "hidden";
+            }
+        }
+        static isButtonPressedOnce(element) {
+            return (element.dataset.pushedOnce == "true") ? true : false;
+        }
+        static checkToHide(element) {
+            if (this.isButtonPressedOnce(element)) {
+                this.setButtonVisibility(element, false);
+            }
         }
         constructor() {
             super();

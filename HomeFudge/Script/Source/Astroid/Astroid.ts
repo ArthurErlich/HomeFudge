@@ -7,7 +7,7 @@ namespace HomeFudge {
         LARGE = "LARGE"
     }
     export class Astroid extends GameObject {
-        private SIZE = SIZE;
+        public static SIZE = SIZE;
 
         protected maxHealth:number;
         protected hitPoints: number;
