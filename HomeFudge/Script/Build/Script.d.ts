@@ -97,19 +97,22 @@ declare namespace HomeFudge {
         SMALL: AstroidData;
         MEDIUM: AstroidData;
         LARGE: AstroidData;
+        scale: number;
         constructor(_small: AstroidData, _medium: AstroidData, _large: AstroidData);
     }
     class AstroidData {
         hitpoints: number;
         mass: number;
         spawnRotSpeed: number;
-        constructor(_hitpoints: number, _mass: number, _spawnRotSpeed: number);
+        scale: number;
+        constructor(_hitpoints: number, _mass: number, _spawnRotSpeed: number, _scale: number);
     }
     interface Ui {
         scaling: number;
         fontSize: number;
         selection: UI_Selection;
-        [key: string]: number | UI_Selection;
+        buttons: UI_Buttons;
+        [key: string]: number | UI_Selection | UI_Buttons;
     }
     class UI_Selection {
         healthBarWidth: number;
@@ -117,7 +120,18 @@ declare namespace HomeFudge {
         healthBarTextSize: number;
         selectionRingRadius: number;
         ringBorderWidth: number;
-        constructor(_healthBarWidth: number, _healthBarHight: number, _healthBarTextSize: number, _selectionRingRadius: number, _ringBorderWidth: number);
+        constructor(_healthBarWidth: number, _healthBarHight: number, _healthBarTextSize: number, _selectionRingRadius: number, _ringBorderWidth: number, _buttons: UI_Buttons);
+    }
+    class UI_Buttons {
+        FORWARDS: string;
+        BACKWARDS: string;
+        YAW_LEFT: string;
+        YAW_RIGHT: string;
+        ROLL_LEFT: string;
+        ROLL_RIGHT: string;
+        PITCH_UP: string;
+        PITCH_DOWN: string;
+        constructor(_FORWARDS: string, _BACKWARDS: string, ROLL_LEFT: string, ROLL_RIGHT: string, _YAW_LEFT: string, _YAW_RIGHT: string, _PITCH_UP: string, _PITCH_DOWN: string);
     }
     export {};
 }
@@ -125,6 +139,14 @@ declare namespace HomeFudge {
     import ƒ = FudgeCore;
     class ConvexHull {
         static convertToFloat32Array(convexMesh: ƒ.Mesh): Float32Array;
+    }
+}
+declare namespace HomeFudge {
+    class GameStats {
+        static playedOnce: boolean;
+        static setFlags(): void;
+        static getPlayedStatus(): boolean;
+        private static setPlayedStatus;
     }
 }
 declare namespace HomeFudge {
@@ -260,6 +282,21 @@ declare namespace HomeFudge {
         private init;
         private setAllComponents;
         constructor(location: ƒ.Vector3);
+    }
+}
+declare namespace HomeFudge {
+    import ƒ = FudgeCore;
+    class ConsoleCommands {
+        static spawnDestoryer(position: ƒ.Vector3, rotation: ƒ.Vector3): void;
+    }
+}
+declare namespace HomeFudge {
+    import ƒ = FudgeCore;
+    class ComponentHugeAstroid extends ƒ.ComponentScript {
+        static readonly iSubclass: number;
+        message: string;
+        constructor();
+        hndEvent: (_event: Event) => void;
     }
 }
 declare namespace HomeFudge {
@@ -401,6 +438,7 @@ declare namespace HomeFudge {
         private static maxSpeed;
         private static seedRigidBody;
         private rigidBody;
+        remove(): void;
         update(): void;
         private init;
         private getNodeResources;
@@ -623,10 +661,13 @@ declare namespace HomeFudge {
     import ƒ = FudgeCore;
     abstract class UI extends ƒ.Mutable {
         static scale: number;
-        static ui_elements: UI[];
+        static width: number;
+        static height: number;
+        static elements: UI[];
         abstract update(): void;
         static init(): void;
         static setScaleAndReload(scale: number): void;
+        static globalSettings(element: HTMLElement): void;
         protected reduceMutator(_mutator: ƒ.Mutator): void;
         constructor();
     }
@@ -654,11 +695,32 @@ declare namespace HomeFudge {
         private static initUiRingSelection;
         private static initUiHealthMeterStatus;
         private static initUIHealtHMeterNumber;
-        private static globalSettings;
         private static initUIConnectionLine;
         static init(): void;
         static setScaleAndReload(scale: number): void;
         protected reduceMutator(_mutator: ƒ.Mutator): void;
+        constructor();
+    }
+}
+declare namespace HomeFudge {
+    class UI_FirstStart extends UI {
+        private static mainCanvas;
+        private static rollLeft;
+        private static rollRight;
+        private static pitchUp;
+        private static pitchDown;
+        private static yawLeft;
+        private static yawRight;
+        private static forward;
+        private static backwards;
+        private static pressedButton;
+        private static size;
+        update(): void;
+        private static createButtons;
+        static initCanvas(): void;
+        static resetAllButtonColor(): void;
+        static setButtonColor(BUTTONS: typeof Ship.DIRECTION[keyof typeof Ship.DIRECTION]): void;
+        private static setAllButtonColors;
         constructor();
     }
 }

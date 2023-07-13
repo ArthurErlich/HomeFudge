@@ -73,6 +73,12 @@ namespace HomeFudge {
       let destroyer2 = new Destroyer(mtx);
       _worldNode.appendChild(destroyer2);
       _worldNode.appendChild(destroyer);
+
+      //Example command: ConsoleCommands.spawnDestoryer(new FudgeCore.Vector3(0,0,0),new FudgeCore.Vector3(0,0,0))
+      (window as any).ConsoleCommands = ConsoleCommands; // attaches the ConsoleCommands globally to be useable in the console
+
+
+
       // let node: ƒ.Node= new ƒ.Node("name");
       // let nodeMes = new ƒ.ComponentMesh(new ƒ.MeshSprite);
       // nodeMes.mtxPivot.scale(new ƒ.Vector3(200,200,200));
@@ -84,8 +90,6 @@ namespace HomeFudge {
 
     /// ------------T-E-S-T--A-R-E-A------------------\\\
     //TODO: Before the loop starts. Add an Game Menu draws on frame while updating
-    selectedObject = p1;
-
     let x = 400;
     let y = 10;
     let z = -300;
@@ -126,35 +130,8 @@ namespace HomeFudge {
       selectedObject = pickViewport[0].node;
       UI_Selection.setNodeToFocus(selectedObject);
     }
-
-    // UI_Selection.update();
-    // let uiPos: ƒ.Vector2 = _viewport.pointWorldToClient(selectedObject.mtxWorld.translation);
-    UI_Selection.setSize(p1.destroyer.mtxWorld.translation.getDistance(selectedObject.mtxWorld.translation));
     /// ------------T-E-S-T--A-R-E-A------------------\\\
   }
-
-
-
-
-  /// ------------T-E-S-T--A-R-E-A------------------\\\
-  // function getPosTest(): void {
-  //   let pickCam: ƒ.Pick[] = ƒ.Picker.pickCamera(_worldNode.getChildren(), _viewport.camera, Mouse.position);
-  //   let pickViewport: ƒ.Pick[] = ƒ.Picker.pickViewport(_viewport, Mouse.position);
-
-  //   console.log("%c" + "Camera Picker", "background:red");
-  //   pickCam.forEach(element => {
-  //     console.log("%c" + element.posMesh.toString(), "background:yellow");
-  //   });
-  //   console.log("-------------");
-  //   console.log("%c" + "Viewport Picker", "background:red");
-  //   pickViewport.forEach(element => {
-  //     console.log("%c" + element.posMesh.toString(), "background:yellow");
-  //   });
-  //   console.log("-------------");
-  // }
-  /// ------------T-E-S-T--A-R-E-A------------------\\\
-
-
 
   /// ------------T-E-S-T--A-R-E-A------------------\\\
   //TODO: add a start stop Loop for Debug

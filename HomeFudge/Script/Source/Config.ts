@@ -171,7 +171,7 @@ namespace HomeFudge {
         public LARGE: AstroidData;
         public scale: number;
 
-        constructor(_small: AstroidData, _medium: AstroidData, _large: AstroidData, _scale:) {
+        constructor(_small: AstroidData, _medium: AstroidData, _large: AstroidData) {
             if (_small == undefined) {
                 throw new Error("Small Astroid is undefined in the config!");
             }
@@ -181,6 +181,7 @@ namespace HomeFudge {
             if (_large == undefined) {
                 throw new Error("Large Astroid is undefined in the config!");
             }
+            
             this.SMALL = _small;
             this.MEDIUM = _medium;
             this.LARGE = _large;

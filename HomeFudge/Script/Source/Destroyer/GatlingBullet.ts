@@ -4,19 +4,22 @@ namespace HomeFudge {
     //TODO:move texturePivot to the Beck
     export class GatlingBullet extends Bullet {
         protected maxLifeTime: number = null;
-
-
+        
+        
         private static graph: ƒ.Graph = null;
         private static mesh: ƒ.Mesh = null;
         private static material: ƒ.Material = null;
         private static maxSpeed: number = null;
-
+        
         private static seedRigidBody: ƒ.ComponentRigidbody = null;
         private rigidBody: ƒ.ComponentRigidbody = null;
-
+        
         //TODO: try faction out.
         // faction: FACTION="FACTION.A";
-
+        
+        public remove(): void {
+            throw new Error("Method not implemented.");
+        }
         public update(): void{
 
             //goes out of the update loop as long the date is received into the config variable

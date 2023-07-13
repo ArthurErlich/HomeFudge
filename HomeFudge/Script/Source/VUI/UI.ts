@@ -37,6 +37,6 @@ namespace HomeFudge{
 }
 
 //TODO: Move to "nice to have doc"
-//Reflect.get(cmp,Audio,"source") <- hack way to get hidden stuff behinde private members
-//mtxPivot.mutate("{tranlation":{x:y, y:3}})
-// using controll for delay on the camera movment. Let the camere pivot node lagg behinde the real world coordinate
+//Reflect.get(cmp,Audio,"source") <- hack way to get hidden stuff behind private members
+//mtxPivot.mutate("{translation":{x:y, y:3}})
+// using control for delay on the camera movement. Let the camera pivot node lags behinds the real world coordinate
