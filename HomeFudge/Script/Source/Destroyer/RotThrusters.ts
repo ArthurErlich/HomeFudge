@@ -6,6 +6,7 @@ namespace HomeFudge {
         private static mesh: ƒ.Mesh = null;
         private static material: ƒ.Material = null;
         private static animation: ƒ.Animation = null;
+        private fireSoundComponent: ƒ.ComponentAudio = null;
 
         private meshComp: ƒ.ComponentMesh;
 
@@ -24,6 +25,7 @@ namespace HomeFudge {
             this.createComponents(position);
             this.mtxLocal.scale(new ƒ.Vector3(4, 4, 4));
             this.meshComp.activate(false);
+
 
 
             switch (side) {
@@ -83,18 +85,27 @@ namespace HomeFudge {
             let animator = new ƒ.ComponentAnimator(RotThrusters.animation);
             animator.quantization = ƒ.ANIMATION_QUANTIZATION.DISCRETE;
             this.addComponent(animator);
+            this.fireSoundComponent = new ƒ.ComponentAudio(Audio.getSoundEffect(Audio.SOUNDEFFECTS.RCS_FIRE));
+            this.fireSoundComponent.volume = 1;
+            this.addComponent(this.fireSoundComponent);
         }
         public activate(activate: boolean) {
             if (this.meshComp == null || this.meshComp == undefined) {
                 return;
             }
             this.meshComp.activate(activate);
+            this.playSound();
         }
         public isActivated(): boolean {
             if (this.meshComp == null || this.meshComp == undefined) {
                 return false;
             }
             return this.meshComp.isActive;
+        }
+        public playSound(){
+            if(!this.fireSoundComponent.isPlaying){
+                this.fireSoundComponent.play(true);
+            }
         }
         constructor(side: string, position: ƒ.Vector3) {
             super(side + "RotThruster");

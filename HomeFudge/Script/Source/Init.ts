@@ -44,16 +44,16 @@ namespace HomeFudge {
             return;
         }
         // hide the cursor when right clicking, also suppressing right-click menu
-        canvas.addEventListener("mousedown", function (event) {
-            if (event.button == 2) {
-                canvas.requestPointerLock();
-            }
-        });
-        canvas.addEventListener("mouseup", function (event) {
-            if (event.button == 2) {
-                document.exitPointerLock();
-            }
-        });
+        // canvas.addEventListener("mousedown", function (event) {
+        //     if (event.button == 2) {
+        //         canvas.requestPointerLock();
+        //     }
+        // });
+        // canvas.addEventListener("mouseup", function (event) {
+        //     if (event.button == 2) {
+        //         document.exitPointerLock();
+        //     }
+        // });
 
         viewport.initialize("InteractiveViewport", graph, cmpCamera, canvas);
         // setup audio

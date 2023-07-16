@@ -265,16 +265,16 @@ var HomeFudge;
             return;
         }
         // hide the cursor when right clicking, also suppressing right-click menu
-        canvas.addEventListener("mousedown", function (event) {
-            if (event.button == 2) {
-                canvas.requestPointerLock();
-            }
-        });
-        canvas.addEventListener("mouseup", function (event) {
-            if (event.button == 2) {
-                document.exitPointerLock();
-            }
-        });
+        // canvas.addEventListener("mousedown", function (event) {
+        //     if (event.button == 2) {
+        //         canvas.requestPointerLock();
+        //     }
+        // });
+        // canvas.addEventListener("mouseup", function (event) {
+        //     if (event.button == 2) {
+        //         document.exitPointerLock();
+        //     }
+        // });
         viewport.initialize("InteractiveViewport", graph, cmpCamera, canvas);
         // setup audio
         cmpCamera.node.addComponent(cmpListener);
@@ -399,6 +399,8 @@ var HomeFudge;
             await HomeFudge.Config.initConfigs();
             HomeFudge.Mouse.init();
             HomeFudge.UI.init();
+            console.warn("Loading Audio");
+            HomeFudge.Audio.loadAudioFiles();
         }
         async function initWorld() {
             ƒ.Physics.setGravity(ƒ.Vector3.ZERO());
@@ -448,12 +450,13 @@ var HomeFudge;
         /// ------------T-E-S-T--A-R-E-A------------------\\\
         //move to player, check if the same astroid is selected to stop/ or make a countdown of one second to stop selection spam/ or make
         //Filter nodes. add tag to gameObject
-        if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.F])) {
-            let pickViewport = ƒ.Picker.pickViewport(HomeFudge._viewport, HomeFudge.Mouse.position);
-            pickViewport.sort((a, b) => a.zBuffer - b.zBuffer);
-            selectedObject = pickViewport[0].node;
-            HomeFudge.UI_Selection.setNodeToFocus(selectedObject);
-        }
+        //TODO: Remove unused function
+        // if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.F])) {
+        //   let pickViewport: ƒ.Pick[] = ƒ.Picker.pickViewport(_viewport, Mouse.position);
+        //   pickViewport.sort((a, b) => a.zBuffer - b.zBuffer);
+        //   selectedObject = pickViewport[0].node;
+        //   UI_Selection.setNodeToFocus(selectedObject);
+        // }
         /// ------------T-E-S-T--A-R-E-A------------------\\\
     }
     /// ------------T-E-S-T--A-R-E-A------------------\\\
@@ -716,6 +719,38 @@ var HomeFudge;
         }
     }
     HomeFudge.AstroidLarge = AstroidLarge;
+})(HomeFudge || (HomeFudge = {}));
+var HomeFudge;
+(function (HomeFudge) {
+    var ƒ = FudgeCore;
+    let BACKGROUND_MUSIC;
+    (function (BACKGROUND_MUSIC) {
+        BACKGROUND_MUSIC[BACKGROUND_MUSIC["CYCLES"] = 0] = "CYCLES";
+    })(BACKGROUND_MUSIC || (BACKGROUND_MUSIC = {}));
+    let SOUNDEFFECTS;
+    (function (SOUNDEFFECTS) {
+        SOUNDEFFECTS[SOUNDEFFECTS["MM10_CANNON_FIRE"] = 0] = "MM10_CANNON_FIRE";
+        SOUNDEFFECTS[SOUNDEFFECTS["RCS_FIRE"] = 1] = "RCS_FIRE";
+    })(SOUNDEFFECTS || (SOUNDEFFECTS = {}));
+    class Audio {
+        static BACKGROUND_MUSIC = BACKGROUND_MUSIC;
+        static SOUNDEFFECTS = SOUNDEFFECTS;
+        static backgroundMusic = new Array();
+        static soundEffects = new Array();
+        static loadAudioFiles() {
+            // would be nice to load it via a json config file
+            this.backgroundMusic.push(new ƒ.Audio("Sound/Background/10.Cycles.mp3")); //Sound by IXION!
+            this.soundEffects.push(new ƒ.Audio("Sound/autocannon.mp3"));
+            this.soundEffects.push(new ƒ.Audio("Sound/RCS_Fire_Temp.mp3"));
+        }
+        static getBackgroundMusic(BACKGROUND_MUSIC) {
+            return this.backgroundMusic[BACKGROUND_MUSIC];
+        }
+        static getSoundEffect(SOUNDEFFECTS) {
+            return this.soundEffects[SOUNDEFFECTS];
+        }
+    }
+    HomeFudge.Audio = Audio;
 })(HomeFudge || (HomeFudge = {}));
 var HomeFudge;
 (function (HomeFudge) {
@@ -1589,8 +1624,16 @@ var HomeFudge;
 var HomeFudge;
 (function (HomeFudge) {
     var ƒ = FudgeCore;
+    let ROTATE;
+    (function (ROTATE) {
+        ROTATE[ROTATE["UP"] = 0] = "UP";
+        ROTATE[ROTATE["DOWN"] = 1] = "DOWN";
+        ROTATE[ROTATE["LEFT"] = 2] = "LEFT";
+        ROTATE[ROTATE["RIGHT"] = 3] = "RIGHT";
+    })(ROTATE || (ROTATE = {}));
     //TODO:create super class Turret. GatlingTurret and BeamTurret extends Turret
     class GatlingTurret extends ƒ.Node {
+        ROTATE = ROTATE;
         //TODO: make Private again
         headNode = null;
         baseNode = null;
@@ -1599,6 +1642,7 @@ var HomeFudge;
         static baseMesh = null;
         static headMaterial = null;
         static baseMaterial = null;
+        static shootSoundComponent = null;
         roundsPerSecond = null;
         reloadsEverySecond = null;
         roundsTimer = 0;
@@ -1610,13 +1654,13 @@ var HomeFudge;
             //TODO|ON-HOLD| REWRITE Turret Mesh and Material component gathering and attaching -> like Destroyer Class
             this.headNode = this.createComponents("GatlingTurretHead", HomeFudge.JSONparser.toVector3(HomeFudge.Config.gatlingTurret.headPosition), graph);
             this.baseNode = this.createComponents("GatlingTurretBase", HomeFudge.JSONparser.toVector3(HomeFudge.Config.gatlingTurret.basePosition), graph);
-            //TODO:FixWrongShootNode Position. Shoots above the Barrel
             this.shootNode = this.createShootPosNode(HomeFudge.JSONparser.toVector3(HomeFudge.Config.gatlingTurret.shootNodePosition));
             this.roundsPerSecond = HomeFudge.Config.gatlingTurret.roundsPerSeconds;
             this.reloadsEverySecond = HomeFudge.Config.gatlingTurret.reloadTime;
             this.magazineCapacity = HomeFudge.Config.gatlingTurret.magazineCapacity;
             this.magazineRounds = this.magazineCapacity;
-            this.shootNode.addComponent(new ƒ.ComponentAudio(new ƒ.Audio("Sound/autocannon.mp3"))); //TODO: REMOVE TEMP AUDIO move to Resources
+            GatlingTurret.shootSoundComponent = new ƒ.ComponentAudio(HomeFudge.Audio.getSoundEffect(HomeFudge.Audio.SOUNDEFFECTS.MM10_CANNON_FIRE));
+            this.shootNode.addComponent(GatlingTurret.shootSoundComponent);
             this.headNode.addChild(this.shootNode);
             this.baseNode.addChild(this.headNode);
             this.addChild(this.baseNode);
@@ -1769,6 +1813,7 @@ var HomeFudge;
         static mesh = null;
         static material = null;
         static animation = null;
+        fireSoundComponent = null;
         meshComp;
         async init(side, position) {
             //TODO: remove debug
@@ -1840,18 +1885,27 @@ var HomeFudge;
             let animator = new ƒ.ComponentAnimator(RotThrusters.animation);
             animator.quantization = ƒ.ANIMATION_QUANTIZATION.DISCRETE;
             this.addComponent(animator);
+            this.fireSoundComponent = new ƒ.ComponentAudio(HomeFudge.Audio.getSoundEffect(HomeFudge.Audio.SOUNDEFFECTS.RCS_FIRE));
+            this.fireSoundComponent.volume = 1;
+            this.addComponent(this.fireSoundComponent);
         }
         activate(activate) {
             if (this.meshComp == null || this.meshComp == undefined) {
                 return;
             }
             this.meshComp.activate(activate);
+            this.playSound();
         }
         isActivated() {
             if (this.meshComp == null || this.meshComp == undefined) {
                 return false;
             }
             return this.meshComp.isActive;
+        }
+        playSound() {
+            if (!this.fireSoundComponent.isPlaying) {
+                this.fireSoundComponent.play(true);
+            }
         }
         constructor(side, position) {
             super(side + "RotThruster");
@@ -2162,8 +2216,6 @@ var HomeFudge;
 (function (HomeFudge) {
     var ƒ = FudgeCore;
     class Player extends ƒ.Node {
-        //temporary value
-        tempAimTarget = new ƒ.Vector3(100, 100, 0);
         destroyer = null;
         playerID = null;
         selectedWeapon = null; //TODO:Check if ok
@@ -2171,12 +2223,20 @@ var HomeFudge;
         moveDirection = ƒ.Vector3.ZERO(); // TODO: remove moveDirection -> better to do in the Destroyer.
         //empty list for the inputs to be listed. Makes so that if W and A is pressed both get executed in the end of the update.
         // private inputList: ƒ.KEYBOARD_CODE[] = null;
+        init() {
+            this.initAudio();
+            this.initShip(HomeFudge.Ship.SHIPS.DESTROYER);
+        }
         update = () => {
             HomeFudge.UI_FirstStart.resetAllButtonColor();
-            if (HomeFudge.Mouse.isPressedOne([HomeFudge.MOUSE_CODE.LEFT])) {
-                this.destroyer.fireWeapon(this.selectedWeapon, this.tempAimTarget);
+            if (HomeFudge.Mouse.isPressedOne([HomeFudge.MOUSE_CODE.RIGHT])) {
+                let pickViewport = ƒ.Picker.pickViewport(HomeFudge._viewport, HomeFudge.Mouse.position);
+                pickViewport.sort((a, b) => a.zBuffer - b.zBuffer);
+                this.selectedObject = pickViewport[0].node;
+                HomeFudge.UI_Selection.setNodeToFocus(this.selectedObject);
             }
-            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.F])) {
+            if (HomeFudge.Mouse.isPressedOne([HomeFudge.MOUSE_CODE.LEFT])) {
+                this.destroyer.fireWeapon(this.selectedWeapon, ƒ.Vector3.ZERO());
             }
             // if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE."BUTTON"])) {
             //     console.error("Switch NOT IMPLEMENTED!!!");
@@ -2200,8 +2260,6 @@ var HomeFudge;
             //     _mainCamera.camComp.mtxPivot.rotation.z
             // );
         };
-        selectObject() {
-        }
         selectWeapon(weapon) {
             switch (weapon) {
                 case this.destroyer.WEAPONS.GATLING_TURRET:
@@ -2219,6 +2277,7 @@ var HomeFudge;
                 case this.destroyer.WEAPONS.ROCKET_POD:
                     if (this.selectedWeapon != weapon) {
                         this.selectedWeapon = weapon;
+                        HomeFudge._viewport.canvas.style.cursor = "crosshair";
                     }
                     break;
                 default:
@@ -2284,14 +2343,8 @@ var HomeFudge;
                 HomeFudge.UI_FirstStart.setButtonColor(HomeFudge.Ship.DIRECTION.BACKWARDS);
             }
         }
-        init() {
-            this.initAudio();
-            this.initShip(HomeFudge.Ship.SHIPS.DESTROYER);
-        }
         initAudio() {
-            //inits Music Soundtrack
-            let audioComp = new ƒ.ComponentAudio(new ƒ.Audio("Sound/Background/10.Cycles.mp3"), true); //TODO:Move sound to recourses
-            //Sound by IXION!
+            let audioComp = new ƒ.ComponentAudio(HomeFudge.Audio.getBackgroundMusic(HomeFudge.Audio.BACKGROUND_MUSIC.CYCLES), true);
             audioComp.volume = 0.01;
             audioComp.play(true);
             HomeFudge._mainCamera.camNode.addComponent(audioComp); //TODO: Change to player Camera
@@ -2364,6 +2417,7 @@ var HomeFudge;
 (function (HomeFudge) {
     var ƒUi = FudgeUserInterface;
     class UI_Selection extends HomeFudge.UI {
+        static focusedNode = null;
         static ringSelection;
         static healthMeter;
         static healthMeterNumber;
@@ -2374,7 +2428,6 @@ var HomeFudge;
         static healthBarHight = null;
         static ringRadius = null;
         static ringBorderWidth = null;
-        static focusedNode = null;
         static maxNodeHealth = 0;
         static actualNodeHealth = 0;
         static setNodeToFocus(_focusedNode) {

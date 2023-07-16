@@ -1,8 +1,6 @@
 namespace HomeFudge {
     import ƒ = FudgeCore;
     export class Player extends ƒ.Node {
-        //temporary value
-        private tempAimTarget = new ƒ.Vector3(100, 100, 0);
 
         public destroyer: Destroyer = null;
         public playerID: string = null;
@@ -15,14 +13,24 @@ namespace HomeFudge {
         //empty list for the inputs to be listed. Makes so that if W and A is pressed both get executed in the end of the update.
         // private inputList: ƒ.KEYBOARD_CODE[] = null;
 
+        private init() {
+            this.initAudio();
+            this.initShip(Ship.SHIPS.DESTROYER);
+        }
+
         private update = (): void => {
             UI_FirstStart.resetAllButtonColor();
+            if(Mouse.isPressedOne([MOUSE_CODE.RIGHT])) {
+                let pickViewport: ƒ.Pick[] = ƒ.Picker.pickViewport(_viewport, Mouse.position);
+        
+                pickViewport.sort((a, b) => a.zBuffer - b.zBuffer);
+                this.selectedObject = pickViewport[0].node;
+                UI_Selection.setNodeToFocus(this.selectedObject);
+            }
             if (Mouse.isPressedOne([MOUSE_CODE.LEFT])) {
-                this.destroyer.fireWeapon(this.selectedWeapon, this.tempAimTarget);
+                this.destroyer.fireWeapon(this.selectedWeapon, ƒ.Vector3.ZERO());
             }
-            if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.F])) {
 
-            }
             // if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE."BUTTON"])) {
             //     console.error("Switch NOT IMPLEMENTED!!!");
 
@@ -52,9 +60,6 @@ namespace HomeFudge {
             //     _mainCamera.camComp.mtxPivot.rotation.z
             // );
         }
-        private selectObject(): void{
-
-        }
 
         private selectWeapon(weapon: number): void {
             switch (weapon) {
@@ -73,6 +78,7 @@ namespace HomeFudge {
                 case this.destroyer.WEAPONS.ROCKET_POD:
                     if (this.selectedWeapon != weapon) {
                         this.selectedWeapon = weapon;
+                        _viewport.canvas.style.cursor = "crosshair";
                     }
                     break;
                 default:
@@ -150,14 +156,8 @@ namespace HomeFudge {
                 UI_FirstStart.setButtonColor(Ship.DIRECTION.BACKWARDS);
             }
         }
-        private init() {
-            this.initAudio();
-            this.initShip(Ship.SHIPS.DESTROYER);
-        }
         private initAudio() {
-            //inits Music Soundtrack
-            let audioComp = new ƒ.ComponentAudio(new ƒ.Audio("Sound/Background/10.Cycles.mp3"), true); //TODO:Move sound to recourses
-            //Sound by IXION!
+            let audioComp = new ƒ.ComponentAudio(Audio.getBackgroundMusic(Audio.BACKGROUND_MUSIC.CYCLES), true);
             audioComp.volume = 0.01;
             audioComp.play(true);
             _mainCamera.camNode.addComponent(audioComp);//TODO: Change to player Camera

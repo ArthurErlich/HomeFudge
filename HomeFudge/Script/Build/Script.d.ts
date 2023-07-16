@@ -286,6 +286,26 @@ declare namespace HomeFudge {
 }
 declare namespace HomeFudge {
     import ƒ = FudgeCore;
+    enum BACKGROUND_MUSIC {
+        CYCLES = 0
+    }
+    enum SOUNDEFFECTS {
+        MM10_CANNON_FIRE = 0,
+        RCS_FIRE = 1
+    }
+    export class Audio {
+        static BACKGROUND_MUSIC: typeof BACKGROUND_MUSIC;
+        static SOUNDEFFECTS: typeof SOUNDEFFECTS;
+        private static backgroundMusic;
+        private static soundEffects;
+        static loadAudioFiles(): void;
+        static getBackgroundMusic(BACKGROUND_MUSIC: BACKGROUND_MUSIC): ƒ.Audio;
+        static getSoundEffect(SOUNDEFFECTS: SOUNDEFFECTS): ƒ.Audio;
+    }
+    export {};
+}
+declare namespace HomeFudge {
+    import ƒ = FudgeCore;
     class ConsoleCommands {
         static spawnDestroyer(position: ƒ.Vector3, rotation: ƒ.Vector3): void;
         static spawnAstroid(location: ƒ.Vector3, size: string): void;
@@ -452,14 +472,22 @@ declare namespace HomeFudge {
 }
 declare namespace HomeFudge {
     import ƒ = FudgeCore;
-    class GatlingTurret extends ƒ.Node {
-        headNode: ƒ.Node;
-        baseNode: ƒ.Node;
+    enum ROTATE {
+        UP = 0,
+        DOWN = 1,
+        LEFT = 2,
+        RIGHT = 3
+    }
+    export class GatlingTurret extends ƒ.Node {
+        ROTATE: typeof ROTATE;
+        private headNode;
+        private baseNode;
         private shootNode;
         private static headMesh;
         private static baseMesh;
         private static headMaterial;
         private static baseMaterial;
+        private static shootSoundComponent;
         private roundsPerSecond;
         private reloadsEverySecond;
         private roundsTimer;
@@ -475,6 +503,7 @@ declare namespace HomeFudge {
         fireAt(shipVelocity: ƒ.Vector3, target: ƒ.Vector3): void;
         constructor();
     }
+    export {};
 }
 declare namespace HomeFudge {
     import ƒ = FudgeCore;
@@ -494,11 +523,13 @@ declare namespace HomeFudge {
         private static mesh;
         private static material;
         private static animation;
+        private fireSoundComponent;
         private meshComp;
         private init;
         private createComponents;
         activate(activate: boolean): void;
         isActivated(): boolean;
+        playSound(): void;
         constructor(side: string, position: ƒ.Vector3);
     }
 }
@@ -641,18 +672,16 @@ declare namespace HomeFudge {
 declare namespace HomeFudge {
     import ƒ = FudgeCore;
     class Player extends ƒ.Node {
-        private tempAimTarget;
         destroyer: Destroyer;
         playerID: string;
         private selectedWeapon;
         private selectedObject;
         private moveDirection;
+        private init;
         private update;
-        private selectObject;
         private selectWeapon;
         private updateWeaponSelection;
         private updateShipMovement;
-        private init;
         private initAudio;
         private initShip;
         constructor(name: string);
@@ -676,6 +705,7 @@ declare namespace HomeFudge {
 declare namespace HomeFudge {
     import ƒ = FudgeCore;
     class UI_Selection extends UI {
+        static focusedNode: Astroid;
         private static ringSelection;
         private static healthMeter;
         private static healthMeterNumber;
@@ -686,7 +716,6 @@ declare namespace HomeFudge {
         private static healthBarHight;
         private static ringRadius;
         private static ringBorderWidth;
-        private static focusedNode;
         private static maxNodeHealth;
         private static actualNodeHealth;
         static setNodeToFocus(_focusedNode: ƒ.Node): void;

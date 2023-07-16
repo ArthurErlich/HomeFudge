@@ -33,12 +33,12 @@ namespace HomeFudge {
     PLAYER_INPUT = "PlayerInputUpdate",
     UI = "UI",
   }
-  
+
   //this sets the flag for the Tutorial.
   GameStats.setInGameFlags();
   console.log(GameStats.getPlayedStatus());
-  
-  
+
+
   /// ------------T-E-S-T--A-R-E-A------------------\\\
 
   async function start(_event: CustomEvent): Promise<void> {
@@ -60,6 +60,8 @@ namespace HomeFudge {
       await Config.initConfigs();
       Mouse.init();
       UI.init();
+      console.warn("Loading Audio");
+      Audio.loadAudioFiles();
     }
     async function initWorld(): Promise<void> {
       ƒ.Physics.setGravity(ƒ.Vector3.ZERO());
@@ -95,7 +97,7 @@ namespace HomeFudge {
     let z = -300;
     astroidList = new Array(20);
     for (let index = 0; index < 20; index++) {
-      astroidList[index] = Astroid.spawn(new ƒ.Vector3(x * index * Math.random() - x / 2+100, y * index * Math.random() + 1000 - y / 2, -z * index * Math.random()+100), Astroid.getLarge());
+      astroidList[index] = Astroid.spawn(new ƒ.Vector3(x * index * Math.random() - x / 2 + 100, y * index * Math.random() + 1000 - y / 2, -z * index * Math.random() + 100), Astroid.getLarge());
     }
     /// ------------T-E-S-T--A-R-E-A------------------\\\
 
@@ -117,28 +119,31 @@ namespace HomeFudge {
     ƒ.AudioManager.default.update();
     _viewport.draw();
     ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.UI)); // UI needs to be updated after drawing the frame
-    
-    
+
+
     /// ------------T-E-S-T--A-R-E-A------------------\\\
     //move to player, check if the same astroid is selected to stop/ or make a countdown of one second to stop selection spam/ or make
     //Filter nodes. add tag to gameObject
-    if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.F])) {
-      let pickViewport: ƒ.Pick[] = ƒ.Picker.pickViewport(_viewport, Mouse.position);
 
-      pickViewport.sort((a, b) => a.zBuffer - b.zBuffer);
-      selectedObject = pickViewport[0].node;
-      UI_Selection.setNodeToFocus(selectedObject);
+
+      //TODO: Remove unused function
+      // if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.F])) {
+      //   let pickViewport: ƒ.Pick[] = ƒ.Picker.pickViewport(_viewport, Mouse.position);
+
+      //   pickViewport.sort((a, b) => a.zBuffer - b.zBuffer);
+      //   selectedObject = pickViewport[0].node;
+      //   UI_Selection.setNodeToFocus(selectedObject);
+      // }
+      /// ------------T-E-S-T--A-R-E-A------------------\\\
     }
-    /// ------------T-E-S-T--A-R-E-A------------------\\\
-  }
 
   /// ------------T-E-S-T--A-R-E-A------------------\\\
   //TODO: add a start stop Loop for Debug
   //TODO: add respawn / reset timers and more
   function continueLoop(event: KeyboardEvent) {
-    if (event.code == "Insert") {
-      ƒ.Loop.continue();
-    }
-  }
+        if (event.code == "Insert") {
+          ƒ.Loop.continue();
+        }
+      }
   /// ------------T-E-S-T--A-R-E-A------------------\\\
 }

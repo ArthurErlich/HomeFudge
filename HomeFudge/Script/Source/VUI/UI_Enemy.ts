@@ -3,6 +3,8 @@ namespace HomeFudge {
     import ƒ = FudgeCore;
     import ƒUi = FudgeUserInterface;
     export class UI_Selection extends UI {
+        public static focusedNode: Astroid = null;
+        
         private static ringSelection: HTMLDivElement;
         private static healthMeter: HTMLDivElement;
         private static healthMeterNumber: HTMLElement;
@@ -17,7 +19,6 @@ namespace HomeFudge {
         private static ringRadius: number = null;
         private static ringBorderWidth: number = null;
 
-        private static focusedNode: Astroid = null;
         private static maxNodeHealth: number = 0;
         private static actualNodeHealth: number = 0;
 
@@ -32,8 +33,8 @@ namespace HomeFudge {
                 UI_Selection.ringSelection.style.visibility ="hidden";
                 UI_Selection.healthMeter.style.visibility ="hidden";
                 UI_Selection.healthMeterNumber.style.visibility ="hidden";
-
                 return;
+
             } else {
                 UI_Selection.ringSelection.style.visibility ="visible";
                 UI_Selection.healthMeter.style.visibility ="visible";
