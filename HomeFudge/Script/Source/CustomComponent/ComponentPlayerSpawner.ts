@@ -8,8 +8,8 @@ namespace HomeFudge {
         // Properties may be mutated by users in the editor via the automatically created user interface
         
 
-        #cmpTransform: ƒ.ComponentTransform; //Loook how the Transform is ben getting by RIGID BODY COMPONENT IN FUDGE CORE 
-        private playerID: string; // input for setting the Player ID on add change look at the avalbe player span in game and check if ID is the same
+        #cmpTransform: ƒ.ComponentTransform; //Look how the Transform is ben getting by RIGID BODY COMPONENT IN FUDGE CORE 
+        private playerID: string; // input for setting the Player ID
 
 
         constructor() {

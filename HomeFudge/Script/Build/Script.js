@@ -202,16 +202,12 @@ var HomeFudge;
                 case "" || null:
                     GameStats.setPlayedStatus(false);
                     return false;
-                    break;
                 case "true":
                     return true;
-                    break;
                 case "false":
                     return false;
-                    break;
                 default:
                     return false;
-                    break;
             }
         }
         static setPlayedStatus(_playedOnce) {
@@ -820,8 +816,8 @@ var HomeFudge;
         // Register the script as component for use in the editor via drag&drop
         static iSubclass = ƒ.Component.registerSubclass(ComponentPlayerSpawner);
         // Properties may be mutated by users in the editor via the automatically created user interface
-        #cmpTransform; //Loook how the Transform is ben getting by RIGID BODY COMPONENT IN FUDGE CORE 
-        playerID; // input for setting the Player ID on add change look at the avalbe player span in game and check if ID is the same
+        #cmpTransform; //Look how the Transform is ben getting by RIGID BODY COMPONENT IN FUDGE CORE 
+        playerID; // input for setting the Player ID
         constructor() {
             super();
             // Don't start when running in editor
@@ -1085,7 +1081,7 @@ var HomeFudge;
         WEAPONS[WEAPONS["BEAM_TURRET"] = 1] = "BEAM_TURRET";
         WEAPONS[WEAPONS["ROCKET_POD"] = 2] = "ROCKET_POD";
     })(WEAPONS || (WEAPONS = {}));
-    //empty enum wich is set by the Ship superclass
+    //empty enum which is set by the Ship superclass
     let DIRECTION;
     (function (DIRECTION) {
     })(DIRECTION || (DIRECTION = {}));
@@ -1199,7 +1195,7 @@ var HomeFudge;
                 Destroyer.seedRigidBody = node.getComponent(ƒ.ComponentRigidbody);
             }
             this.rigidBody = new ƒ.ComponentRigidbody(HomeFudge.Config.destroyer.mass, Destroyer.seedRigidBody.typeBody, 
-            // Destroyer.seedRigidBody.typeCollider,<<< since the CONVEX colider is not suportet in Editor, manual setting needs be done;
+            // Destroyer.seedRigidBody.typeCollider,<<< since the CONVEX collider is not supported in Editor, manual setting needs be done;
             ƒ.COLLIDER_TYPE.CONVEX, ƒ.COLLISION_GROUP.DEFAULT, startTransform, Destroyer.convexHull);
             this.rigidBody.mtxPivot.scale(new ƒ.Vector3(2, 2, 2)); //Fixes the ConvexHull being 1/2 of the original convex
             this.rigidBody.setPosition(startTransform.translation);
@@ -1469,7 +1465,7 @@ var HomeFudge;
             let rollRight = false;
             let rollLeft = false;
             let angularVelocity = this.localAngularVelocity;
-            this.inputRot = true; //TODO: move away! Think diffrent
+            this.inputRot = true; //TODO: move away! Think different
             //TODO: set input flag for Roll move to Switch case
             //sets input flags fore easier use.
             if (rotateZ < 0) {
@@ -1490,7 +1486,7 @@ var HomeFudge;
             else if (rotateX > 0) {
                 rollRight = true;
             }
-            // Stops applaying more force to the rotation if the maximum rotatin speed is gainend by setting the change to 0
+            // Stops applying more force to the rotation if the maximum rotation speed is gained by setting the change to 0
             if (yawRight && angularVelocity.y <= -this.maxTurnSpeed) {
                 rotateY = 0;
             }
@@ -1509,7 +1505,7 @@ var HomeFudge;
             if (rollRight && angularVelocity.x >= this.maxTurnSpeed) {
                 rotateX = 0;
             }
-            //Aplays the rotation force
+            //Applies the rotation force
             this.desireRotation.set((rotateX * this.maxTurnAcceleration) * HomeFudge._deltaSeconds, (rotateY * this.maxTurnAcceleration) * HomeFudge._deltaSeconds, (rotateZ * this.maxTurnAcceleration) * HomeFudge._deltaSeconds);
         }
         constructor(startTransform) {

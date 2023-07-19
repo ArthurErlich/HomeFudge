@@ -5,7 +5,7 @@ namespace HomeFudge {
         BEAM_TURRET,
         ROCKET_POD
     }
-    //empty enum wich is set by the Ship superclass
+    //empty enum which is set by the Ship superclass
     enum DIRECTION {
     }
     export class Destroyer extends Ship {
@@ -158,7 +158,7 @@ namespace HomeFudge {
             this.rigidBody = new ƒ.ComponentRigidbody(
                 Config.destroyer.mass,
                 Destroyer.seedRigidBody.typeBody,
-                // Destroyer.seedRigidBody.typeCollider,<<< since the CONVEX colider is not suportet in Editor, manual setting needs be done;
+                // Destroyer.seedRigidBody.typeCollider,<<< since the CONVEX collider is not supported in Editor, manual setting needs be done;
                 ƒ.COLLIDER_TYPE.CONVEX,
                 ƒ.COLLISION_GROUP.DEFAULT,
                 startTransform,
@@ -450,7 +450,7 @@ namespace HomeFudge {
 
             let angularVelocity: ƒ.Vector3 = this.localAngularVelocity;
 
-            this.inputRot = true; //TODO: move away! Think diffrent
+            this.inputRot = true; //TODO: move away! Think different
 
             //TODO: set input flag for Roll move to Switch case
             //sets input flags fore easier use.
@@ -472,7 +472,7 @@ namespace HomeFudge {
                 rollRight = true;
             }
             
-            // Stops applaying more force to the rotation if the maximum rotatin speed is gainend by setting the change to 0
+            // Stops applying more force to the rotation if the maximum rotation speed is gained by setting the change to 0
             if (yawRight && angularVelocity.y <= -this.maxTurnSpeed) {
                 rotateY = 0;
             }
@@ -494,7 +494,7 @@ namespace HomeFudge {
                 rotateX = 0;
             }
 
-            //Aplays the rotation force
+            //Applies the rotation force
             this.desireRotation.set((rotateX * this.maxTurnAcceleration) * _deltaSeconds, (rotateY * this.maxTurnAcceleration) * _deltaSeconds, (rotateZ * this.maxTurnAcceleration) * _deltaSeconds);
 
         }

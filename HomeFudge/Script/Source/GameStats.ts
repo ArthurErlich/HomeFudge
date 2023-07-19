@@ -17,16 +17,16 @@ namespace HomeFudge {
                 case "" || null:
                     GameStats.setPlayedStatus(false);
                     return false;
-                    break;
+
                 case "true":
                     return true;
-                    break;
+
                 case "false":
                     return false;
-                    break;
+
                 default:
                     return false;
-                    break;
+
             }
         }
         public static setPlayedStatus(_playedOnce: boolean): void {

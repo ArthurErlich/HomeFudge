@@ -8,6 +8,7 @@
         "Mathf",
         "Oimo",
         "Rigidbody",
+        "rotu",
         "SOUNDEFFECTS"
     ],
     "liveServer.settings.port": 5523

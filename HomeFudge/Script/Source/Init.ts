@@ -61,7 +61,7 @@ namespace HomeFudge {
         ƒ.AudioManager.default.listenWith(cmpListener);
         ƒ.AudioManager.default.listenTo(graph);
         ƒ.Debug.log("Audio:", ƒ.AudioManager.default);
-
+        
         // draw viewport once for immediate feedback
         viewport.draw();
 
