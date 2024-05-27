@@ -1,3 +1,4 @@
+/// <reference path="GameStats.ts" />
 namespace HomeFudge {
   import ƒ = FudgeCore;
   ƒ.Debug.info("Main Program Template running!");
@@ -47,7 +48,7 @@ namespace HomeFudge {
     _worldNode = _viewport.getBranch();
 
 
-    // _viewport.physicsDebugMode =ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
+    _viewport.physicsDebugMode =ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
 
     console.log(_viewport);
     //Loads Config then initializes the world in the right order

@@ -3,7 +3,7 @@ namespace HomeFudge {
     enum GAME_STATS {
         PLAYED_ONCE = "PlayedOnce"
     }
-    export class GameStats {
+    export abstract class GameStats {
 
         public static playedOnce: boolean = false;
         public static setInGameFlags() {
