@@ -5,7 +5,7 @@ namespace HomeFudge{
     export class DebugForces extends Debug{
 
         public setVisible(_on: boolean): void {
-            throw new Error("Method not implemented.");
+            throw new Error("Method not implemented." + ƒ);
         }
 
     }

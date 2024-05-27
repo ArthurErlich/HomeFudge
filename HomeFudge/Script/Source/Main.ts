@@ -88,7 +88,6 @@ namespace HomeFudge {
       // node.addComponent(nodeMes);
       // node.addComponent(new ƒ.ComponentMaterial(new ƒ.Material("lit",ƒ.ShaderLit)));
       // _worldNode.appendChild(node);
-      // änder epps
     
       /// ------------T-E-S-T--A-R-E-A------------------\\\
     }

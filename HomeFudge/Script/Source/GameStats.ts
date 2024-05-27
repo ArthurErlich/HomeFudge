@@ -1,5 +1,5 @@
 namespace HomeFudge {
-    import ƒ = FudgeCore;
+    // import ƒ = FudgeCore;
     enum GAME_STATS {
         PLAYED_ONCE = "PlayedOnce"
     }

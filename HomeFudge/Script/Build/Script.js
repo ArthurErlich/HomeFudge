@@ -187,6 +187,7 @@ var HomeFudge;
 })(HomeFudge || (HomeFudge = {}));
 var HomeFudge;
 (function (HomeFudge) {
+    // import ƒ = FudgeCore;
     let GAME_STATS;
     (function (GAME_STATS) {
         GAME_STATS["PLAYED_ONCE"] = "PlayedOnce";
@@ -350,7 +351,9 @@ var HomeFudge;
     }
     HomeFudge.LoadingScreen = LoadingScreen;
 })(HomeFudge || (HomeFudge = {}));
+/// <reference path="GameStats.ts" />
 var HomeFudge;
+/// <reference path="GameStats.ts" />
 (function (HomeFudge) {
     var ƒ = FudgeCore;
     ƒ.Debug.info("Main Program Template running!");
@@ -383,7 +386,7 @@ var HomeFudge;
         HomeFudge.LoadingScreen.remove();
         HomeFudge._viewport = _event.detail;
         HomeFudge._worldNode = HomeFudge._viewport.getBranch();
-        // _viewport.physicsDebugMode =ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
+        HomeFudge._viewport.physicsDebugMode = ƒ.PHYSICS_DEBUGMODE.COLLIDERS;
         console.log(HomeFudge._viewport);
         //Loads Config then initializes the world in the right order
         await loadConfig().then(initWorld).then(() => {
@@ -939,9 +942,10 @@ var HomeFudge;
 var HomeFudge;
 /// <reference path="Debug.ts" />
 (function (HomeFudge) {
+    var ƒ = FudgeCore;
     class DebugForces extends HomeFudge.Debug {
         setVisible(_on) {
-            throw new Error("Method not implemented.");
+            throw new Error("Method not implemented." + ƒ);
         }
     }
     HomeFudge.DebugForces = DebugForces;
@@ -2381,7 +2385,8 @@ var HomeFudge;
             UI.elements.push(new HomeFudge.UI_FirstStart());
         }
         ;
-        static setScaleAndReload(scale) {
+        static setScale(scale) {
+            UI.scale = scale;
         }
         ;
         static globalSettings(element) {

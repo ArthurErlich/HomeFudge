@@ -142,7 +142,7 @@ declare namespace HomeFudge {
     }
 }
 declare namespace HomeFudge {
-    class GameStats {
+    abstract class GameStats {
         static playedOnce: boolean;
         static setInGameFlags(): void;
         static getPlayedStatus(): boolean;
@@ -696,7 +696,7 @@ declare namespace HomeFudge {
         static elements: UI[];
         abstract update(): void;
         static init(): void;
-        static setScaleAndReload(scale: number): void;
+        static setScale(scale: number): void;
         static globalSettings(element: HTMLElement): void;
         protected reduceMutator(_mutator: ƒ.Mutator): void;
         constructor();
