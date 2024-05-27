@@ -2468,7 +2468,7 @@ var HomeFudge;
             //TODO: adding max and min scaling for the ui
             //replace vw to something  else. 
             let widthSelector = (UI_Selection.ringSelection.clientWidth);
-            let scale = 4000 / distanceToPlayer;
+            let scale = 4000 - distanceToPlayer;
             UI_Selection.ringSelection.style.width = scale + "vw";
             UI_Selection.ringSelection.style.height = scale + "vw";
         }
