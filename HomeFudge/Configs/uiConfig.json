@@ -1,0 +1,22 @@
+{
+    "scaling":1.0,
+    "fontSize":18,
+    "selection":{
+        "healthBarWidth":100,
+        "healthBarHight":25,
+        "healthBarTextSize":0,
+        "selectionRingRadius":50,
+        "ringBorderWidth": 5
+    },    
+    "buttons":{
+        "FORWARDS":"C",
+        "BACKWARDS":"V",
+        "YAW_LEFT":"A",
+        "YAW_RIGHT":"D",
+        "ROLL_LEFT":"Q",
+        "ROLL_RIGHT":"E",
+        "PITCH_UP":"W",
+        "PITCH_DOWN":"S"
+    }
+
+}

@@ -1,13 +1,14 @@
 declare namespace HomeFudge {
     export class Config {
         private static errorText;
-        static gatlingBullet: GatlingBulletConfig;
-        static gatlingTurret: GatlingTurretConfig;
-        static beamTurret: BeamTurretConfig;
+        static gatlingBullet: GatlingBullet;
+        static gatlingTurret: GatlingTurret;
+        static beamTurret: BeamTurret;
         static laserBeam: LaserBeam;
-        static destroyer: DestroyerConfig;
-        static camera: CameraConfig;
-        static astroid: AstroidConfig;
+        static destroyer: Destroyer;
+        static camera: Camera;
+        static astroid: Astroid;
+        static ui: Ui;
         /**
          * The function initializes configurations by fetching JSON files and assigning their contents
          * to corresponding variables.
@@ -15,7 +16,7 @@ declare namespace HomeFudge {
         static initConfigs(): Promise<void>;
         private static printError;
     }
-    interface GatlingTurretConfig {
+    interface GatlingTurret {
         graphID: string;
         headPosition: number[];
         basePosition: number[];
@@ -28,7 +29,7 @@ declare namespace HomeFudge {
         magazineCapacity: number;
         [key: string]: number[] | number | string;
     }
-    interface GatlingBulletConfig {
+    interface GatlingBullet {
         graphID: string;
         maxLifeTime: number;
         maxSpeed: number;
@@ -36,7 +37,7 @@ declare namespace HomeFudge {
         mass: number;
         [key: string]: string | number;
     }
-    interface BeamTurretConfig {
+    interface BeamTurret {
         graphID: string;
         maxRotSpeed: number;
         maxPitch: number;
@@ -52,7 +53,7 @@ declare namespace HomeFudge {
         graphID: string;
         [key: string]: string;
     }
-    interface DestroyerConfig {
+    interface Destroyer {
         graphID: string;
         maxAcceleration: number;
         maxSpeed: number;
@@ -61,18 +62,26 @@ declare namespace HomeFudge {
         mass: number;
         maxHealthPoints: number;
         RotThruster_FL: number[];
+        RotThruster_FDL: number[];
+        RotThruster_FUL: number[];
         RotThruster_FR: number[];
+        RotThruster_FDR: number[];
+        RotThruster_FUR: number[];
         RotThruster_BL: number[];
+        RotThruster_BDL: number[];
+        RotThruster_BUL: number[];
         RotThruster_BR: number[];
+        RotThruster_BDR: number[];
+        RotThruster_BUR: number[];
         MainThrusterA: number[];
         MainThrusterB: number[];
         [key: string]: string | number | number[];
     }
-    interface CameraConfig {
+    interface Camera {
         offset: number[];
         [key: string]: number[];
     }
-    interface AstroidConfig {
+    interface Astroid {
         graphID: string;
         size: AstroidSize;
         seedNodes: AstroidSeedNodes;
@@ -88,13 +97,41 @@ declare namespace HomeFudge {
         SMALL: AstroidData;
         MEDIUM: AstroidData;
         LARGE: AstroidData;
+        scale: number;
         constructor(_small: AstroidData, _medium: AstroidData, _large: AstroidData);
     }
     class AstroidData {
         hitpoints: number;
         mass: number;
         spawnRotSpeed: number;
-        constructor(_hitpoints: number, _mass: number, _spawnRotSpeed: number);
+        scale: number;
+        constructor(_hitpoints: number, _mass: number, _spawnRotSpeed: number, _scale: number);
+    }
+    interface Ui {
+        scaling: number;
+        fontSize: number;
+        selection: UI_Selection;
+        buttons: UI_Buttons;
+        [key: string]: number | UI_Selection | UI_Buttons;
+    }
+    class UI_Selection {
+        healthBarWidth: number;
+        healthBarHight: number;
+        healthBarTextSize: number;
+        selectionRingRadius: number;
+        ringBorderWidth: number;
+        constructor(_healthBarWidth: number, _healthBarHight: number, _healthBarTextSize: number, _selectionRingRadius: number, _ringBorderWidth: number, _buttons: UI_Buttons);
+    }
+    class UI_Buttons {
+        FORWARDS: string;
+        BACKWARDS: string;
+        YAW_LEFT: string;
+        YAW_RIGHT: string;
+        ROLL_LEFT: string;
+        ROLL_RIGHT: string;
+        PITCH_UP: string;
+        PITCH_DOWN: string;
+        constructor(_FORWARDS: string, _BACKWARDS: string, ROLL_LEFT: string, ROLL_RIGHT: string, _YAW_LEFT: string, _YAW_RIGHT: string, _PITCH_UP: string, _PITCH_DOWN: string);
     }
     export {};
 }
@@ -104,13 +141,12 @@ declare namespace HomeFudge {
         static convertToFloat32Array(convexMesh: ƒ.Mesh): Float32Array;
     }
 }
-declare namespace Script {
-    import ƒ = FudgeCore;
-    class CustomComponentScript extends ƒ.ComponentScript {
-        static readonly iSubclass: number;
-        message: string;
-        constructor();
-        hndEvent: (_event: Event) => void;
+declare namespace HomeFudge {
+    class GameStats {
+        static playedOnce: boolean;
+        static setInGameFlags(): void;
+        static getPlayedStatus(): boolean;
+        static setPlayedStatus(_playedOnce: boolean): void;
     }
 }
 declare namespace HomeFudge {
@@ -149,17 +185,6 @@ declare namespace HomeFudge {
         GAME_OBJECTS = "GameObjectUpdate",
         PLAYER_INPUT = "PlayerInputUpdate",
         UI = "UI"
-    }
-}
-declare namespace HomeFudge {
-    import ƒ = FudgeCore;
-    class PlayerSpawnerComponent extends ƒ.ComponentScript {
-        #private;
-        static readonly iSubclass: number;
-        message: string;
-        private playerID;
-        constructor();
-        hndEvent: (_event: Event) => void;
     }
 }
 declare namespace HomeFudge {
@@ -225,13 +250,16 @@ declare namespace HomeFudge {
         LARGE = "LARGE"
     }
     export class Astroid extends GameObject {
-        private SIZE;
-        d: any;
+        static SIZE: typeof SIZE;
+        protected maxHealth: number;
+        protected hitPoints: number;
         update(): void;
         static getLarge(): SIZE;
         static spawn(location: ƒ.Vector3, size?: SIZE): Astroid;
         alive(): boolean;
         remove(): void;
+        getMaxHP(): number;
+        getHP(): number;
         protected static loadMeshList(nodes: ƒ.Node[]): ƒ.Mesh[];
         protected static loadMaterialList(nodes: ƒ.Node[]): ƒ.Material[];
         protected static setupRigidbody(location: ƒ.Vector3, boundingBox: ƒ.Vector3, spawnRotEffect: number): ƒ.ComponentRigidbody;
@@ -243,7 +271,8 @@ declare namespace HomeFudge {
     import ƒ = FudgeCore;
     class AstroidLarge extends Astroid {
         private static graph;
-        private hitPoints;
+        protected maxHealth: number;
+        protected hitPoints: number;
         private static meshList;
         private static materialList;
         private rigidBody;
@@ -253,6 +282,73 @@ declare namespace HomeFudge {
         private init;
         private setAllComponents;
         constructor(location: ƒ.Vector3);
+    }
+}
+declare namespace HomeFudge {
+    import ƒ = FudgeCore;
+    enum BACKGROUND_MUSIC {
+        CYCLES = 0
+    }
+    enum SOUNDEFFECTS {
+        MM10_CANNON_FIRE = 0,
+        RCS_FIRE = 1
+    }
+    export class Audio {
+        static BACKGROUND_MUSIC: typeof BACKGROUND_MUSIC;
+        static SOUNDEFFECTS: typeof SOUNDEFFECTS;
+        private static backgroundMusic;
+        private static soundEffects;
+        static loadAudioFiles(): void;
+        static getBackgroundMusic(BACKGROUND_MUSIC: BACKGROUND_MUSIC): ƒ.Audio;
+        static getSoundEffect(SOUNDEFFECTS: SOUNDEFFECTS): ƒ.Audio;
+    }
+    export {};
+}
+declare namespace HomeFudge {
+    import ƒ = FudgeCore;
+    class ConsoleCommands {
+        static spawnDestroyer(position: ƒ.Vector3, rotation: ƒ.Vector3): void;
+        static spawnAstroid(location: ƒ.Vector3, size: string): void;
+    }
+}
+declare namespace HomeFudge {
+    import ƒ = FudgeCore;
+    class ComponentHugeAstroid extends ƒ.ComponentScript {
+        static readonly iSubclass: number;
+        message: string;
+        constructor();
+        hndEvent: (_event: Event) => void;
+    }
+}
+declare namespace HomeFudge {
+    import ƒ = FudgeCore;
+    class ComponentPlayerSpawner extends ƒ.ComponentScript {
+        #private;
+        static readonly iSubclass: number;
+        private playerID;
+        constructor();
+        hndEvent: (_event: Event) => void;
+    }
+}
+declare namespace HomeFudge {
+    import ƒ = FudgeCore;
+    class ComponentTag extends ƒ.ComponentScript {
+        static readonly iSubclass: number;
+        message: string;
+        private tag;
+        setTag(_tag: string): void;
+        getTag(): string;
+        constructor();
+        hndEvent: (_event: Event) => void;
+    }
+}
+declare namespace HomeFudge {
+    import ƒ = FudgeCore;
+    class CustomComponentScript extends ƒ.ComponentScript {
+        static readonly iSubclass: number;
+        message: string;
+        constructor();
+        hndEvent: (_event: Event) => void;
     }
 }
 declare namespace HomeFudge {
@@ -363,6 +459,7 @@ declare namespace HomeFudge {
         private static maxSpeed;
         private static seedRigidBody;
         private rigidBody;
+        remove(): void;
         update(): void;
         private init;
         private getNodeResources;
@@ -375,14 +472,22 @@ declare namespace HomeFudge {
 }
 declare namespace HomeFudge {
     import ƒ = FudgeCore;
-    class GatlingTurret extends ƒ.Node {
-        headNode: ƒ.Node;
-        baseNode: ƒ.Node;
+    enum ROTATE {
+        UP = 0,
+        DOWN = 1,
+        LEFT = 2,
+        RIGHT = 3
+    }
+    export class GatlingTurret extends ƒ.Node {
+        ROTATE: typeof ROTATE;
+        private headNode;
+        private baseNode;
         private shootNode;
         private static headMesh;
         private static baseMesh;
         private static headMaterial;
         private static baseMaterial;
+        private static shootSoundComponent;
         private roundsPerSecond;
         private reloadsEverySecond;
         private roundsTimer;
@@ -398,6 +503,7 @@ declare namespace HomeFudge {
         fireAt(shipVelocity: ƒ.Vector3, target: ƒ.Vector3): void;
         constructor();
     }
+    export {};
 }
 declare namespace HomeFudge {
     import ƒ = FudgeCore;
@@ -417,11 +523,13 @@ declare namespace HomeFudge {
         private static mesh;
         private static material;
         private static animation;
+        private fireSoundComponent;
         private meshComp;
         private init;
         private createComponents;
         activate(activate: boolean): void;
         isActivated(): boolean;
+        playSound(): void;
         constructor(side: string, position: ƒ.Vector3);
     }
 }
@@ -432,10 +540,6 @@ declare namespace HomeFudge {
         static update(): void;
         static removeGarbage(): void;
         static getAliveGameobjects(): GameObject[];
-    }
-}
-declare namespace FudgeCore {
-    class InputLoop {
     }
 }
 declare namespace HomeFudge {
@@ -568,16 +672,16 @@ declare namespace HomeFudge {
 declare namespace HomeFudge {
     import ƒ = FudgeCore;
     class Player extends ƒ.Node {
-        private tempAimTarget;
         destroyer: Destroyer;
         playerID: string;
         private selectedWeapon;
+        private selectedObject;
         private moveDirection;
+        private init;
         private update;
         private selectWeapon;
         private updateWeaponSelection;
         private updateShipMovement;
-        private init;
         private initAudio;
         private initShip;
         constructor(name: string);
@@ -585,15 +689,71 @@ declare namespace HomeFudge {
 }
 declare namespace HomeFudge {
     import ƒ = FudgeCore;
-    class UI_EnemySelection extends ƒ.Mutable {
-        private static ui_RingSelection;
-        private static ui_HealthMeter;
-        static setPosition(pos: ƒ.Vector2): void;
-        static setSize(distanceToPlayer: number): void;
-        static setHealthBar(hpPercent: number): void;
-        private static initUiRingSelection;
-        private static initUiHealthStatus;
-        constructor();
+    abstract class UI extends ƒ.Mutable {
+        static scale: number;
+        static width: number;
+        static height: number;
+        static elements: UI[];
+        abstract update(): void;
+        static init(): void;
+        static setScaleAndReload(scale: number): void;
+        static globalSettings(element: HTMLElement): void;
         protected reduceMutator(_mutator: ƒ.Mutator): void;
+        constructor();
+    }
+}
+declare namespace HomeFudge {
+    import ƒ = FudgeCore;
+    class UI_Selection extends UI {
+        static focusedNode: Astroid;
+        private static ringSelection;
+        private static healthMeter;
+        private static healthMeterNumber;
+        private static distanceNumbers;
+        private static connectionLine;
+        private static fontSize;
+        private static healthBarWidth;
+        private static healthBarHight;
+        private static ringRadius;
+        private static ringBorderWidth;
+        private static maxNodeHealth;
+        private static actualNodeHealth;
+        static setNodeToFocus(_focusedNode: ƒ.Node): void;
+        update(): void;
+        static setSize(distanceToPlayer: number): void;
+        static updateHealthBar(): void;
+        private static initUiRingSelection;
+        private static initUiHealthMeterStatus;
+        private static initUIHealtHMeterNumber;
+        private static initUIConnectionLine;
+        static init(): void;
+        static setScaleAndReload(scale: number): void;
+        protected reduceMutator(_mutator: ƒ.Mutator): void;
+        constructor();
+    }
+}
+declare namespace HomeFudge {
+    class UI_FirstStart extends UI {
+        private static mainCanvas;
+        private static rollLeft;
+        private static rollRight;
+        private static pitchUp;
+        private static pitchDown;
+        private static yawLeft;
+        private static yawRight;
+        private static forward;
+        private static backwards;
+        private static pressedButton;
+        private static size;
+        update(): void;
+        private static createButtons;
+        static initCanvas(): void;
+        static resetAllButtonColor(): void;
+        static setButtonColor(BUTTONS: typeof Ship.DIRECTION[keyof typeof Ship.DIRECTION]): void;
+        private static setAllButtonColors;
+        private static setButtonVisibility;
+        private static isButtonPressedOnce;
+        private static checkToHide;
+        constructor();
     }
 }

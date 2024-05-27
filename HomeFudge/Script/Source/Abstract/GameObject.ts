@@ -9,10 +9,10 @@ namespace HomeFudge{
             return GameLoop.getAliveGameobjects();
         }
         constructor(idString:string){
-            super(idString +"_"+ (Math.random()*100));
+            super(idString +"_"); //+ (Math.random()*100) + location.toString() + "_" + Date.now().valueOf() plus random string to make the ame Unique. Maybe usefull -> Hash functions
 
-            GameLoop.addGameObject(this);
             //TODO: TEST out updater list
+            // GameLoop.addGameObject(this);// es mention in the GameLoop class, this is a future performance optimization.
             ƒ.Loop.addEventListener(UPDATE_EVENTS.GAME_OBJECTS, () => {
                 this.update();
             });

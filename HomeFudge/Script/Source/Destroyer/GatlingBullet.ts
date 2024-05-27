@@ -4,19 +4,22 @@ namespace HomeFudge {
     //TODO:move texturePivot to the Beck
     export class GatlingBullet extends Bullet {
         protected maxLifeTime: number = null;
-
-
+        
+        
         private static graph: ƒ.Graph = null;
         private static mesh: ƒ.Mesh = null;
         private static material: ƒ.Material = null;
         private static maxSpeed: number = null;
-
+        
         private static seedRigidBody: ƒ.ComponentRigidbody = null;
         private rigidBody: ƒ.ComponentRigidbody = null;
-
+        
         //TODO: try faction out.
         // faction: FACTION="FACTION.A";
-
+        
+        public remove(): void {
+            throw new Error("Method not implemented.");
+        }
         public update(): void{
 
             //goes out of the update loop as long the date is received into the config variable
@@ -68,12 +71,15 @@ namespace HomeFudge {
             this.getNodeResources(node);
             this.addComponent(new ƒ.ComponentTransform(spawnTransform));
             this.addComponent(new ƒ.ComponentMesh(GatlingBullet.mesh));
+            this.getComponent(ƒ.ComponentMesh).mtxPivot.scale(new ƒ.Vector3(2,2,2));
             this.addComponent(new ƒ.ComponentMaterial(GatlingBullet.material));
             this.rigidBody = new ƒ.ComponentRigidbody(
                 Config.gatlingBullet.mass,
                 GatlingBullet.seedRigidBody.typeBody,
                 GatlingBullet.seedRigidBody.typeCollider
             );
+            let rotEffect: number = 0.1;
+            this.rigidBody.effectRotation = new ƒ.Vector3(rotEffect, rotEffect, rotEffect);
             this.rigidBody.mtxPivot = GatlingBullet.seedRigidBody.mtxPivot;
             this.rigidBody.setPosition(spawnTransform.translation);
             this.rigidBody.setRotation(spawnTransform.rotation);

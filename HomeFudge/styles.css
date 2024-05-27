@@ -44,3 +44,6 @@ div#RingSelection { /* make the settings inside the game and add config file for
 div#HealthMeeter { /* make the settings inside the game and add config file for the ui*/
   visibility: hidden;
 }
+div#MainFirstStart{
+  visibility: hidden;
+}

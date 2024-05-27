@@ -1,18 +1,27 @@
 namespace HomeFudge {
     import ƒ = FudgeCore;
+    enum ROTATE{
+        UP,
+        DOWN,
+        LEFT,
+        RIGHT,
+    }
 
     //TODO:create super class Turret. GatlingTurret and BeamTurret extends Turret
     export class GatlingTurret extends ƒ.Node {
 
+        public ROTATE = ROTATE;
+
         //TODO: make Private again
-        public headNode: ƒ.Node = null;
-        public baseNode: ƒ.Node = null;
+        private headNode: ƒ.Node = null;
+        private baseNode: ƒ.Node = null;
         private shootNode: ƒ.Node = null;
 
         private static headMesh: ƒ.Mesh = null;
         private static baseMesh: ƒ.Mesh = null;
         private static headMaterial: ƒ.Material = null;
         private static baseMaterial: ƒ.Material = null;
+        private static shootSoundComponent: ƒ.ComponentAudio = null;
 
         private roundsPerSecond: number = null;
         private reloadsEverySecond: number = null;
@@ -29,7 +38,6 @@ namespace HomeFudge {
             //TODO|ON-HOLD| REWRITE Turret Mesh and Material component gathering and attaching -> like Destroyer Class
             this.headNode = this.createComponents("GatlingTurretHead", JSONparser.toVector3(Config.gatlingTurret.headPosition), graph);
             this.baseNode = this.createComponents("GatlingTurretBase", JSONparser.toVector3(Config.gatlingTurret.basePosition), graph);
-            //TODO:FixWrongShootNode Position. Shoots above the Barrel
             this.shootNode = this.createShootPosNode(JSONparser.toVector3(Config.gatlingTurret.shootNodePosition));
 
             this.roundsPerSecond = Config.gatlingTurret.roundsPerSeconds;
@@ -37,7 +45,8 @@ namespace HomeFudge {
             this.magazineCapacity = Config.gatlingTurret.magazineCapacity;
             this.magazineRounds = this.magazineCapacity;
 
-            this.shootNode.addComponent(new ƒ.ComponentAudio(new ƒ.Audio("Sound/autocannon.mp3")));//TODO: REMOVE TEMP AUDIO move to Resources
+            GatlingTurret.shootSoundComponent = new ƒ.ComponentAudio(Audio.getSoundEffect(Audio.SOUNDEFFECTS.MM10_CANNON_FIRE));
+            this.shootNode.addComponent(GatlingTurret.shootSoundComponent);
 
             this.headNode.addChild(this.shootNode);
             this.baseNode.addChild(this.headNode);

@@ -1,15 +1,15 @@
 namespace HomeFudge {
     import ƒ = FudgeCore;
-    ƒ.Project.registerScriptNamespace(Script);  // Register the namespace to FUDGE for serialization
+    ƒ.Project.registerScriptNamespace(HomeFudge);  // Register the namespace to FUDGE for serialization
 
-    export class PlayerSpawnerComponent extends ƒ.ComponentScript {
+    export class ComponentPlayerSpawner extends ƒ.ComponentScript {
         // Register the script as component for use in the editor via drag&drop
-        public static readonly iSubclass: number = ƒ.Component.registerSubclass(PlayerSpawnerComponent);
+        public static readonly iSubclass: number = ƒ.Component.registerSubclass(ComponentPlayerSpawner);
         // Properties may be mutated by users in the editor via the automatically created user interface
-        public message: string = "CustomComponentScript added to ";
+        
 
-        #cmpTransform: ƒ.ComponentTransform; //Loook how the Transform is ben getting by RIGID BODY COMPONENT IN FUDGE CORE 
-        private playerID: string; // input for setting the Player ID on add change look at the avalbe player span in game and check if ID is the same
+        #cmpTransform: ƒ.ComponentTransform; //Look how the Transform is ben getting by RIGID BODY COMPONENT IN FUDGE CORE 
+        private playerID: string; // input for setting the Player ID
 
 
         constructor() {
@@ -37,6 +37,7 @@ namespace HomeFudge {
                     // if deserialized the node is now fully reconstructed and access to all its components and children is possible
                     break;
                 case ƒ.EVENT.RENDER_PREPARE:
+                    
                     break;
             }
         }

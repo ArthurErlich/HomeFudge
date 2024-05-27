@@ -2,13 +2,14 @@ namespace HomeFudge {
     export class Config {
         private static errorText: string = "There was an Error on loading the Configs for"
 
-        public static gatlingBullet: GatlingBulletConfig = null;
-        public static gatlingTurret: GatlingTurretConfig = null;
-        public static beamTurret: BeamTurretConfig = null;
+        public static gatlingBullet: GatlingBullet = null;
+        public static gatlingTurret: GatlingTurret = null;
+        public static beamTurret: BeamTurret = null;
         public static laserBeam: LaserBeam = null;
-        public static destroyer: DestroyerConfig = null;
-        public static camera: CameraConfig = null;
-        public static astroid: AstroidConfig = null;
+        public static destroyer: Destroyer = null;
+        public static camera: Camera = null;
+        public static astroid: Astroid = null;
+        public static ui: Ui = null;
 
         /**
          * The function initializes configurations by fetching JSON files and assigning their contents
@@ -22,6 +23,8 @@ namespace HomeFudge {
             let destroyerResponse: Response = await fetch("Configs/destroyerConfig.json");
             let cameraResponse: Response = await fetch("Configs/cameraConfig.json");
             let astroidResponse: Response = await fetch("Configs/astroidConfig.json");
+            let uiResponse: Response = await fetch("Configs/uiConfig.json");
+
 
 
             try {
@@ -59,6 +62,11 @@ namespace HomeFudge {
             } catch (error) {
                 Config.printError(error, Astroid.name);
             }
+            try {
+                Config.ui = await uiResponse.json();
+            } catch (error) {
+                Config.printError(error, "UI");
+            }
 
 
         }
@@ -68,7 +76,7 @@ namespace HomeFudge {
 
     }
     ///interface for Blender positions and configs for all parts of the Game\\\
-    interface GatlingTurretConfig {
+    interface GatlingTurret {
         ///graph of all resource for the turret\\\
         graphID: string;
         ///position for the nodes\\\
@@ -85,7 +93,7 @@ namespace HomeFudge {
         magazineCapacity: number;
         [key: string]: number[] | number | string;
     }
-    interface GatlingBulletConfig {
+    interface GatlingBullet {
         graphID: string;
         maxLifeTime: number;
         maxSpeed: number;
@@ -93,7 +101,7 @@ namespace HomeFudge {
         mass: number;
         [key: string]: string | number;
     }
-    interface BeamTurretConfig {
+    interface BeamTurret {
         graphID: string;
         maxRotSpeed: number;
         maxPitch: number;
@@ -110,7 +118,7 @@ namespace HomeFudge {
         graphID: string;
         [key: string]: string;
     }
-    interface DestroyerConfig {
+    interface Destroyer {
         graphID: string;
         maxAcceleration: number;
         maxSpeed: number;
@@ -118,20 +126,30 @@ namespace HomeFudge {
         maxTurnAcceleration: number;
         mass: number;
         maxHealthPoints: number;
+        //Forward facing Thrusters
         RotThruster_FL: number[];
+        RotThruster_FDL: number[];
+        RotThruster_FUL: number[];
         RotThruster_FR: number[];
+        RotThruster_FDR: number[];
+        RotThruster_FUR: number[];
+        //Backwards facing Thrusters
         RotThruster_BL: number[];
+        RotThruster_BDL: number[];
+        RotThruster_BUL: number[];
         RotThruster_BR: number[];
+        RotThruster_BDR: number[];
+        RotThruster_BUR: number[];
         MainThrusterA: number[];
         MainThrusterB: number[];
         [key: string]: string | number | number[];
     }
-    interface CameraConfig {
+    interface Camera {
         offset: number[];
         [key: string]: number[];
     }
     //#region Astroid
-    interface AstroidConfig {
+    interface Astroid {
         graphID: string;
         size: AstroidSize;
         seedNodes: AstroidSeedNodes;
@@ -151,17 +169,19 @@ namespace HomeFudge {
         public SMALL: AstroidData;
         public MEDIUM: AstroidData;
         public LARGE: AstroidData;
+        public scale: number;
 
         constructor(_small: AstroidData, _medium: AstroidData, _large: AstroidData) {
-            if (_small == undefined ){  
+            if (_small == undefined) {
                 throw new Error("Small Astroid is undefined in the config!");
             }
-            if (_medium == undefined ){
+            if (_medium == undefined) {
                 throw new Error("Medium Astroid is undefined in the config!");
             }
-            if (_large == undefined ){
+            if (_large == undefined) {
                 throw new Error("Large Astroid is undefined in the config!");
             }
+            
             this.SMALL = _small;
             this.MEDIUM = _medium;
             this.LARGE = _large;
@@ -171,23 +191,74 @@ namespace HomeFudge {
         public hitpoints: number;
         public mass: number;
         public spawnRotSpeed: number;
-        constructor(_hitpoints: number, _mass: number, _spawnRotSpeed:number) {
+        public scale: number;
+        constructor(_hitpoints: number, _mass: number, _spawnRotSpeed: number, _scale: number) {
             if (_mass == undefined || typeof _mass == 'number') {
                 this.mass = 0;
                 throw new Error("Mass is undefined in the config!");
             }
-            if (_hitpoints == undefined  || typeof _hitpoints == 'number') {
+            if (_hitpoints == undefined || typeof _hitpoints == 'number') {
                 this.hitpoints = 0;
                 throw new Error("HitPoints is undefined in the config!");
             }
-            if (_spawnRotSpeed == undefined  || typeof _spawnRotSpeed == 'number') {
+            if (_spawnRotSpeed == undefined || typeof _spawnRotSpeed == 'number') {
+                this.spawnRotSpeed = 0;
+                throw new Error("Spawn rotation speed is undefined in the config!");
+            }
+            if (_scale == undefined || typeof _scale == 'number') {
                 this.spawnRotSpeed = 0;
                 throw new Error("Spawn rotation speed is undefined in the config!");
             }
             this.hitpoints = _hitpoints;
             this.mass = _mass;
             this.spawnRotSpeed = _spawnRotSpeed;
+            this.scale = _scale;
         }
     }
     //#endregion Astroid
+
+    //#region UI
+    interface Ui {
+        scaling: number;
+        fontSize: number;
+        selection: UI_Selection;
+        buttons: UI_Buttons;
+
+        [key: string]: number | UI_Selection | UI_Buttons;
+    }
+    class UI_Selection {
+        healthBarWidth: number;
+        healthBarHight: number;
+        healthBarTextSize: number;
+        selectionRingRadius: number;
+        ringBorderWidth: number;
+        constructor(_healthBarWidth: number, _healthBarHight: number, _healthBarTextSize: number, _selectionRingRadius: number, _ringBorderWidth: number, _buttons: UI_Buttons) {
+            this.healthBarWidth = _healthBarWidth;
+            this.healthBarHight = _healthBarHight;
+            this.healthBarTextSize = _healthBarTextSize;
+            this.selectionRingRadius = _selectionRingRadius;
+            this.ringBorderWidth = _ringBorderWidth;
+        }
+    }
+    class UI_Buttons {
+        FORWARDS: string;
+        BACKWARDS: string;
+        YAW_LEFT: string;
+        YAW_RIGHT: string;
+        ROLL_LEFT: string;
+        ROLL_RIGHT: string;
+        PITCH_UP: string;
+        PITCH_DOWN: string;
+        constructor(_FORWARDS: string, _BACKWARDS: string, ROLL_LEFT: string, ROLL_RIGHT: string, _YAW_LEFT: string, _YAW_RIGHT: string, _PITCH_UP: string, _PITCH_DOWN: string) {
+            this.FORWARDS = _FORWARDS;
+            this.BACKWARDS = _BACKWARDS;
+            this.ROLL_LEFT = ROLL_LEFT;
+            this.ROLL_RIGHT = ROLL_RIGHT;
+            this.YAW_LEFT = _YAW_LEFT;
+            this.YAW_RIGHT = _YAW_RIGHT;
+            this.PITCH_UP = _PITCH_UP;
+            this.PITCH_DOWN = _PITCH_DOWN;
+        }
+    }
+    //#endregion UI
 }

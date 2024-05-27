@@ -23,7 +23,7 @@ namespace HomeFudge {
   let p1: Player = null;
 
   ///Destroyer\\\
-  let astroidList:Astroid[] = null;
+  let astroidList: Astroid[] = null;
 
 
 
@@ -33,6 +33,12 @@ namespace HomeFudge {
     PLAYER_INPUT = "PlayerInputUpdate",
     UI = "UI",
   }
+
+  //this sets the flag for the Tutorial.
+  GameStats.setInGameFlags();
+  console.log(GameStats.getPlayedStatus());
+
+
   /// ------------T-E-S-T--A-R-E-A------------------\\\
 
   async function start(_event: CustomEvent): Promise<void> {
@@ -53,6 +59,9 @@ namespace HomeFudge {
       console.warn("LoadingConfigs");
       await Config.initConfigs();
       Mouse.init();
+      UI.init();
+      console.warn("Loading Audio");
+      Audio.loadAudioFiles();
     }
     async function initWorld(): Promise<void> {
       ƒ.Physics.setGravity(ƒ.Vector3.ZERO());
@@ -66,86 +75,77 @@ namespace HomeFudge {
       let destroyer2 = new Destroyer(mtx);
       _worldNode.appendChild(destroyer2);
       _worldNode.appendChild(destroyer);
+
+      //Example command: ConsoleCommands.spawnDestroyer(new FudgeCore.Vector3(0,0,0),new FudgeCore.Vector3(0,0,0))
+      (window as any).ConsoleCommands = ConsoleCommands; // attaches the ConsoleCommands globally to be useable in the console
+
+
+
       // let node: ƒ.Node= new ƒ.Node("name");
       // let nodeMes = new ƒ.ComponentMesh(new ƒ.MeshSprite);
       // nodeMes.mtxPivot.scale(new ƒ.Vector3(200,200,200));
       // node.addComponent(nodeMes);
       // node.addComponent(new ƒ.ComponentMaterial(new ƒ.Material("lit",ƒ.ShaderLit)));
       // _worldNode.appendChild(node);
+      // änder epps
+    
       /// ------------T-E-S-T--A-R-E-A------------------\\\
     }
 
     /// ------------T-E-S-T--A-R-E-A------------------\\\
     //TODO: Before the loop starts. Add an Game Menu draws on frame while updating
-    let x = 200;
-    let y = 0;
-    let z = -100;
-    astroidList = new Array(50);
-    for (let index = 0; index < 50; index++) {
-      astroidList[index] = Astroid.spawn(new ƒ.Vector3(x*index*Math.random()-x/2, y*index*Math.random()+100-y/2, -z*index*Math.random()), Astroid.getLarge());
+    let x = 400;
+    let y = 10;
+    let z = -300;
+    astroidList = new Array(20);
+    for (let index = 0; index < 20; index++) {
+      astroidList[index] = Astroid.spawn(new ƒ.Vector3(x * index * Math.random() - x / 2 + 100, y * index * Math.random() + 1000 - y / 2, -z * index * Math.random() + 100), Astroid.getLarge());
     }
-    let astroid_UI:UI_EnemySelection = new UI_EnemySelection();
-    UI_EnemySelection.setPosition(new ƒ.Vector2(100,100));
     /// ------------T-E-S-T--A-R-E-A------------------\\\
 
     ƒ.Loop.addEventListener(ƒ.EVENT.LOOP_FRAME, update);
     ƒ.Loop.start(ƒ.LOOP_MODE.TIME_GAME, 35);  // start the game loop to continuously draw the _viewport, update the audiosystem and drive the physics i/a
   }
 
+
+  let selectedObject: ƒ.Node = p1;//TODO:REMOVE
+
   function update(_event: Event): void {
     _deltaSeconds = ƒ.Loop.timeFrameGame / 1000;
-    ƒ.Physics.simulate();  // make an update loop just for the Physics. fixed at 30fps
+    ƒ.Physics.simulate();  // make an update loop just for the Physics. fixed at 30fps to avoid some physics bugs by to many fps
     ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.PLAYER_INPUT));
     ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.GAME_OBJECTS));
 
     // GameLoop.update(); <-- different approach instant of dispatching an event for the loop.
 
-
-    // /// ------------T-E-S-T--A-R-E-A------------------\\\
-
-    // /// ------------T-E-S-T--A-R-E-A------------------\\\
-
     ƒ.AudioManager.default.update();
     _viewport.draw();
     ƒ.EventTargetStatic.dispatchEvent(new Event(UPDATE_EVENTS.UI)); // UI needs to be updated after drawing the frame
 
+
     /// ------------T-E-S-T--A-R-E-A------------------\\\
-    // let uiPos: ƒ.Vector2 = _viewport.pointWorldToClient(destroyer.mtxWorld.translation); //TODO: learn the VUI!
-    let uiPos: ƒ.Vector2 = _viewport.pointWorldToClient(astroidList[10].mtxWorld.translation);
-
-    UI_EnemySelection.setPosition(uiPos);
-    UI_EnemySelection.setSize(p1.destroyer.mtxWorld.translation.getDistance(astroidList[10].mtxWorld.translation));
-    /// ------------T-E-S-T--A-R-E-A------------------\\\
-
-  }
-
-  /// ------------T-E-S-T--A-R-E-A------------------\\\
-  // function getPosTest(): void {
-  //   let pickCam: ƒ.Pick[] = ƒ.Picker.pickCamera(_worldNode.getChildren(), _viewport.camera, Mouse.position);
-  //   let pickViewport: ƒ.Pick[] = ƒ.Picker.pickViewport(_viewport, Mouse.position);
-
-  //   console.log("%c" + "Camera Picker", "background:red");
-  //   pickCam.forEach(element => {
-  //     console.log("%c" + element.posMesh.toString(), "background:yellow");
-  //   });
-  //   console.log("-------------");
-  //   console.log("%c" + "Viewport Picker", "background:red");
-  //   pickViewport.forEach(element => {
-  //     console.log("%c" + element.posMesh.toString(), "background:yellow");
-  //   });
-  //   console.log("-------------");
-  // }
-  /// ------------T-E-S-T--A-R-E-A------------------\\\
+    //move to player, check if the same astroid is selected to stop/ or make a countdown of one second to stop selection spam/ or make
+    //Filter nodes. add tag to gameObject
 
 
+      //TODO: Remove unused function
+      // if (ƒ.Keyboard.isPressedOne([ƒ.KEYBOARD_CODE.F])) {
+      //   let pickViewport: ƒ.Pick[] = ƒ.Picker.pickViewport(_viewport, Mouse.position);
+
+      //   pickViewport.sort((a, b) => a.zBuffer - b.zBuffer);
+      //   selectedObject = pickViewport[0].node;
+      //   UI_Selection.setNodeToFocus(selectedObject);
+      // }
+      /// ------------T-E-S-T--A-R-E-A------------------\\\
+    }
 
   /// ------------T-E-S-T--A-R-E-A------------------\\\
   //TODO: add a start stop Loop for Debug
   //TODO: add respawn / reset timers and more
   function continueLoop(event: KeyboardEvent) {
-    if (event.code == "Insert") {
-      ƒ.Loop.continue();
-    }
-  }
+        if (event.code == "Insert") {
+          ƒ.Loop.continue();
+        }
+      }
   /// ------------T-E-S-T--A-R-E-A------------------\\\
 }

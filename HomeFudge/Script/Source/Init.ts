@@ -44,16 +44,16 @@ namespace HomeFudge {
             return;
         }
         // hide the cursor when right clicking, also suppressing right-click menu
-        canvas.addEventListener("mousedown", function (event) {
-            if (event.button == 2) {
-                canvas.requestPointerLock();
-            }
-        });
-        canvas.addEventListener("mouseup", function (event) {
-            if (event.button == 2) {
-                document.exitPointerLock();
-            }
-        });
+        // canvas.addEventListener("mousedown", function (event) {
+        //     if (event.button == 2) {
+        //         canvas.requestPointerLock();
+        //     }
+        // });
+        // canvas.addEventListener("mouseup", function (event) {
+        //     if (event.button == 2) {
+        //         document.exitPointerLock();
+        //     }
+        // });
 
         viewport.initialize("InteractiveViewport", graph, cmpCamera, canvas);
         // setup audio
@@ -61,7 +61,7 @@ namespace HomeFudge {
         ƒ.AudioManager.default.listenWith(cmpListener);
         ƒ.AudioManager.default.listenTo(graph);
         ƒ.Debug.log("Audio:", ƒ.AudioManager.default);
-
+        
         // draw viewport once for immediate feedback
         viewport.draw();
 

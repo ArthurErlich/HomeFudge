@@ -4,17 +4,20 @@
         "SMALL": {
             "hitpoints": 100,
             "mass":100,
-            "spawnRotSpeed" : 4
+            "spawnRotSpeed" : 4,
+            "scale": 1
         },
         "MEDIUM": {
             "hitpoints": 250,
             "mass":250,
-            "spawnRotSpeed" : 2
+            "spawnRotSpeed" : 2,
+            "scale": 1
         },
         "LARGE": {
             "hitpoints": 500,
             "mass":500,
-            "spawnRotSpeed" : 1
+            "spawnRotSpeed" : 1,
+            "scale": 10
         }
     },
     "seedNodes": {

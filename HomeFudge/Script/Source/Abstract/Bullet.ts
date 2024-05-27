@@ -9,8 +9,7 @@ namespace HomeFudge {
 
         constructor(idString:string){
             super("Bullet" + idString);
-            _worldNode.addChild(this);
-            //register to update event            
+            _worldNode.addChild(this);     
         }
     }
 }

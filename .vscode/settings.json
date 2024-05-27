@@ -7,7 +7,9 @@
         "GAMEOBJECTS",
         "Mathf",
         "Oimo",
-        "Rigidbody"
+        "Rigidbody",
+        "rotu",
+        "SOUNDEFFECTS"
     ],
     "liveServer.settings.port": 5523
 }
