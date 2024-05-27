@@ -14,7 +14,8 @@ namespace HomeFudge{
             UI.elements.push(new UI_Selection());
             UI.elements.push(new UI_FirstStart());
         };
-        public static setScaleAndReload(scale:number):void{
+        public static setScale(scale:number):void{
+            UI.scale = scale;
         };
         public static globalSettings(element: HTMLElement) {
             element.style.visibility = "visible";
